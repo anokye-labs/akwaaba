@@ -37,7 +37,6 @@
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$false)]
     [switch]$Refresh
 )
 
@@ -119,7 +118,17 @@ query {
 "@
         
         # Try to fetch issue types - this may not be available in all orgs
-        $result = gh api graphql -f query="$query" 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue
+        $errorOutput = $null
+        $result = gh api graphql -f query="$query" 2>&1 | Tee-Object -Variable errorOutput | 
+            Where-Object { $_ -is [string] } | ConvertFrom-Json -ErrorAction SilentlyContinue
+        
+        # Log any errors for debugging
+        if ($errorOutput) {
+            $errorMessages = $errorOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+            if ($errorMessages) {
+                Write-Verbose "GraphQL query info: $($errorMessages -join '; ')"
+            }
+        }
         
         if ($result -and $result.data.organization.projectsV2.nodes) {
             $issueTypes = @()
@@ -172,7 +181,17 @@ function Get-RepositoryProjects {
         
         # Get projects accessible to the authenticated user
         # This includes organization and repository projects
-        $projects = gh project list --owner "@me" --format json 2>$null | ConvertFrom-Json
+        $errorOutput = $null
+        $projects = gh project list --owner "@me" --format json 2>&1 | Tee-Object -Variable errorOutput |
+            Where-Object { $_ -is [string] } | ConvertFrom-Json -ErrorAction SilentlyContinue
+        
+        # Log any errors for debugging
+        if ($errorOutput) {
+            $errorMessages = $errorOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+            if ($errorMessages) {
+                Write-Verbose "Project list query info: $($errorMessages -join '; ')"
+            }
+        }
         
         if ($projects) {
             $projectList = @()
