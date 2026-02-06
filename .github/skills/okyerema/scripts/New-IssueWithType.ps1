@@ -38,13 +38,14 @@ if (-not $typeId) {
 }
 
 # Create issue
-$escapedBody = $Body.Replace('"', '\"').Replace("`n", '\n')
+$escapedTitle = $Title.Replace('\', '\\').Replace('"', '\"')
+$escapedBody = $Body.Replace('\', '\\').Replace('"', '\"').Replace("`n", '\n')
 
 $mutation = @"
 mutation {
   createIssue(input: {
     repositoryId: `"$repoId`"
-    title: `"$Title`"
+    title: `"$escapedTitle`"
     body: `"$escapedBody`"
     issueTypeId: `"$typeId`"
   }) {

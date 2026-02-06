@@ -59,7 +59,7 @@ foreach ($num in $ChildNumbers | Sort-Object) {
 $newBody = $cleanBody + $tasklist
 
 # Update parent
-$escapedBody = $newBody.Replace('"', '\"').Replace("`n", '\n')
+$escapedBody = $newBody.Replace('\', '\\').Replace('"', '\"').Replace("`n", '\n')
 
 $updateMutation = @"
 mutation {
