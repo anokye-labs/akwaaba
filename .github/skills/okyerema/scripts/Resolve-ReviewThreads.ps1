@@ -54,6 +54,7 @@ if (-not $ThreadIds) {
       repository(owner: `"$Owner`", name: `"$Repo`") {
         pullRequest(number: $PullNumber) {
           reviewThreads(first: 100) {
+            totalCount
             nodes {
               id
               isResolved
