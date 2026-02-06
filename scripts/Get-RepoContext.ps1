@@ -52,6 +52,7 @@ function Invoke-GitHubCommand {
     .DESCRIPTION
         Executes a GitHub CLI command and captures both stdout and stderr,
         logging any errors with Write-Verbose for debugging.
+        Returns only the string output; errors are logged but not returned.
     #>
     [CmdletBinding()]
     param(
@@ -61,8 +62,8 @@ function Invoke-GitHubCommand {
     
     try {
         $errorOutput = $null
-        $result = & $Command 2>&1 | Tee-Object -Variable errorOutput |
-            Where-Object { $_ -is [string] }
+        # Capture all output including errors, then filter to get only string output
+        $allOutput = & $Command 2>&1 | Tee-Object -Variable errorOutput
         
         # Log any errors for debugging
         if ($errorOutput) {
@@ -72,7 +73,8 @@ function Invoke-GitHubCommand {
             }
         }
         
-        return $result
+        # Return only string output (not error records)
+        return $allOutput | Where-Object { $_ -is [string] }
     }
     catch {
         Write-Verbose "Command execution error: $_"
@@ -296,12 +298,12 @@ $repoInfo = Get-RepositoryId
 $owner = $null
 if ($repoInfo -and $repoInfo.NameWithOwner) {
     $parts = $repoInfo.NameWithOwner.Split('/')
-    if ($parts.Length -ge 2) {
+    if ($parts.Length -eq 2) {
         $owner = $parts[0]
         Write-Verbose "Repository owner: $owner"
     }
     else {
-        Write-Warning "Unexpected NameWithOwner format: $($repoInfo.NameWithOwner)"
+        Write-Warning "Unexpected NameWithOwner format: $($repoInfo.NameWithOwner). Expected 'owner/repo'."
     }
 }
 
@@ -309,9 +311,9 @@ $issueTypes = if ($owner) { Get-OrganizationIssueTypes -Owner $owner } else { @(
 $projects = Get-RepositoryProjects
 $labels = Get-RepositoryLabels
 
-# Create result object
+# Create result object with safe access to properties
 $result = [PSCustomObject]@{
-    RepoId = $repoInfo.Id
+    RepoId = if ($repoInfo) { $repoInfo.Id } else { $null }
     IssueTypes = $issueTypes
     ProjectId = $projects
     Labels = $labels
