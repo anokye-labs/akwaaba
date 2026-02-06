@@ -98,8 +98,9 @@ mutation {
 }
 "@
         gh api graphql -f query="$labelMutation" | Out-Null
-        $appliedLabels = $labelNodes | Where-Object { $_.id -in $labelIds } | ForEach-Object { $_.name }
-        $missing = $Labels | Where-Object { $_ -notin ($labelNodes.name) }
+        $allLabelNodes = $labelResult.data.repository.labels.nodes
+        $appliedLabels = $allLabelNodes | Where-Object { $_.id -in $labelIds } | ForEach-Object { $_.name }
+        $missing = $Labels | Where-Object { $_ -notin ($allLabelNodes.name) }
         Write-Host "  + Labels: $($appliedLabels -join ', ')" -ForegroundColor Gray
         if ($missing) { Write-Warning "Labels not found (skipped): $($missing -join ', ')" }
     }
