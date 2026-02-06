@@ -45,6 +45,41 @@ if (-not $script:RepoContextCache) {
     $script:RepoContextCache = $null
 }
 
+function Invoke-GitHubCommand {
+    <#
+    .SYNOPSIS
+        Helper function to execute GitHub CLI commands with proper error handling.
+    .DESCRIPTION
+        Executes a GitHub CLI command and captures both stdout and stderr,
+        logging any errors with Write-Verbose for debugging.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [scriptblock]$Command
+    )
+    
+    try {
+        $errorOutput = $null
+        $result = & $Command 2>&1 | Tee-Object -Variable errorOutput |
+            Where-Object { $_ -is [string] }
+        
+        # Log any errors for debugging
+        if ($errorOutput) {
+            $errorMessages = $errorOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+            if ($errorMessages) {
+                Write-Verbose "Command info: $($errorMessages -join '; ')"
+            }
+        }
+        
+        return $result
+    }
+    catch {
+        Write-Verbose "Command execution error: $_"
+        return $null
+    }
+}
+
 function Get-RepositoryId {
     <#
     .SYNOPSIS
@@ -118,16 +153,8 @@ query {
 "@
         
         # Try to fetch issue types - this may not be available in all orgs
-        $errorOutput = $null
-        $result = gh api graphql -f query="$query" 2>&1 | Tee-Object -Variable errorOutput | 
-            Where-Object { $_ -is [string] } | ConvertFrom-Json -ErrorAction SilentlyContinue
-        
-        # Log any errors for debugging
-        if ($errorOutput) {
-            $errorMessages = $errorOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
-            if ($errorMessages) {
-                Write-Verbose "GraphQL query info: $($errorMessages -join '; ')"
-            }
+        $result = Invoke-GitHubCommand -Command { 
+            gh api graphql -f query="$query" | ConvertFrom-Json -ErrorAction SilentlyContinue 
         }
         
         if ($result -and $result.data.organization.projectsV2.nodes) {
@@ -181,17 +208,11 @@ function Get-RepositoryProjects {
         
         # Get projects accessible to the authenticated user
         # This includes organization and repository projects
-        $errorOutput = $null
-        $projects = gh project list --owner "@me" --format json 2>&1 | Tee-Object -Variable errorOutput |
-            Where-Object { $_ -is [string] } | ConvertFrom-Json -ErrorAction SilentlyContinue
-        
-        # Log any errors for debugging
-        if ($errorOutput) {
-            $errorMessages = $errorOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
-            if ($errorMessages) {
-                Write-Verbose "Project list query info: $($errorMessages -join '; ')"
-            }
+        $result = Invoke-GitHubCommand -Command {
+            gh project list --owner "@me" --format json | ConvertFrom-Json -ErrorAction SilentlyContinue
         }
+        
+        $projects = $result
         
         if ($projects) {
             $projectList = @()
@@ -270,10 +291,18 @@ if ($script:RepoContextCache -and -not $Refresh) {
 Write-Verbose "Fetching fresh repository context..."
 
 $repoInfo = Get-RepositoryId
-$owner = if ($repoInfo -and $repoInfo.NameWithOwner) { 
-    $repoInfo.NameWithOwner.Split('/')[0] 
-} else { 
-    $null 
+
+# Extract owner from NameWithOwner (format: "owner/repo")
+$owner = $null
+if ($repoInfo -and $repoInfo.NameWithOwner) {
+    $parts = $repoInfo.NameWithOwner.Split('/')
+    if ($parts.Length -ge 2) {
+        $owner = $parts[0]
+        Write-Verbose "Repository owner: $owner"
+    }
+    else {
+        Write-Warning "Unexpected NameWithOwner format: $($repoInfo.NameWithOwner)"
+    }
 }
 
 $issueTypes = if ($owner) { Get-OrganizationIssueTypes -Owner $owner } else { @() }
