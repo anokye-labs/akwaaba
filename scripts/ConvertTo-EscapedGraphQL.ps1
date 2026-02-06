@@ -59,55 +59,18 @@ function ConvertTo-EscapedGraphQL {
 
     begin {
         $accumulator = @()
-    }
-
-    process {
-        # If using -Value parameter, use it; otherwise accumulate pipeline input
-        if ($PSBoundParameters.ContainsKey('Value')) {
-            $textToProcess = $Value
-        } else {
-            $accumulator += $InputObject
-            return
-        }
         
-        # Process the text
-        if ($null -eq $textToProcess) {
-            return ""
-        }
-        
-        # Escape in the correct order to avoid double-escaping
-        # 1. First escape backslashes (\ -> \\)
-        $escaped = $textToProcess -replace '\\', '\\'
-        
-        # 2. Then escape double quotes (" -> \")
-        $escaped = $escaped -replace '"', '\"'
-        
-        # 3. Escape newlines (actual newline characters -> \n)
-        $escaped = $escaped -replace "`r`n", '\n'  # Windows CRLF
-        $escaped = $escaped -replace "`n", '\n'     # Unix LF
-        $escaped = $escaped -replace "`r", '\r'     # Old Mac CR
-        
-        # 4. Escape tabs
-        $escaped = $escaped -replace "`t", '\t'
-        
-        # 5. Emoji and unicode characters are preserved as-is (UTF-8)
-        # GraphQL accepts unicode in string literals
-        
-        return $escaped
-    }
-
-    end {
-        # If we accumulated pipeline input, process it now
-        if ($accumulator.Count -gt 0) {
-            $textToProcess = $accumulator -join "`n"
+        # Private helper function to perform the actual escaping
+        function Invoke-GraphQLEscape {
+            param([string]$text)
             
-            if ($null -eq $textToProcess) {
+            if ($null -eq $text) {
                 return ""
             }
             
             # Escape in the correct order to avoid double-escaping
             # 1. First escape backslashes (\ -> \\)
-            $escaped = $textToProcess -replace '\\', '\\'
+            $escaped = $text -replace '\\', '\\'
             
             # 2. Then escape double quotes (" -> \")
             $escaped = $escaped -replace '"', '\"'
@@ -124,6 +87,23 @@ function ConvertTo-EscapedGraphQL {
             # GraphQL accepts unicode in string literals
             
             return $escaped
+        }
+    }
+
+    process {
+        # If using -Value parameter, use it; otherwise accumulate pipeline input
+        if ($PSBoundParameters.ContainsKey('Value')) {
+            return Invoke-GraphQLEscape -text $Value
+        } else {
+            $accumulator += $InputObject
+        }
+    }
+
+    end {
+        # If we accumulated pipeline input, process it now
+        if ($accumulator.Count -gt 0) {
+            $textToProcess = $accumulator -join "`n"
+            return Invoke-GraphQLEscape -text $textToProcess
         }
     }
 }
