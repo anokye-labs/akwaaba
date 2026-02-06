@@ -62,15 +62,13 @@ function Invoke-GitHubCommand {
     
     try {
         $errorOutput = $null
-        # Capture all output including errors, then filter to get only string output
+        # Capture all output including errors via 2>&1, then filter to get only string output
         $allOutput = & $Command 2>&1 | Tee-Object -Variable errorOutput
         
-        # Log any errors for debugging
-        if ($errorOutput) {
-            $errorMessages = $errorOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
-            if ($errorMessages) {
-                Write-Verbose "Command info: $($errorMessages -join '; ')"
-            }
+        # Extract and log any error records for debugging
+        $errorRecords = $errorOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }
+        if ($errorRecords) {
+            Write-Verbose "Error messages: $($errorRecords -join '; ')"
         }
         
         # Return only string output (not error records)
@@ -156,7 +154,7 @@ query {
         
         # Try to fetch issue types - this may not be available in all orgs
         $result = Invoke-GitHubCommand -Command { 
-            gh api graphql -f query="$query" | ConvertFrom-Json -ErrorAction SilentlyContinue 
+            gh api graphql -f query="$query" | ConvertFrom-Json
         }
         
         if ($result -and $result.data.organization.projectsV2.nodes) {
@@ -211,7 +209,7 @@ function Get-RepositoryProjects {
         # Get projects accessible to the authenticated user
         # This includes organization and repository projects
         $result = Invoke-GitHubCommand -Command {
-            gh project list --owner "@me" --format json | ConvertFrom-Json -ErrorAction SilentlyContinue
+            gh project list --owner "@me" --format json | ConvertFrom-Json
         }
         
         $projects = $result
