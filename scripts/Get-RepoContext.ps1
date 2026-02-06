@@ -12,7 +12,7 @@
 
 .OUTPUTS
     PSCustomObject with the following properties:
-    - RepoId: The numeric ID of the repository
+    - RepoId: The ID of the repository (string identifier)
     - IssueTypes: Array of organization issue types with their IDs and names
     - ProjectId: Array of project IDs and names associated with the repository
     - Labels: Array of label names, IDs, and colors in the repository
@@ -91,20 +91,24 @@ function Get-OrganizationIssueTypes {
     try {
         Write-Verbose "Fetching organization issue types for $Owner..."
         
-        # Attempt to get issue types from the organization
+        # Attempt to get issue types from the organization's projects
         # Note: This requires GitHub GraphQL API access
         $query = @"
 query {
   organization(login: "$Owner") {
-    projectV2 {
-      fields(first: 20) {
-        nodes {
-          ... on ProjectV2SingleSelectField {
-            id
-            name
-            options {
+    projectsV2(first: 5) {
+      nodes {
+        id
+        title
+        fields(first: 20) {
+          nodes {
+            ... on ProjectV2SingleSelectField {
               id
               name
+              options {
+                id
+                name
+              }
             }
           }
         }
@@ -117,18 +121,22 @@ query {
         # Try to fetch issue types - this may not be available in all orgs
         $result = gh api graphql -f query="$query" 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue
         
-        if ($result -and $result.data.organization.projectV2) {
-            $issueTypeFields = $result.data.organization.projectV2.fields.nodes | 
-                Where-Object { $_.name -like "*Type*" -or $_.name -like "*Issue*" }
-            
+        if ($result -and $result.data.organization.projectsV2.nodes) {
             $issueTypes = @()
-            foreach ($field in $issueTypeFields) {
-                if ($field.options) {
-                    foreach ($option in $field.options) {
-                        $issueTypes += @{
-                            Id = $option.id
-                            Name = $option.name
-                            FieldName = $field.name
+            
+            foreach ($project in $result.data.organization.projectsV2.nodes) {
+                $issueTypeFields = $project.fields.nodes | 
+                    Where-Object { $_.name -like "*Type*" -or $_.name -like "*Issue*" }
+                
+                foreach ($field in $issueTypeFields) {
+                    if ($field.options) {
+                        foreach ($option in $field.options) {
+                            $issueTypes += @{
+                                Id = $option.id
+                                Name = $option.name
+                                FieldName = $field.name
+                                ProjectTitle = $project.title
+                            }
                         }
                     }
                 }
@@ -151,15 +159,19 @@ query {
 function Get-RepositoryProjects {
     <#
     .SYNOPSIS
-        Fetches project IDs associated with the repository.
+        Fetches project IDs accessible to the authenticated user.
+    .DESCRIPTION
+        Returns projects owned by the authenticated user. In practice, this includes
+        organization and repository projects that the user has access to.
     #>
     [CmdletBinding()]
     param()
     
     try {
-        Write-Verbose "Fetching repository projects..."
+        Write-Verbose "Fetching accessible projects..."
         
-        # Get projects linked to this repository
+        # Get projects accessible to the authenticated user
+        # This includes organization and repository projects
         $projects = gh project list --owner "@me" --format json 2>$null | ConvertFrom-Json
         
         if ($projects) {

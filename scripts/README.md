@@ -40,15 +40,16 @@ $context = ./scripts/Get-RepoContext.ps1 -Verbose
 
 ```powershell
 @{
-    RepoId = "R_kgDO..." # Repository ID
-    IssueTypes = @(      # Organization issue types (if available)
+    RepoId = "R_kgDO..." # Repository ID (string identifier)
+    IssueTypes = @(      # Organization issue types from Projects (if available)
         @{
             Id = "..."
             Name = "Bug"
             FieldName = "Issue Type"
+            ProjectTitle = "Main Project"
         }
     )
-    ProjectId = @(       # Repository projects
+    ProjectId = @(       # Projects accessible to authenticated user
         @{
             Id = "PVT_..."
             Number = 1
