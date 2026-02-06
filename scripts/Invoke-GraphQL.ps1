@@ -115,17 +115,17 @@ function Test-RetryableError {
     param([string]$ErrorMessage, [int]$ExitCode)
     
     # Check for HTTP error codes
-    if ($ErrorMessage -match '502|503') {
+    if ($ErrorMessage -match '\b502\b|\b503\b') {
         return $true
     }
     
     # Check for rate limit errors
-    if ($ErrorMessage -match 'rate limit|rate-limit|retry after|too many requests|429') {
+    if ($ErrorMessage -match '\brate[- ]?limit\b|\bretry[- ]after\b|\btoo many requests\b|\b429\b') {
         return $true
     }
     
     # Check for timeout errors
-    if ($ErrorMessage -match 'timeout|timed out') {
+    if ($ErrorMessage -match '\btimeout\b|\btimed out\b') {
         return $true
     }
     
@@ -133,6 +133,7 @@ function Test-RetryableError {
 }
 
 # Function to calculate delay with exponential backoff
+# Note: Attempt=1 means first retry (not first attempt)
 function Get-RetryDelay {
     param([int]$Attempt, [int]$InitialDelay, [int]$MaxDelay)
     
@@ -150,8 +151,8 @@ function Get-RetryDelay {
 function ConvertTo-StructuredError {
     param([string]$ErrorMessage, [int]$ExitCode, [string]$CorrelationId)
     
-    # Try to parse JSON error if present
-    if ($ErrorMessage -match '\{.*"errors".*\}') {
+    # Try to parse JSON error if present (use non-greedy quantifiers)
+    if ($ErrorMessage -match '\{.*?"errors".*?\}') {
         try {
             $jsonMatch = [regex]::Match($ErrorMessage, '\{.*\}').Value
             $errorObj = $jsonMatch | ConvertFrom-Json

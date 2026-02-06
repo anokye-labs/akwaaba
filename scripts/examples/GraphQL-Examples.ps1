@@ -97,7 +97,7 @@ Write-Host ""
 
 # Example 4: Using custom correlation ID for tracing
 Write-Host "Example 4: Using custom correlation ID" -ForegroundColor Cyan
-$customCorrelationId = "TRACE-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+$customCorrelationId = "TRACE-$(Get-Date -Format 'yyyyMMdd-HHmmss-fff')"
 $query4 = @"
 query {
     viewer {
