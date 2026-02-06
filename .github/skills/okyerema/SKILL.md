@@ -39,3 +39,6 @@ Write-OkyeremaLog -Level Error -Operation "Build" -Message "Build failed" -Quiet
 ## References
 
 - [Write-OkyeremaLog.ps1](Write-OkyeremaLog.ps1) - Main logging script
+- [Test-OkyeremaLog.ps1](Test-OkyeremaLog.ps1) - Test suite
+- [Examples-OkyeremaLog.ps1](Examples-OkyeremaLog.ps1) - Real-world usage examples
+- [README.md](README.md) - Complete documentation

@@ -87,5 +87,5 @@ if (-not $Quiet) {
     [Console]::Error.WriteLine($jsonLog)
 }
 
-# Return the log entry object for potential pipeline usage
-return $logEntry
+# Output the log entry object for potential pipeline usage
+$logEntry
