@@ -28,6 +28,7 @@ The Okyerema coordinates adwoma (work) across the asafo (team). This skill teach
 - Setting up issue hierarchies
 - Querying or manipulating GitHub Projects
 - Checking issue relationships
+- Responding to and resolving PR review threads
 - Understanding how work is structured
 
 ## Quick Operations
@@ -129,6 +130,7 @@ For detailed GraphQL examples and workflows, reference these guides:
 - **[Issue Types](references/issue-types.md)** — Creating, updating, verifying types
 - **[Relationships](references/relationships.md)** — Parent-child, hierarchy queries, orphan detection
 - **[Projects](references/projects.md)** — GitHub Projects V2 GraphQL API
+- **[PR Reviews](references/pr-reviews.md)** — Reply to, resolve, and find unresolved review threads
 - **[Labels](references/labels.md)** — When and how to use labels properly
 - **[Errors & Fixes](references/errors.md)** — Common mistakes and solutions
 
