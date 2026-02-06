@@ -101,8 +101,9 @@ mutation {
 ### Reply and resolve all unresolved threads with the same message
 ```powershell
 $threads = .\Get-UnresolvedThreads.ps1 -Owner ORG -Repo REPO -PullNumber 6
-# Then for each:
-.\Reply-ReviewThread.ps1 -Owner ORG -Repo REPO -PullNumber 6 -ThreadId "PRRT_xxx" -Body "Addressed in commit abc123" -Resolve
+foreach ($t in $threads) {
+    .\Reply-ReviewThread.ps1 -Owner ORG -Repo REPO -PullNumber 6 -ThreadId $t.id -Body "Addressed in commit abc123" -Resolve
+}
 ```
 
 ### Bulk resolve all (no reply)

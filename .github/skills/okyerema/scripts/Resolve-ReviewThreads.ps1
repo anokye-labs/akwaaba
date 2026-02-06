@@ -39,7 +39,8 @@ param(
 )
 
 $action = if ($Unresolve) { "unresolveReviewThread" } else { "resolveReviewThread" }
-$label = if ($Unresolve) { "Unresolved" } else { "Resolved" }
+$verb = if ($Unresolve) { "unresolve" } else { "resolve" }
+$pastTense = if ($Unresolve) { "Unresolved" } else { "Resolved" }
 
 # If no specific IDs, fetch all matching threads
 if (-not $ThreadIds) {
@@ -67,12 +68,16 @@ if (-not $ThreadIds) {
     $ThreadIds = ($threads | Where-Object { $_.isResolved -eq $targetResolved }).id
 
     if ($ThreadIds.Count -eq 0) {
-        Write-Host "No threads to $($label.ToLower())." -ForegroundColor Yellow
+        Write-Host "No threads to $verb." -ForegroundColor Yellow
         exit 0
+    }
+
+    if ($result.data.repository.pullRequest.reviewThreads.totalCount -gt $threads.Count) {
+        Write-Warning "PR has more than 100 threads. Only the first 100 are processed."
     }
 }
 
-Write-Host "$($label): $($ThreadIds.Count) thread(s)" -ForegroundColor Cyan
+Write-Host "Will $verb $($ThreadIds.Count) thread(s)" -ForegroundColor Cyan
 
 foreach ($id in $ThreadIds) {
     gh api graphql -f query="
@@ -81,7 +86,7 @@ foreach ($id in $ThreadIds) {
         thread { isResolved }
       }
     }" | Out-Null
-    Write-Host "  $label $id" -ForegroundColor Green
+    Write-Host "  $pastTense $id" -ForegroundColor Green
 }
 
 Write-Host "Done." -ForegroundColor Green

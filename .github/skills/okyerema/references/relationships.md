@@ -209,7 +209,7 @@ $updateMutation = @"
 mutation {
   updateIssue(input: {
     id: `"$issueId`"
-    body: `"$($newBody.Replace('"', '\"').Replace("`n", '\n'))`"
+    body: `"$($newBody.Replace('\', '\\').Replace('"', '\"').Replace("`n", '\n'))`"
   }) {
     issue { number }
   }

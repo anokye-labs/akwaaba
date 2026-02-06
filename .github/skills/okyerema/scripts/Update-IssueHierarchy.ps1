@@ -38,7 +38,7 @@ $cleanLines = @()
 $inTasklist = $false
 
 foreach ($line in $lines) {
-    if ($line -match '^## .* Tracked') {
+    if ($line -match '^## [\p{So}\s]*Tracked (Tasks|Features|Items)') {
         $inTasklist = $true
         continue
     }

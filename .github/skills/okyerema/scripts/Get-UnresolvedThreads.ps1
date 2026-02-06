@@ -68,6 +68,9 @@ if (-not $IncludeResolved) {
 $total = $result.data.repository.pullRequest.reviewThreads.totalCount
 $showing = $threads.Count
 
+# Emit thread objects to pipeline for programmatic use
+$threads | ForEach-Object { Write-Output $_ }
+
 Write-Host "`n$Owner/$Repo PR #$PullNumber — $showing thread(s)" -ForegroundColor Cyan
 if (-not $IncludeResolved) {
     $resolved = $total - $showing
