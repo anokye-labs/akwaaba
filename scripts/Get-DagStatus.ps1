@@ -172,7 +172,8 @@ query(`$owner: String!, `$repo: String!, `$number: Int!) {
     $result = Invoke-GraphQL -Query $query -Variables $variables -CorrelationId $CorrelationId
 
     if (-not $result.Success) {
-        Write-OkyeremaLog -Message "Failed to fetch issue #$Number: $($result.Errors[0].Message)" -Level Error -Operation "Get-IssueWithHierarchy" -CorrelationId $CorrelationId
+        $errorMsg = $result.Errors[0].Message
+        Write-OkyeremaLog -Message "Failed to fetch issue #$Number`: $errorMsg" -Level Error -Operation "Get-IssueWithHierarchy" -CorrelationId $CorrelationId
         throw "Failed to fetch issue #$Number"
     }
 
