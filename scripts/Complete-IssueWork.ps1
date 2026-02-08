@@ -199,6 +199,19 @@ function Get-RepoContextHelper {
     return $null
 }
 
+# Helper function to safely get first error message
+function Get-FirstErrorMessage {
+    param(
+        [Parameter(Mandatory = $true)]
+        $Result
+    )
+    
+    if ($Result.Errors -and $Result.Errors.Count -gt 0) {
+        return $Result.Errors[0].Message
+    }
+    return "Unknown error"
+}
+
 #endregion
 
 #region Main Logic
@@ -236,13 +249,21 @@ if (-not $Owner -or -not $Repo) {
     
     if ($context) {
         # Parse owner and repo from GitHub CLI
-        $repoViewResult = gh repo view --json nameWithOwner 2>&1 | ConvertFrom-Json
-        if ($repoViewResult -and $repoViewResult.nameWithOwner) {
-            $parts = $repoViewResult.nameWithOwner.Split('/')
-            if ($parts.Length -eq 2) {
-                if (-not $Owner) { $Owner = $parts[0] }
-                if (-not $Repo) { $Repo = $parts[1] }
+        try {
+            $repoViewResult = gh repo view --json nameWithOwner 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                $repoViewJson = $repoViewResult | ConvertFrom-Json
+                if ($repoViewJson -and $repoViewJson.nameWithOwner) {
+                    $parts = $repoViewJson.nameWithOwner.Split('/')
+                    if ($parts.Length -eq 2) {
+                        if (-not $Owner) { $Owner = $parts[0] }
+                        if (-not $Repo) { $Repo = $parts[1] }
+                    }
+                }
             }
+        }
+        catch {
+            Write-OkyeremaLogHelper -Level Warn -Message "Could not get repository info from gh CLI: $_" -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
         }
     }
     
@@ -280,7 +301,7 @@ $issueVars = @{
 $issueResult = Invoke-GraphQL -Query $issueQuery -Variables $issueVars -CorrelationId $CorrelationId -DryRun:$DryRun
 
 if (-not $issueResult.Success) {
-    $errorMsg = "Failed to fetch issue #$IssueNumber: $($issueResult.Errors[0].Message)"
+    $errorMsg = "Failed to fetch issue #$IssueNumber: $(Get-FirstErrorMessage -Result $issueResult)"
     Write-OkyeremaLogHelper -Level Error -Message $errorMsg -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
     throw $errorMsg
 }
@@ -385,7 +406,7 @@ $prVars = @{
 $prQueryResult = Invoke-GraphQL -Query $prQuery -Variables $prVars -CorrelationId $CorrelationId
 
 if (-not $prQueryResult.Success) {
-    Write-OkyeremaLogHelper -Level Warn -Message "Could not fetch PR details, skipping project operations: $($prQueryResult.Errors[0].Message)" -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
+    Write-OkyeremaLogHelper -Level Warn -Message "Could not fetch PR details, skipping project operations: $(Get-FirstErrorMessage -Result $prQueryResult)" -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
 }
 else {
     $pr = $prQueryResult.Data.repository.pullRequest
@@ -433,7 +454,7 @@ query(`$owner: String!, `$projectNumber: Int!) {
         $projectResult = Invoke-GraphQL -Query $projectQuery -Variables $projectVars -CorrelationId $CorrelationId
 
         if (-not $projectResult.Success) {
-            Write-OkyeremaLogHelper -Level Warn -Message "Could not fetch project details: $($projectResult.Errors[0].Message)" -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
+            Write-OkyeremaLogHelper -Level Warn -Message "Could not fetch project details: $(Get-FirstErrorMessage -Result $projectResult)" -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
         }
         else {
             $project = $projectResult.Data.organization.projectV2
@@ -504,7 +525,7 @@ mutation(`$projectId: ID!, `$itemId: ID!, `$fieldId: ID!, `$value: ProjectV2Fiel
                                 Write-OkyeremaLogHelper -Level Info -Message "Status set to 'In Review'" -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
                             }
                             else {
-                                Write-OkyeremaLogHelper -Level Warn -Message "Could not set Status field: $($updateResult.Errors[0].Message)" -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
+                                Write-OkyeremaLogHelper -Level Warn -Message "Could not set Status field: $(Get-FirstErrorMessage -Result $updateResult)" -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
                             }
                         }
                         else {
@@ -516,7 +537,7 @@ mutation(`$projectId: ID!, `$itemId: ID!, `$fieldId: ID!, `$value: ProjectV2Fiel
                     }
                 }
                 else {
-                    Write-OkyeremaLogHelper -Level Warn -Message "Could not add PR to project: $($addResult.Errors[0].Message)" -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
+                    Write-OkyeremaLogHelper -Level Warn -Message "Could not add PR to project: $(Get-FirstErrorMessage -Result $addResult)" -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
                 }
             }
             else {
