@@ -439,17 +439,15 @@ Total Blocked Issues: $($BlockedIssues.Count)
             $output += "  Blocked by:`n"
             
             foreach ($blocker in $issue.BlockedBy) {
-                if ($blocker.Repository) {
-                    $output += "    - $($blocker.Repository)#$($blocker.Number)"
-                } else {
-                    $output += "    - #$($blocker.Number)"
+                # Format blocker reference
+                $blockerRef = if ($blocker.Repository) { 
+                    "$($blocker.Repository)#$($blocker.Number)" 
+                } else { 
+                    "#$($blocker.Number)" 
                 }
                 
-                if ($blocker.Title) {
-                    $output += ": $($blocker.Title)"
-                }
-                
-                $output += " [$($blocker.State)]`n"
+                $blockerTitle = if ($blocker.Title) { ": $($blocker.Title)" } else { "" }
+                $output += "    - $blockerRef$blockerTitle [$($blocker.State)]`n"
             }
         }
     }
@@ -477,15 +475,20 @@ try {
         Write-OkyeremaLogHelper -Message "Fetching repository context" -CorrelationId $CorrelationId
         $context = Get-RepoContextHelper
         
-        if ($context.RepoId) {
-            # Parse owner/repo from context
-            # This is a simplification - in reality we'd need to call gh repo view
+        # Check if we got valid context by verifying RepoId exists
+        # RepoId is the primary identifier and should always be present for a valid repository
+        if ($context -and $context.RepoId) {
+            # Parse owner/repo from GitHub CLI
             $repoInfo = gh repo view --json nameWithOwner | ConvertFrom-Json
             $parts = $repoInfo.nameWithOwner -split '/'
-            $Owner = $parts[0]
-            $Repo = $parts[1]
             
-            Write-OkyeremaLogHelper -Message "Using repository: $Owner/$Repo" -CorrelationId $CorrelationId
+            if ($parts.Length -eq 2) {
+                $Owner = $parts[0]
+                $Repo = $parts[1]
+                Write-OkyeremaLogHelper -Message "Using repository: $Owner/$Repo" -CorrelationId $CorrelationId
+            } else {
+                throw "Could not parse repository owner and name. Please specify -Owner and -Repo parameters."
+            }
         } else {
             throw "Could not determine repository context. Please specify -Owner and -Repo parameters."
         }
@@ -506,24 +509,23 @@ try {
     
     Write-OkyeremaLogHelper -Message "Generated resolution order with $($resolutionOrder.Count) issues" -CorrelationId $CorrelationId
     
-    # Count open issues
-    $openIssues = @($issues | Where-Object { $_.state -eq "OPEN" })
-    $totalOpen = $openIssues.Count
+    # Create structured result object
+    $result = [PSCustomObject]@{
+        BlockedIssues = $blockedIssues
+        ResolutionOrder = $resolutionOrder
+        TotalOpen = $totalOpen
+        TotalBlocked = $blockedIssues.Count
+    }
     
-    # Format and output results
+    # Format and display output based on format
     $output = Format-Output -BlockedIssues $blockedIssues -ResolutionOrder $resolutionOrder -TotalOpen $totalOpen -Format $OutputFormat
     
     Write-Host $output
     
     Write-OkyeremaLogHelper -Message "Blocked issues analysis completed successfully" -CorrelationId $CorrelationId
     
-    # Return structured data for pipeline use
-    return [PSCustomObject]@{
-        BlockedIssues = $blockedIssues
-        ResolutionOrder = $resolutionOrder
-        TotalOpen = $totalOpen
-        TotalBlocked = $blockedIssues.Count
-    }
+    # Return structured data for pipeline use (always the same structure regardless of display format)
+    return $result
 }
 catch {
     Write-OkyeremaLogHelper -Message "Error during blocked issues analysis: $_" -Level "Error" -CorrelationId $CorrelationId
