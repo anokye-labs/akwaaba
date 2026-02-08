@@ -302,20 +302,49 @@ if (-not $SkipBranch) {
     
     try {
         # Fetch latest from origin
-        $null = git fetch origin main 2>&1
+        $fetchOutput = git fetch origin main 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-OkyeremaLog -Message "Failed to fetch from origin/main: $fetchOutput" `
+                -Level Warn `
+                -Operation "Start-IssueWork" `
+                -CorrelationId $CorrelationId
+            throw "Git fetch failed"
+        }
         
         # Check if branch already exists
         $existingBranch = git branch --list $branchName 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-OkyeremaLog -Message "Failed to list branches: $existingBranch" `
+                -Level Warn `
+                -Operation "Start-IssueWork" `
+                -CorrelationId $CorrelationId
+            throw "Git branch list failed"
+        }
+        
         if ($existingBranch) {
             Write-OkyeremaLog -Message "Branch $branchName already exists, checking it out" `
                 -Level Info `
                 -Operation "Start-IssueWork" `
                 -CorrelationId $CorrelationId
-            $null = git checkout $branchName 2>&1
+            $checkoutOutput = git checkout $branchName 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                Write-OkyeremaLog -Message "Failed to checkout existing branch: $checkoutOutput" `
+                    -Level Warn `
+                    -Operation "Start-IssueWork" `
+                    -CorrelationId $CorrelationId
+                throw "Git checkout failed"
+            }
         }
         else {
             # Create and checkout new branch from origin/main
-            $null = git checkout -b $branchName origin/main 2>&1
+            $checkoutOutput = git checkout -b $branchName origin/main 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                Write-OkyeremaLog -Message "Failed to create branch: $checkoutOutput" `
+                    -Level Warn `
+                    -Operation "Start-IssueWork" `
+                    -CorrelationId $CorrelationId
+                throw "Git checkout -b failed"
+            }
             Write-OkyeremaLog -Message "Created and checked out branch: $branchName" `
                 -Level Info `
                 -Operation "Start-IssueWork" `
