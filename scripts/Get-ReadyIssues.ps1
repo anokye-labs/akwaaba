@@ -63,6 +63,12 @@
 .NOTES
     Requires GitHub CLI (gh) to be installed and authenticated.
     Depends on: Invoke-GraphQL.ps1, Get-RepoContext.ps1, Write-OkyeremaLog.ps1
+    
+    Limitations:
+    - Fetches up to 3 levels deep in the hierarchy
+    - Limited to 100 tracked issues per level
+    - Limited to 50 labels and 10 assignees per issue
+    - These limits are sufficient for most hierarchies but may truncate very large structures
 #>
 
 [CmdletBinding()]
@@ -145,6 +151,8 @@ Write-Verbose "Repository: $owner/$repo"
 
 # Build GraphQL query to fetch the entire DAG from root issue
 # This recursively fetches children up to 3 levels deep
+# Note: Limited to 100 issues per level, 50 labels, 10 assignees per issue
+# These limits are sufficient for most hierarchies but may truncate large structures
 $dagQuery = @"
 query(`$owner: String!, `$repo: String!, `$rootNumber: Int!) {
   repository(owner: `$owner, name: `$repo) {
@@ -282,7 +290,14 @@ function Get-BlockingDependencies {
     $blockingIssues = @()
     
     # Match "Blocked by:" section with issue references
-    # Pattern: Blocked by:\s*\n(-\s*\[.\]\s*.*?#(\d+).*\n?)+
+    # Expected format in issue body:
+    #   Blocked by:
+    #   - [ ] owner/repo#123 - Description
+    #   - [x] #456 - Another issue
+    # Pattern explanation:
+    #   (?ms) - multiline and singleline mode
+    #   Blocked by:\s*\n - Match "Blocked by:" followed by newline
+    #   ((?:-\s*\[.\].*?\n?)+) - Capture checklist items (- [ ] or - [x])
     if ($Body -match '(?ms)Blocked by:\s*\n((?:-\s*\[.\].*?\n?)+)') {
         $blockSection = $Matches[1]
         
@@ -371,8 +386,16 @@ function Add-IssueToMap {
         Url = $Issue.url
         Body = $Issue.body
         Type = if ($Issue.issueType) { $Issue.issueType.name } else { $null }
-        Labels = @($Issue.labels.nodes | ForEach-Object { $_.name })
-        Assignees = @($Issue.assignees.nodes | ForEach-Object { $_.login })
+        Labels = if ($Issue.labels -and $Issue.labels.nodes) { 
+            @($Issue.labels.nodes | ForEach-Object { $_.name })
+        } else { 
+            @() 
+        }
+        Assignees = if ($Issue.assignees -and $Issue.assignees.nodes) { 
+            @($Issue.assignees.nodes | ForEach-Object { $_.login })
+        } else { 
+            @() 
+        }
         Children = @()
         Parent = $Parent
         Depth = $Depth
