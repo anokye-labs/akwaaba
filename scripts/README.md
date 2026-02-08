@@ -48,6 +48,37 @@ Write-Host "Repository ID: $($context.RepoId)"
 $context = ./scripts/Get-RepoContext.ps1 -Refresh
 ```
 
+### Get-DagCompletionReport.ps1
+
+Generate a summary report of DAG progress suitable for status updates.
+
+**Features:**
+- Per-phase breakdown (by Epic)
+- Per-feature breakdown (by Feature under Epic)
+- Burndown data (closed over time)
+- Multiple output formats: Console, Markdown table, or JSON
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Depends on: `Invoke-GraphQL.ps1`, `Get-RepoContext.ps1`, `Write-OkyeremaLog.ps1`
+
+**Usage:**
+
+```powershell
+# Console format (default)
+./scripts/Get-DagCompletionReport.ps1 -RootIssueNumber 1
+
+# Markdown format for documentation
+./scripts/Get-DagCompletionReport.ps1 -RootIssueNumber 1 -OutputFormat Markdown
+
+# JSON format for automation
+./scripts/Get-DagCompletionReport.ps1 -RootIssueNumber 1 -OutputFormat Json
+
+# Include burndown data
+./scripts/Get-DagCompletionReport.ps1 -RootIssueNumber 1 -IncludeBurndown
+```
+
 ### Invoke-GraphQL.ps1
 
 Centralized GraphQL executor with retry logic, rate-limit handling, and structured error output.
