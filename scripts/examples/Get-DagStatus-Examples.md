@@ -178,10 +178,10 @@ if ($status.PercentComplete -lt 80) {
 }
 
 # Find blocked items
-$blocked = @()
+$script:blocked = @()
 function Find-Blocked($node) {
     if ($node.IsBlocked) {
-        $blocked += $node
+        $script:blocked += $node
     }
     foreach ($child in $node.Children) {
         Find-Blocked $child
@@ -189,8 +189,8 @@ function Find-Blocked($node) {
 }
 Find-Blocked $status
 
-if ($blocked.Count -gt 0) {
-    Write-Warning "Found $($blocked.Count) blocked items that need attention"
+if ($script:blocked.Count -gt 0) {
+    Write-Warning "Found $($script:blocked.Count) blocked items that need attention"
 }
 ```
 
@@ -226,11 +226,11 @@ All outputs can be piped to other PowerShell commands:
 ```powershell
 # Count open issues
 $json = ./scripts/Get-DagStatus.ps1 -IssueNumber 14 -Format JSON | ConvertFrom-Json
-$openCount = 0
+$script:openCount = 0
 function Count-Open($node) {
     if ($node.State -eq "OPEN") { $script:openCount++ }
     foreach ($child in $node.Children) { Count-Open $child }
 }
 Count-Open $json
-Write-Host "Total open issues: $openCount"
+Write-Host "Total open issues: $script:openCount"
 ```

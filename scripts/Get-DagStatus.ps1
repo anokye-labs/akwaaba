@@ -260,7 +260,7 @@ function Calculate-NodeMetrics {
 
     if ($Node.TotalChildren -gt 0) {
         # Count closed direct children
-        $Node.ClosedChildren = ($Node.Children | Where-Object { $_.State -eq "CLOSED" }).Count
+        $Node.ClosedChildren = @($Node.Children | Where-Object { $_.State -eq "CLOSED" }).Count
 
         # Calculate percentage complete (based on direct children only)
         $Node.PercentComplete = [math]::Round(($Node.ClosedChildren / $Node.TotalChildren) * 100, 1)
