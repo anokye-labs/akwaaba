@@ -57,6 +57,8 @@ Generate a summary report of DAG progress suitable for status updates.
 - Per-feature breakdown (by Feature under Epic)
 - Burndown data (closed over time)
 - Multiple output formats: Console, Markdown table, or JSON
+- Recursive hierarchy traversal
+- Progress visualization with progress bars (Console format)
 
 **Prerequisites:**
 - PowerShell 7.x or higher
@@ -66,17 +68,30 @@ Generate a summary report of DAG progress suitable for status updates.
 **Usage:**
 
 ```powershell
-# Console format (default)
+# Console format (default) - colorful output with progress bars
 ./scripts/Get-DagCompletionReport.ps1 -RootIssueNumber 1
 
-# Markdown format for documentation
+# Markdown format for documentation and status updates
 ./scripts/Get-DagCompletionReport.ps1 -RootIssueNumber 1 -OutputFormat Markdown
 
-# JSON format for automation
+# JSON format for automation and data processing
 ./scripts/Get-DagCompletionReport.ps1 -RootIssueNumber 1 -OutputFormat Json
 
-# Include burndown data
+# Include burndown data showing completion over time
 ./scripts/Get-DagCompletionReport.ps1 -RootIssueNumber 1 -IncludeBurndown
+
+# Test mode to see queries without executing
+./scripts/Get-DagCompletionReport.ps1 -RootIssueNumber 1 -DryRun
+```
+
+**Testing:**
+
+```powershell
+# Run mock test to verify output formatters
+./scripts/Test-Get-DagCompletionReport-Mock.ps1
+
+# Run full integration test (requires valid issue number)
+./scripts/Test-Get-DagCompletionReport.ps1 -IssueNumber 1
 ```
 
 ### Invoke-GraphQL.ps1
