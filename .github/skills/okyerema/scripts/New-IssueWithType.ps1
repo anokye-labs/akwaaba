@@ -1,5 +1,6 @@
 # New-IssueWithType.ps1
 # Create a GitHub issue with proper organization issue type
+# Now uses Invoke-GraphQL.ps1 for robust GraphQL operations
 
 param(
     [Parameter(Mandatory)][string]$Owner,
@@ -12,10 +13,22 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Find repository root and foundation layer scripts
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$repoRoot = $scriptDir
+# Navigate up from .github/skills/okyerema/scripts to repository root
+for ($i = 0; $i -lt 4; $i++) {
+    $repoRoot = Split-Path -Parent $repoRoot
+}
+$scriptsPath = Join-Path $repoRoot "scripts"
+
+# Import foundation layer scripts
+. (Join-Path $scriptsPath "Invoke-GraphQL.ps1")
+
 # Get repo ID and type IDs
 $query = @"
-query {
-  repository(owner: `"$Owner`", name: `"$Repo`") {
+query(`$owner: String!, `$repo: String!) {
+  repository(owner: `$owner, name: `$repo) {
     id
     owner {
       ... on Organization {
@@ -28,26 +41,35 @@ query {
 }
 "@
 
-$result = gh api graphql -f query="$query" | ConvertFrom-Json
-$repoId = $result.data.repository.id
-$typeId = ($result.data.repository.owner.issueTypes.nodes | Where-Object { $_.name -eq $TypeName }).id
+$variables = @{
+    owner = $Owner
+    repo = $Repo
+}
 
-if (-not $typeId) {
-    Write-Error "Issue type '$TypeName' not found. Available: $($result.data.repository.owner.issueTypes.nodes.name -join ', ')"
+$result = Invoke-GraphQL -Query $query -Variables $variables
+
+if (-not $result.Success) {
+    $errorMsg = if ($result.Errors.Count -gt 0) { $result.Errors[0].Message } else { "Unknown error" }
+    Write-Error "Failed to fetch repository info: $errorMsg"
     return
 }
 
-# Create issue
-$escapedTitle = $Title.Replace('\', '\\').Replace('"', '\"')
-$escapedBody = $Body.Replace('\', '\\').Replace('"', '\"').Replace("`n", '\n')
+$repoId = $result.Data.repository.id
+$typeId = ($result.Data.repository.owner.issueTypes.nodes | Where-Object { $_.name -eq $TypeName }).id
 
+if (-not $typeId) {
+    Write-Error "Issue type '$TypeName' not found. Available: $($result.Data.repository.owner.issueTypes.nodes.name -join ', ')"
+    return
+}
+
+# Create issue (variables are already properly handled by Invoke-GraphQL)
 $mutation = @"
-mutation {
+mutation(`$repoId: ID!, `$title: String!, `$body: String!, `$typeId: ID!) {
   createIssue(input: {
-    repositoryId: `"$repoId`"
-    title: `"$escapedTitle`"
-    body: `"$escapedBody`"
-    issueTypeId: `"$typeId`"
+    repositoryId: `$repoId
+    title: `$title
+    body: `$body
+    issueTypeId: `$typeId
   }) {
     issue {
       id
@@ -60,32 +82,49 @@ mutation {
 }
 "@
 
-$result = gh api graphql -f query="$mutation" | ConvertFrom-Json
-$issue = $result.data.createIssue.issue
+$mutationVars = @{
+    repoId = $repoId
+    title = $Title
+    body = $Body
+    typeId = $typeId
+}
+
+$createResult = Invoke-GraphQL -Query $mutation -Variables $mutationVars
+
+if (-not $createResult.Success) {
+    $errorMsg = if ($createResult.Errors.Count -gt 0) { $createResult.Errors[0].Message } else { "Unknown error" }
+    Write-Error "Failed to create issue: $errorMsg"
+    return
+}
+
+$issue = $createResult.Data.createIssue.issue
 
 Write-Host "✓ Created #$($issue.number) [$($issue.issueType.name)] $($issue.title)" -ForegroundColor Green
 
-# Add labels if provided (via GraphQL, not gh CLI)
+# Add labels if provided (via GraphQL)
 if ($Labels.Count -gt 0) {
     # Get label IDs
     $labelQuery = @"
-query {
-  repository(owner: `"$Owner`", name: `"$Repo`") {
+query(`$owner: String!, `$repo: String!) {
+  repository(owner: `$owner, name: `$repo) {
     labels(first: 100) {
       nodes { id name }
     }
   }
 }
 "@
-    $labelResult = gh api graphql -f query="$labelQuery" | ConvertFrom-Json
-    $labelIds = $Labels | ForEach-Object {
-        $name = $_
-        ($labelResult.data.repository.labels.nodes | Where-Object { $_.name -eq $name }).id
-    } | Where-Object { $_ }
+    
+    $labelResult = Invoke-GraphQL -Query $labelQuery -Variables $variables
+    
+    if ($labelResult.Success) {
+        $labelIds = $Labels | ForEach-Object {
+            $name = $_
+            ($labelResult.Data.repository.labels.nodes | Where-Object { $_.name -eq $name }).id
+        } | Where-Object { $_ }
 
-    if ($labelIds.Count -gt 0) {
-        $labelIdList = ($labelIds | ForEach-Object { "`"$_`"" }) -join ', '
-        $labelMutation = @"
+        if ($labelIds.Count -gt 0) {
+            $labelIdList = ($labelIds | ForEach-Object { "`"$_`"" }) -join ', '
+            $labelMutation = @"
 mutation {
   addLabelsToLabelable(input: {
     labelableId: `"$($issue.id)`"
@@ -97,12 +136,16 @@ mutation {
   }
 }
 "@
-        gh api graphql -f query="$labelMutation" | Out-Null
-        $allLabelNodes = $labelResult.data.repository.labels.nodes
-        $appliedLabels = $allLabelNodes | Where-Object { $_.id -in $labelIds } | ForEach-Object { $_.name }
-        $missing = $Labels | Where-Object { $_ -notin ($allLabelNodes.name) }
-        Write-Host "  + Labels: $($appliedLabels -join ', ')" -ForegroundColor Gray
-        if ($missing) { Write-Warning "Labels not found (skipped): $($missing -join ', ')" }
+            $labelAddResult = Invoke-GraphQL -Query $labelMutation
+            
+            if ($labelAddResult.Success) {
+                $allLabelNodes = $labelResult.Data.repository.labels.nodes
+                $appliedLabels = $allLabelNodes | Where-Object { $_.id -in $labelIds } | ForEach-Object { $_.name }
+                $missing = $Labels | Where-Object { $_ -notin ($allLabelNodes.name) }
+                Write-Host "  + Labels: $($appliedLabels -join ', ')" -ForegroundColor Gray
+                if ($missing) { Write-Warning "Labels not found (skipped): $($missing -join ', ')" }
+            }
+        }
     }
 }
 
