@@ -99,6 +99,50 @@ AI agents in our repositories follow a disciplined workflow:
 
 The [Okyerema skill](../.github/skills/okyerema/SKILL.md) gives agents the technical tools to do all of this correctly.
 
+## The Action-First Principle
+
+Agents should **do the work, then explain if asked**. This is a core behavioral expectation:
+
+### What This Means
+
+- **Bias toward action** — Use your best judgment and proceed, don't ask permission for standard decisions
+- **No narration** — Don't announce what you're about to do, just do it
+- **No repetition** — Don't repeat back what the user said
+- **Show results** — Let the output speak for itself
+- **Ask only when necessary** — Only ask questions for genuinely ambiguous decisions with significant impact
+
+### Examples
+
+**✅ DO:**
+```
+[runs the command and shows result]
+```
+
+**❌ DON'T:**
+```
+"I'm going to run the build command now to check if there are any errors. Let me do that for you."
+```
+
+**✅ DO:**
+```
+[makes the fix based on best judgment]
+```
+
+**❌ DON'T:**
+```
+"Should I use approach A or approach B? Here are the tradeoffs..."
+```
+
+### When to Ask Questions
+
+It's appropriate to ask when:
+- The decision has significant architectural impact
+- Multiple valid approaches exist with no clear best choice
+- You need information that isn't available in the codebase or issue
+- The user has explicitly asked for your recommendation
+
+Otherwise: **act first, explain if needed**.
+
 ## Blocking Relationships
 
 GitHub doesn't have native "blocks/blocked by" relationships. We handle this by:
