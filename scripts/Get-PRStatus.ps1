@@ -514,7 +514,7 @@ $now = Get-Date
 $timeMetrics = [PSCustomObject]@{
     CreatedAt = $pr.createdAt
     UpdatedAt = $pr.updatedAt
-    AgeSincCreated = Get-HumanReadableDuration -StartTime $createdAt
+    AgeSinceCreated = Get-HumanReadableDuration -StartTime $createdAt
     TimeSinceLastUpdate = Get-HumanReadableDuration -StartTime $updatedAt
 }
 
@@ -677,7 +677,7 @@ switch ($OutputFormat) {
 |----------|-------|
 | Created | $($timeMetrics.CreatedAt) |
 | Last Updated | $($timeMetrics.UpdatedAt) |
-| Age | $($timeMetrics.AgeSincCreated) |
+| Age | $($timeMetrics.AgeSinceCreated) |
 | Time Since Update | $($timeMetrics.TimeSinceLastUpdate) |
 
 "@
@@ -844,7 +844,7 @@ switch ($OutputFormat) {
         Write-Host "  Last Updated: " -NoNewline -ForegroundColor Gray
         Write-Host $timeMetrics.UpdatedAt -ForegroundColor White
         Write-Host "  Age: " -NoNewline -ForegroundColor Gray
-        Write-Host $timeMetrics.AgeSincCreated -ForegroundColor Yellow
+        Write-Host $timeMetrics.AgeSinceCreated -ForegroundColor Yellow
         Write-Host "  Time Since Update: " -NoNewline -ForegroundColor Gray
         Write-Host $timeMetrics.TimeSinceLastUpdate -ForegroundColor Yellow
         
