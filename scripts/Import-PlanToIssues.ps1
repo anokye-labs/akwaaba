@@ -179,6 +179,9 @@ function Parse-PlanMarkdown {
         RawContent = $content
     }
 
+    # Common regex pattern for section boundaries (## but not ###)
+    $sectionEndPattern = '(?=\n##(?!#)|\z)'
+
     # Parse title (first line starting with #)
     $titleMatch = $content -match '(?m)^#\s+(.+)$'
     if ($titleMatch) {
@@ -200,20 +203,21 @@ function Parse-PlanMarkdown {
 
     if ($content -match '\*\*Dependencies:\*\*\s*(.+)') {
         $depLine = $Matches[1].Trim()
-        # Parse comma-separated or single dependency (case-insensitive filtering)
-        $plan.Dependencies = $depLine -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_ -notmatch '^(None|N/A|n/a)$' }
+        # Parse comma-separated or single dependency (case-insensitive filtering for None/N/A)
+        $plan.Dependencies = $depLine -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_ -notmatch '(?i)^(None|N/A)$' }
     }
 
     # Parse Overview section (flexible whitespace after heading)
-    if ($content -match '(?s)##\s+Overview\s*\n+(.+?)(?=\n##(?!#)|\z)') {
+    if ($content -match "(?s)##\s+Overview\s*\n+(.+?)$sectionEndPattern") {
         $plan.Overview = $Matches[1].Trim()
     }
 
     # Parse Tasks section (flexible whitespace after heading)
-    if ($content -match '(?s)##\s+(?:Key\s+)?Tasks\s*\n+(.+?)(?=\n##(?!#)|\z)') {
+    if ($content -match "(?s)##\s+(?:Key\s+)?Tasks\s*\n+(.+?)$sectionEndPattern") {
         $tasksSection = $Matches[1]
         
         # Split by task headers (### Task N:)
+        # NOTE: Requires strict format: "### Task N:" where N is one or more digits
         $taskMatches = [regex]::Matches($tasksSection, '(?s)###\s+Task\s+\d+:\s*(.+?)(?=\n###|\z)')
         
         # Log warning if expected tasks section exists but no tasks were parsed
@@ -228,7 +232,8 @@ function Parse-PlanMarkdown {
             $taskLines = $taskContent -split '\n'
             $taskTitle = $taskLines[0].Trim()
             
-            # Extract checklist items
+            # Extract checklist items (only unchecked items: - [ ])
+            # Checked items (- [x]) are ignored as they represent completed work
             $checklistItems = @()
             foreach ($line in $taskLines) {
                 if ($line -match '^\s*-\s+\[\s*\]\s*(.+)') {
@@ -245,14 +250,14 @@ function Parse-PlanMarkdown {
     }
 
     # Parse Acceptance Criteria section (flexible whitespace after heading)
-    if ($content -match '(?s)##\s+Acceptance\s+Criteria\s*\n+(.+?)(?=\n##(?!#)|\z)') {
+    if ($content -match "(?s)##\s+Acceptance\s+Criteria\s*\n+(.+?)$sectionEndPattern") {
         $criteriaSection = $Matches[1].Trim()
         $criteriaLines = $criteriaSection -split '\n' | Where-Object { $_ -match '^\s*-\s+(.+)' }
         $plan.AcceptanceCriteria = $criteriaLines | ForEach-Object { $_ -replace '^\s*-\s+', '' }
     }
 
     # Parse Notes section (flexible whitespace after heading)
-    if ($content -match '(?s)##\s+Notes\s*\n+(.+?)(?=\n##(?!#)|\z)') {
+    if ($content -match "(?s)##\s+Notes\s*\n+(.+?)$sectionEndPattern") {
         $plan.Notes = $Matches[1].Trim()
     }
 
@@ -506,9 +511,9 @@ try {
         if (-not (Test-Path $PlanDirectory)) {
             throw "Plan directory not found: $PlanDirectory"
         }
-        # Exclude phase README files from directory processing
+        # Exclude phase README files from directory processing (case-insensitive)
         # (They can be explicitly processed with -PlanFile if needed)
-        $filesToProcess = Get-ChildItem -Path $PlanDirectory -Filter "*.md" | Where-Object { $_.Name -ne "README.md" } | ForEach-Object { $_.FullName }
+        $filesToProcess = Get-ChildItem -Path $PlanDirectory -Filter "*.md" | Where-Object { $_.Name -ine "README.md" } | ForEach-Object { $_.FullName }
         
         if ($filesToProcess.Count -eq 0) {
             throw "No markdown files found in directory: $PlanDirectory"
