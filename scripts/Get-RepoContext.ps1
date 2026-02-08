@@ -127,9 +127,10 @@ function Get-OrganizationIssueTypes {
         
         # Attempt to get issue types from the organization's projects
         # Note: This requires GitHub GraphQL API access
+        # Using parameterized query to prevent GraphQL injection
         $query = @"
-query {
-  organization(login: "$Owner") {
+query(`$owner: String!) {
+  organization(login: `$owner) {
     projectsV2(first: 5) {
       nodes {
         id
@@ -153,8 +154,9 @@ query {
 "@
         
         # Try to fetch issue types - this may not be available in all orgs
+        # Using -F flag to pass parameters safely
         $result = Invoke-GitHubCommand -Command { 
-            gh api graphql -f query="$query" | ConvertFrom-Json
+            gh api graphql -f query="$query" -F owner="$Owner" | ConvertFrom-Json
         }
         
         if ($result -and $result.data.organization.projectsV2.nodes) {
