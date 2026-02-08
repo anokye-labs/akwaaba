@@ -173,7 +173,7 @@ query(`$owner: String!, `$repo: String!, `$number: Int!) {
 
     if (-not $result.Success) {
         $errorMsg = $result.Errors[0].Message
-        Write-OkyeremaLog -Message "Failed to fetch issue #$Number`: $errorMsg" -Level Error -Operation "Get-IssueWithHierarchy" -CorrelationId $CorrelationId
+        Write-OkyeremaLog -Message "Failed to fetch issue #$Number - $errorMsg" -Level Error -Operation "Get-IssueWithHierarchy" -CorrelationId $CorrelationId
         throw "Failed to fetch issue #$Number"
     }
 

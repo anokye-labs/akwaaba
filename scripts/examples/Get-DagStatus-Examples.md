@@ -173,8 +173,10 @@ Use JSON output in automated pipelines:
 ```powershell
 $status = ./scripts/Get-DagStatus.ps1 -IssueNumber 100 -Format JSON | ConvertFrom-Json
 
-if ($status.PercentComplete -lt 80) {
-    Write-Warning "Epic is less than 80% complete"
+# Check completion threshold
+$completionThreshold = 80
+if ($status.PercentComplete -lt $completionThreshold) {
+    Write-Warning "Epic is less than $completionThreshold% complete"
 }
 
 # Find blocked items using functional approach
