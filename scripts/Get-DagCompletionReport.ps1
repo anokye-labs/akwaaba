@@ -256,12 +256,13 @@ function Get-EpicStatistics {
 function Get-BurndownData {
     param([object]$Root)
     
-    $allIssues = @()
+    # Use ArrayList for better performance with large hierarchies
+    $allIssues = [System.Collections.Generic.List[object]]::new()
     
     function Collect-Issues {
         param([object]$Issue)
         
-        $allIssues += $Issue
+        $allIssues.Add($Issue)
         
         foreach ($child in $Issue.Children) {
             Collect-Issues -Issue $child
@@ -433,7 +434,7 @@ function Write-JsonReport {
         }
         Phases = $EpicStats
         Burndown = if ($BurndownData) { $BurndownData } else { @() }
-        GeneratedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+        GeneratedAt = (Get-Date).ToUniversalTime().ToString("o")
     }
     
     $report | ConvertTo-Json -Depth 10
@@ -452,12 +453,23 @@ if (-not $repoContext) {
 }
 
 # Extract owner and repo from current repository
-$repoInfo = gh repo view --json nameWithOwner | ConvertFrom-Json
-$parts = $repoInfo.nameWithOwner.Split('/')
-$owner = $parts[0]
-$repo = $parts[1]
-
-Write-OkyeremaLogHelper -Message "Repository: $owner/$repo" -Level "Debug"
+try {
+    $repoInfo = gh repo view --json nameWithOwner 2>&1 | Out-String
+    if ($LASTEXITCODE -ne 0) {
+        Write-OkyeremaLogHelper -Message "Failed to get repository info: $repoInfo" -Level "Error"
+        throw "GitHub CLI command failed. Ensure 'gh' is installed, authenticated, and run from a repository directory."
+    }
+    $repoInfoObj = $repoInfo | ConvertFrom-Json
+    $parts = $repoInfoObj.nameWithOwner.Split('/')
+    $owner = $parts[0]
+    $repo = $parts[1]
+    
+    Write-OkyeremaLogHelper -Message "Repository: $owner/$repo" -Level "Debug"
+}
+catch {
+    Write-OkyeremaLogHelper -Message "Failed to get repository context: $_" -Level "Error"
+    throw "Failed to determine repository owner and name. Ensure you are running this from a repository directory and GitHub CLI is properly configured."
+}
 
 # Fetch the issue hierarchy
 Write-OkyeremaLogHelper -Message "Fetching issue hierarchy starting from #$RootIssueNumber" -Level "Info"
