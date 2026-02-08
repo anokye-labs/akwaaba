@@ -48,6 +48,37 @@ Write-Host "Repository ID: $($context.RepoId)"
 $context = ./scripts/Get-RepoContext.ps1 -Refresh
 ```
 
+### Get-OrphanedIssues.ps1
+
+Find open issues not connected to any Epic/Feature hierarchy.
+
+**Features:**
+- Queries all open issues in the repository
+- Filters to issues with no parent (trackedInIssues.totalCount == 0)
+- Excludes Epics (they are roots, not orphans)
+- Suggests potential parent Epic/Feature based on title similarity
+- Provides formatted console output with visual hierarchy
+- Returns structured data for pipeline use
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Depends on: Invoke-GraphQL.ps1, Get-RepoContext.ps1, Write-OkyeremaLog.ps1
+
+**Usage:**
+
+```powershell
+# Find all orphaned issues
+./scripts/Get-OrphanedIssues.ps1
+
+# Test mode - show query without executing
+./scripts/Get-OrphanedIssues.ps1 -DryRun
+
+# Use in pipeline
+$orphans = ./scripts/Get-OrphanedIssues.ps1
+$orphans | Where-Object { $_.IssueType -eq "Task" }
+```
+
 ### Invoke-GraphQL.ps1
 
 Centralized GraphQL executor with retry logic, rate-limit handling, and structured error output.
