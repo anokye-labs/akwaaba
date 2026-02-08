@@ -4,6 +4,26 @@ This directory contains PowerShell automation scripts for the Akwaaba repository
 
 ## Available Scripts
 
+### ConvertTo-EscapedGraphQL.ps1
+
+A utility function that safely escapes text for use in GraphQL string literals. Addresses escaping bugs identified in PR #6 review comments.
+
+**Features:**
+- Handles newlines (converts to `\n`)
+- Escapes double quotes (converts to `\"`)
+- Escapes backslashes (converts to `\\`)
+- Preserves emoji and unicode characters
+- Pipe-friendly for easy integration
+- Handles multiline heredocs
+- Tab character escaping (converts to `\t`)
+
+**Usage:**
+
+```powershell
+. ./scripts/ConvertTo-EscapedGraphQL.ps1
+"Hello `"World`"" | ConvertTo-EscapedGraphQL
+```
+
 ### Invoke-GraphQL.ps1
 
 Centralized GraphQL executor with retry logic, rate-limit handling, and structured error output.
@@ -17,54 +37,25 @@ Centralized GraphQL executor with retry logic, rate-limit handling, and structur
 **Usage:**
 
 ```powershell
-# Simple query
 $query = 'query { viewer { login } }'
 $result = ./Invoke-GraphQL.ps1 -Query $query
 
-# Query with variables
-$query = 'query($owner: String!, $name: String!) { 
-    repository(owner: $owner, name: $name) { 
-        name 
-        description 
-    } 
-}'
 $vars = @{ owner = "octocat"; name = "Hello-World" }
 $result = ./Invoke-GraphQL.ps1 -Query $query -Variables $vars
 
-# DryRun mode (logs without executing)
+# DryRun mode
 $result = ./Invoke-GraphQL.ps1 -Query $query -DryRun
-
-# With verbose logging
-$result = ./Invoke-GraphQL.ps1 -Query $query -Verbose
-
-# Custom retry settings
-$result = ./Invoke-GraphQL.ps1 -Query $query -MaxRetries 5 -InitialDelaySeconds 3
 ```
 
 **Response Object:**
 
-The script returns a structured PSCustomObject:
-
 ```powershell
 @{
-    Success       = $true/$false     # Boolean indicating success
-    Data          = <response data>  # GraphQL response data (if successful)
-    Errors        = @(<errors>)      # Array of structured error objects (if failed)
-    CorrelationId = "guid"           # Correlation ID for tracing
-    Attempts      = 1                # Number of attempts made
-}
-```
-
-**Error Object Structure:**
-
-```powershell
-@{
-    Message       = "Error message"
-    Type          = "ErrorType"
-    Path          = @("field", "path")
+    Success       = $true/$false
+    Data          = <response data>
+    Errors        = @(<errors>)
     CorrelationId = "guid"
-    ExitCode      = 1
-    RawError      = "Full error text"
+    Attempts      = 1
 }
 ```
 
@@ -74,8 +65,17 @@ The script returns a structured PSCustomObject:
 2. **Check the Success property** before using the Data
 3. **Use -Verbose** for debugging and troubleshooting
 4. **Use -DryRun** to test queries without executing them
-5. **Include correlation IDs** in logs for easier tracing across multiple calls
 
 ## Examples
 
 See `examples/GraphQL-Examples.ps1` for more usage examples.
+
+## Contributing
+
+When adding new scripts to this directory:
+
+1. Follow PowerShell best practices
+2. Include comprehensive comment-based help
+3. Add test scripts when applicable
+4. Update this README with documentation
+5. Use the `ConvertTo-Verb` naming convention for functions
