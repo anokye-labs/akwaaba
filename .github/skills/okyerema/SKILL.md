@@ -4,7 +4,7 @@ description: >
   Project orchestration skill for Anokye Labs. Use when creating, managing, or
   querying GitHub issues, projects, hierarchies, and relationships. The Okyerema
   (talking drummer) keeps agents in rhythm — coordinating adwoma (work) through
-  the asafo (the team). Invoke this skill for any issue creation, hierarchy
+  the asafo (the team). Read this skill for any issue creation, hierarchy
   setup, project board manipulation, or when you need to understand how we
   structure work.
 ---
