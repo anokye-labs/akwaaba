@@ -24,6 +24,45 @@ A utility function that safely escapes text for use in GraphQL string literals. 
 "Hello `"World`"" | ConvertTo-EscapedGraphQL
 ```
 
+### Get-PRReviewTimeline.ps1
+
+Timeline view of PR review activity showing when reviews were requested, submitted, and comments posted/resolved.
+
+**Features:**
+- Shows chronological timeline of all PR review events
+- Tracks review requests, submissions, comments, and resolutions
+- Calculates cycle times (time to first review, time to approval, time to merge)
+- Identifies bottlenecks (longest wait periods between events)
+- Multiple output formats: Console (colored), Markdown (tables), JSON (structured)
+- Optional inclusion of detailed comment information
+- DryRun mode for testing queries
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Invoke-GraphQL.ps1
+- Get-RepoContext.ps1
+- Write-OkyeremaLog.ps1
+
+**Usage:**
+
+```powershell
+# Console output with colors
+./scripts/Get-PRReviewTimeline.ps1 -Owner anokye-labs -Repo akwaaba -PullNumber 6
+
+# Markdown table format
+./scripts/Get-PRReviewTimeline.ps1 -Owner anokye-labs -Repo akwaaba -PullNumber 6 -OutputFormat Markdown
+
+# JSON for programmatic processing
+./scripts/Get-PRReviewTimeline.ps1 -Owner anokye-labs -Repo akwaaba -PullNumber 6 -OutputFormat Json
+
+# Include detailed comments
+./scripts/Get-PRReviewTimeline.ps1 -Owner anokye-labs -Repo akwaaba -PullNumber 6 -IncludeComments
+
+# Test the query without execution
+./scripts/Get-PRReviewTimeline.ps1 -Owner anokye-labs -Repo akwaaba -PullNumber 6 -DryRun
+```
+
 ### Get-RepoContext.ps1
 
 Fetches repository context (repo ID, issue types, project IDs, and label IDs) in one query.
