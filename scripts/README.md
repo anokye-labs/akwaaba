@@ -71,6 +71,35 @@ $result = ./Invoke-GraphQL.ps1 -Query $query -Variables $vars
 $result = ./Invoke-GraphQL.ps1 -Query $query -DryRun
 ```
 
+### Set-IssueDependency.ps1
+
+Express blocking/dependency relationships between GitHub issues through body-text convention.
+
+**Features:**
+- Updates issue body with Dependencies section
+- Cross-references both directions (blocks/blocked-by)
+- Supports Wave indicators for work start timing
+- DryRun mode for testing changes
+- Automatic title fetching for referenced issues
+
+**Usage:**
+
+```powershell
+# Set issue #20 to depend on issues #14, #16, and #17
+./Set-IssueDependency.ps1 -IssueNumber 20 -DependsOn @(14, 16, 17) -Wave 1
+
+# Set issue #14 to block issue #20
+./Set-IssueDependency.ps1 -IssueNumber 14 -Blocks @(20)
+
+# Test changes without executing
+./Set-IssueDependency.ps1 -IssueNumber 20 -DependsOn @(14, 16, 17) -DryRun
+
+# Using full issue references
+./Set-IssueDependency.ps1 -IssueNumber 20 -DependsOn @("anokye-labs/akwaaba#14", "anokye-labs/akwaaba#16")
+```
+
+**Note:** GitHub has no native dependency tracking, so this uses body-text convention documented in `how-we-work/our-way.md`.
+
 ## Best Practices
 
 1. **Always use Invoke-GraphQL.ps1** instead of calling `gh api graphql` directly
