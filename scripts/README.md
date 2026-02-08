@@ -220,6 +220,32 @@ Bulk-add issues to a GitHub Project V2 and optionally set field values.
     -Owner "anokye-labs" -Repo "akwaaba"
 ```
 
+### Set-IssueDependency.ps1
+
+Express blocking/dependency relationships between GitHub issues through body-text convention.
+
+**Features:**
+- Updates issue body with Dependencies section
+- Cross-references both directions (blocks/blocked-by)
+- Supports Wave indicators for work start timing
+- DryRun mode for testing changes
+- Automatic title fetching for referenced issues
+
+**Usage:**
+
+```powershell
+# Set issue #20 to depend on issues #14, #16, and #17
+./Set-IssueDependency.ps1 -IssueNumber 20 -DependsOn @(14, 16, 17) -Wave 1
+
+# Set issue #14 to block issue #20
+./Set-IssueDependency.ps1 -IssueNumber 14 -Blocks @(20)
+
+# Test changes without executing
+./Set-IssueDependency.ps1 -IssueNumber 20 -DependsOn @(14, 16, 17) -DryRun
+```
+
+**Note:** GitHub has no native dependency tracking, so this uses body-text convention.
+
 ## Best Practices
 
 1. **Always use Invoke-GraphQL.ps1** instead of calling `gh api graphql` directly
