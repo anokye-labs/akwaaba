@@ -98,6 +98,49 @@ mutation {
 | `Get-PRCommentAnalysis.ps1` | Analyze PR comments for actionability with categorization (blocking, suggestion, nitpick, question, praise) |
 | `Reply-ReviewThread.ps1` | Reply to a thread by ID or index, optionally resolve |
 | `Resolve-ReviewThreads.ps1` | Bulk resolve/unresolve threads |
+| `Invoke-PRCompletion.ps1` | **Orchestrate full review-fix-push-resolve cycle** with iteration loop |
+
+## Automated PR Completion
+
+For **full automation** of the review-fix-push-resolve cycle:
+
+```powershell
+# Run complete PR completion orchestration
+.\Invoke-PRCompletion.ps1 -Owner ORG -Repo REPO -PullNumber 6
+
+# With custom settings
+.\Invoke-PRCompletion.ps1 -Owner ORG -Repo REPO -PullNumber 6 `
+    -MaxIterations 3 `
+    -ReviewWaitSeconds 60 `
+    -AutoFixScope BugsOnly
+
+# Dry-run to preview without changes
+.\Invoke-PRCompletion.ps1 -Owner ORG -Repo REPO -PullNumber 6 -DryRun
+```
+
+**What it does:**
+1. Fetches unresolved review threads
+2. Classifies each thread by severity (blocking, suggestion, question, nitpick)
+3. Reports findings to stdout
+4. Detects git changes (agent makes fixes between iterations)
+5. Commits with iteration-numbered message
+6. Pushes to PR branch
+7. Replies to addressed threads with commit SHA
+8. Resolves addressed threads
+9. Waits for reviewers
+10. Loops until clean or max iterations
+
+**Returns structured output:**
+```powershell
+@{
+    Status = "Clean" | "Partial" | "Failed"
+    Iterations = 2
+    TotalFixed = 5
+    TotalSkipped = 1
+    Remaining = 0
+    CommitShas = @("abc1234", "def5678")
+}
+```
 
 ## Common Patterns
 
