@@ -48,6 +48,61 @@ Write-Host "Repository ID: $($context.RepoId)"
 $context = ./scripts/Get-RepoContext.ps1 -Refresh
 ```
 
+### Import-DagFromJson.ps1
+
+Create issue graph from a JSON DAG (Directed Acyclic Graph) definition.
+
+**Features:**
+- Parses and validates JSON DAG input
+- Performs topological sort to determine creation order
+- Creates issues in dependency order
+- Builds tasklist relationships automatically
+- DryRun mode for validation without execution
+- Structured logging via Write-OkyeremaLog
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Invoke-GraphQL.ps1
+- ConvertTo-EscapedGraphQL.ps1
+- Write-OkyeremaLog.ps1
+
+**Input Format:**
+
+```json
+{
+  "nodes": [
+    {
+      "id": "epic-1",
+      "title": "Epic Issue Title",
+      "type": "Epic",
+      "body": "Issue description"
+    }
+  ],
+  "edges": [
+    {
+      "from": "epic-1",
+      "to": "feature-1",
+      "relationship": "tracks"
+    }
+  ]
+}
+```
+
+**Usage:**
+
+```powershell
+# Create issues from JSON file
+./scripts/Import-DagFromJson.ps1 -JsonPath "dag.json"
+
+# Validate without creating issues
+./scripts/Import-DagFromJson.ps1 -JsonPath "dag.json" -DryRun
+
+# Use JSON string directly
+$json = '{"nodes":[{"id":"epic-1","title":"My Epic","type":"Epic","body":"Description"}],"edges":[]}'
+./scripts/Import-DagFromJson.ps1 -JsonString $json
+```
+
 ### Invoke-GraphQL.ps1
 
 Centralized GraphQL executor with retry logic, rate-limit handling, and structured error output.
