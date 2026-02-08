@@ -82,17 +82,20 @@ mutation {
 
 ## Workflow: Address Review Feedback
 
-1. **Read** unresolved threads → `Get-UnresolvedThreads.ps1`
-2. **Fix** the code
-3. **Commit & push** to the PR branch
-4. **Reply** to each thread explaining the fix → `Reply-ReviewThread.ps1 -Resolve`
-5. **Verify** no unresolved threads remain → `Get-UnresolvedThreads.ps1`
+1. **Analyze** PR comments for actionability → `Get-PRCommentAnalysis.ps1`
+2. **Prioritize** blocking and high-priority comments
+3. **Read** unresolved threads → `Get-UnresolvedThreads.ps1`
+4. **Fix** the code
+5. **Commit & push** to the PR branch
+6. **Reply** to each thread explaining the fix → `Reply-ReviewThread.ps1 -Resolve`
+7. **Verify** no unresolved threads remain → `Get-UnresolvedThreads.ps1`
 
 ## Helper Scripts
 
 | Script | Purpose |
 |--------|---------|
 | `Get-UnresolvedThreads.ps1` | List unresolved (or all) threads with comment details |
+| `Get-PRCommentAnalysis.ps1` | Analyze PR comments for actionability with categorization (blocking, suggestion, nitpick, question, praise) |
 | `Reply-ReviewThread.ps1` | Reply to a thread by ID or index, optionally resolve |
 | `Resolve-ReviewThreads.ps1` | Bulk resolve/unresolve threads |
 
@@ -109,4 +112,33 @@ foreach ($t in $threads) {
 ### Bulk resolve all (no reply)
 ```powershell
 .\Resolve-ReviewThreads.ps1 -Owner ORG -Repo REPO -PullNumber 6 -All
+```
+
+### Analyze PR comments with JSON output for automation
+```powershell
+$json = .\Get-PRCommentAnalysis.ps1 -Owner ORG -Repo REPO -PullNumber 6 -OutputFormat Json
+$analysis = $json | ConvertFrom-Json
+
+# Get all blocking comments
+$blocking = $analysis.categories.blocking
+Write-Host "Found $($blocking.Count) blocking comments"
+
+# Get files with most comments
+$analysis.byFile.PSObject.Properties | ForEach-Object {
+    [PSCustomObject]@{
+        File = $_.Name
+        Comments = $_.Value.Count
+    }
+} | Sort-Object Comments -Descending | Format-Table
+```
+
+### Get console output with categorization
+```powershell
+# Shows color-coded output by category (blocking, suggestion, nitpick, question, praise)
+.\Get-PRCommentAnalysis.ps1 -Owner ORG -Repo REPO -PullNumber 6
+```
+
+### Generate Markdown report
+```powershell
+.\Get-PRCommentAnalysis.ps1 -Owner ORG -Repo REPO -PullNumber 6 -OutputFormat Markdown > pr-analysis.md
 ```
