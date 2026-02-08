@@ -112,13 +112,37 @@ if (-not $CorrelationId) {
     $CorrelationId = [guid]::NewGuid().ToString()
 }
 
-# Import dependencies
+# Define paths to dependency scripts
 $scriptRoot = $PSScriptRoot
-. "$scriptRoot/Invoke-GraphQL.ps1"
-. "$scriptRoot/ConvertTo-EscapedGraphQL.ps1"
-. "$scriptRoot/../.github/skills/okyerema/scripts/Write-OkyeremaLog.ps1"
+$invokeGraphQLPath = "$scriptRoot/Invoke-GraphQL.ps1"
+$convertToEscapedPath = "$scriptRoot/ConvertTo-EscapedGraphQL.ps1"
+$writeLogPath = "$scriptRoot/../.github/skills/okyerema/scripts/Write-OkyeremaLog.ps1"
 
-Write-OkyeremaLog -Message "Starting issue hierarchy creation" -Level Info -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+# Import ConvertTo-EscapedGraphQL as it's a function
+. $convertToEscapedPath
+
+# Helper function to call Invoke-GraphQL
+function Invoke-GraphQLHelper {
+    param(
+        [string]$Query,
+        [hashtable]$Variables = @{},
+        [switch]$DryRun
+    )
+    
+    & $invokeGraphQLPath -Query $Query -Variables $Variables -DryRun:$DryRun
+}
+
+# Helper function to write logs
+function Write-Log {
+    param(
+        [string]$Message,
+        [string]$Level = "Info"
+    )
+    
+    & $writeLogPath -Message $Message -Level $Level
+}
+
+Write-Log -Message "Starting issue hierarchy creation" -Level Info
 
 # Validate hierarchy structure
 function Test-HierarchyDefinition {
@@ -145,11 +169,11 @@ function Test-HierarchyDefinition {
     }
 }
 
-Write-OkyeremaLog -Message "Validating hierarchy definition" -Level Info -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+Write-Log -Message "Validating hierarchy definition" -Level Info
 Test-HierarchyDefinition -Definition $HierarchyDefinition
 
 # Get repository ID and issue type IDs
-Write-OkyeremaLog -Message "Fetching repository and issue type metadata" -Level Info -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+Write-Log -Message "Fetching repository and issue type metadata" -Level Info
 
 $metadataQuery = @"
 query {
@@ -166,10 +190,10 @@ query {
 }
 "@
 
-$metadataResult = Invoke-GraphQL -Query $metadataQuery -CorrelationId $CorrelationId -DryRun:$DryRun
+$metadataResult = Invoke-GraphQLHelper -Query $metadataQuery -DryRun:$DryRun
 
 if (-not $metadataResult.Success) {
-    Write-OkyeremaLog -Message "Failed to fetch repository metadata" -Level Error -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+    Write-Log -Message "Failed to fetch repository metadata" -Level Error
     return [PSCustomObject]@{
         Success       = $false
         AllIssues     = @()
@@ -184,12 +208,12 @@ foreach ($type in $metadataResult.Data.repository.owner.issueTypes.nodes) {
     $issueTypes[$type.name] = $type.id
 }
 
-Write-OkyeremaLog -Message "Repository ID: $repositoryId" -Level Debug -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+Write-Log -Message "Repository ID: $repositoryId" -Level Debug
 
 # Get project ID if project number provided
 $projectId = $null
 if ($ProjectNumber) {
-    Write-OkyeremaLog -Message "Fetching project $ProjectNumber" -Level Info -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+    Write-Log -Message "Fetching project $ProjectNumber" -Level Info
     
     $projectQuery = @"
 query {
@@ -201,13 +225,13 @@ query {
 }
 "@
     
-    $projectResult = Invoke-GraphQL -Query $projectQuery -CorrelationId $CorrelationId -DryRun:$DryRun
+    $projectResult = Invoke-GraphQLHelper -Query $projectQuery -DryRun:$DryRun
     
     if ($projectResult.Success -and $projectResult.Data.organization.projectV2) {
         $projectId = $projectResult.Data.organization.projectV2.id
-        Write-OkyeremaLog -Message "Project ID: $projectId" -Level Debug -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+        Write-Log -Message "Project ID: $projectId" -Level Debug
     } else {
-        Write-OkyeremaLog -Message "Project $ProjectNumber not found" -Level Warn -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+        Write-Log -Message "Project $ProjectNumber not found" -Level Warn
     }
 }
 
@@ -247,9 +271,9 @@ mutation {
 }
 "@
     
-    Write-OkyeremaLog -Message "Creating $TypeName issue: $Title" -Level Info -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+    Write-Log -Message "Creating $TypeName issue: $Title" -Level Info
     
-    $result = Invoke-GraphQL -Query $mutation -CorrelationId $CorrelationId -DryRun:$DryRun
+    $result = Invoke-GraphQLHelper -Query $mutation -DryRun:$DryRun
     
     if (-not $result.Success) {
         throw "Failed to create $TypeName issue '$Title': $($result.Errors[0].Message)"
@@ -257,12 +281,12 @@ mutation {
     
     $issue = $result.Data.createIssue.issue
     
-    Write-OkyeremaLog -Message "Created #$($issue.number) [$($issue.issueType.name)] $($issue.title)" -Level Info -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+    Write-Log -Message "Created #$($issue.number) [$($issue.issueType.name)] $($issue.title)" -Level Info
     
     # Add labels if provided
     if ($Labels.Count -gt 0) {
         # TODO: Implement label addition via GraphQL if needed
-        Write-OkyeremaLog -Message "Label addition not yet implemented" -Level Warn -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+        Write-Log -Message "Label addition not yet implemented" -Level Warn
     }
     
     return $issue
@@ -289,12 +313,12 @@ mutation {
 }
 "@
     
-    Write-OkyeremaLog -Message "Adding issue to project $ProjectNumber" -Level Debug -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+    Write-Log -Message "Adding issue to project $ProjectNumber" -Level Debug
     
-    $result = Invoke-GraphQL -Query $mutation -CorrelationId $CorrelationId -DryRun:$DryRun
+    $result = Invoke-GraphQLHelper -Query $mutation -DryRun:$DryRun
     
     if (-not $result.Success) {
-        Write-OkyeremaLog -Message "Failed to add issue to project: $($result.Errors[0].Message)" -Level Warn -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+        Write-Log -Message "Failed to add issue to project: $($result.Errors[0].Message)" -Level Warn
     }
 }
 
@@ -329,9 +353,9 @@ mutation {
 }
 "@
     
-    Write-OkyeremaLog -Message "Updating parent tasklist with $($ChildNumbers.Count) children" -Level Info -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+    Write-Log -Message "Updating parent tasklist with $($ChildNumbers.Count) children" -Level Info
     
-    $result = Invoke-GraphQL -Query $mutation -CorrelationId $CorrelationId -DryRun:$DryRun
+    $result = Invoke-GraphQLHelper -Query $mutation -DryRun:$DryRun
     
     if (-not $result.Success) {
         throw "Failed to update parent tasklist: $($result.Errors[0].Message)"
@@ -385,11 +409,11 @@ function New-IssueTreeRecursive {
 
 # Create the entire hierarchy
 try {
-    Write-OkyeremaLog -Message "Creating issue hierarchy tree" -Level Info -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+    Write-Log -Message "Creating issue hierarchy tree" -Level Info
     
     $allIssues = New-IssueTreeRecursive -Definition $HierarchyDefinition
     
-    Write-OkyeremaLog -Message "Successfully created $($allIssues.Count) issues" -Level Info -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+    Write-Log -Message "Successfully created $($allIssues.Count) issues" -Level Info
     
     # Build result object
     $rootIssue = $allIssues[-1]  # Last created is the root
@@ -416,12 +440,12 @@ try {
         CorrelationId = $CorrelationId
     }
     
-    Write-OkyeremaLog -Message "Issue hierarchy creation complete" -Level Info -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+    Write-Log -Message "Issue hierarchy creation complete" -Level Info
     
     return $result
 }
 catch {
-    Write-OkyeremaLog -Message "Error creating hierarchy: $_" -Level Error -Operation "NewIssueHierarchy" -CorrelationId $CorrelationId
+    Write-Log -Message "Error creating hierarchy: $_" -Level Error
     
     return [PSCustomObject]@{
         Success       = $false
