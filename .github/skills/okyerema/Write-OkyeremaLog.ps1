@@ -66,6 +66,8 @@ param(
     [switch]$Quiet
 )
 
+$ErrorActionPreference = 'Stop'
+
 # Create the log entry object
 $logEntry = [ordered]@{
     timestamp     = (Get-Date -Format "o")
@@ -86,6 +88,3 @@ $jsonLog = $logEntry | ConvertTo-Json -Compress
 if (-not $Quiet) {
     [Console]::Error.WriteLine($jsonLog)
 }
-
-# Output the log entry object for potential pipeline usage
-$logEntry

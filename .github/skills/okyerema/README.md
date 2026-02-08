@@ -49,10 +49,9 @@ Track related operations across multiple log entries using correlation IDs. Perf
 ### 🎯 Clean Output Streams
 - Logs go to **stderr** (visible in console but separate from data)
 - **stdout** stays clean for pipeline data
-- Can capture log objects for programmatic processing
 
 ### 🤫 Quiet Mode
-Use `-Quiet` switch to suppress console output while still capturing log objects for processing.
+Use `-Quiet` switch to suppress console output for silent operation.
 
 ## Files
 
@@ -88,16 +87,13 @@ Write-OkyeremaLog -Level Info -Operation "Step2" -Message "Processing data" -Cor
 Write-OkyeremaLog -Level Info -Operation "Workflow" -Message "Completed" -CorrelationId $workflowId
 ```
 
-### Example 4: Pipeline Integration
+### Example 4: CI/CD Pipeline Integration
 ```powershell
-# Capture log objects for processing
-$logs = @()
-$logs += Write-OkyeremaLog -Level Info -Operation "Test" -Message "Starting" -Quiet
-$logs += Write-OkyeremaLog -Level Warn -Operation "Test" -Message "Issue detected" -Quiet
-$logs += Write-OkyeremaLog -Level Info -Operation "Test" -Message "Completed" -Quiet
-
-# Process captured logs
-$errorCount = ($logs | Where-Object { $_.level -eq 'Error' }).Count
+# Log to stderr, pipe actual data to stdout
+Write-OkyeremaLog -Level Info -Operation "Pipeline" -Message "Starting data processing"
+$results = Get-ProcessingResults
+Write-OkyeremaLog -Level Info -Operation "Pipeline" -Message "Processing completed"
+$results | ConvertTo-Json | Write-Output
 ```
 
 ## Testing

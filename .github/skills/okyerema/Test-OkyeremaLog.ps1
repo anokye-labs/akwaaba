@@ -39,14 +39,8 @@ Write-Host "`nTest 6: Quiet mode (should see no JSON output below)" -ForegroundC
 & $scriptPath -Level Info -Operation "Background" -Message "This log is suppressed" -Quiet
 Write-Host "(If you see JSON above this line, the Quiet switch is not working)" -ForegroundColor Yellow
 
-# Test 7: Pipeline usage (capturing return object)
-Write-Host "`nTest 7: Pipeline usage (capturing return object)" -ForegroundColor Green
-$logObject = & $scriptPath -Level Info -Operation "Pipeline" -Message "Testing pipeline" -Quiet
-Write-Host "Captured log object:" -ForegroundColor Cyan
-$logObject | Format-List
-
-# Test 8: Multiple operations with same correlation ID
-Write-Host "`nTest 8: Multiple operations with same correlation ID" -ForegroundColor Green
+# Test 7: Multiple operations with same correlation ID
+Write-Host "`nTest 7: Multiple operations with same correlation ID" -ForegroundColor Green
 $operationId = [guid]::NewGuid().ToString()
 & $scriptPath -Level Info -Operation "Step1" -Message "Starting operation" -CorrelationId $operationId
 & $scriptPath -Level Info -Operation "Step2" -Message "Processing data" -CorrelationId $operationId

@@ -97,25 +97,19 @@ Start-Sleep -Milliseconds 300
 Write-Host "`n---`n" -ForegroundColor Gray
 
 # Example 5: Integration with existing scripts (capturing for processing)
-Write-Host "Example 5: Pipeline Integration" -ForegroundColor Magenta
-Write-Host "Demonstrating log object capture for programmatic processing`n" -ForegroundColor Gray
+# Example 5: Silent background operation
+Write-Host "Example 5: Silent Background Operation (using -Quiet)" -ForegroundColor Magenta
+Write-Host "Running background tasks silently...`n" -ForegroundColor Gray
 
-$logs = @()
-$sessionId = [guid]::NewGuid().ToString()
+$jobId = [guid]::NewGuid().ToString()
+1..5 | ForEach-Object {
+    & $scriptPath -Level Info -Operation "BackgroundJob" -Message "Processing task $_/5" -CorrelationId $jobId -Quiet
+    Start-Sleep -Milliseconds 200
+}
 
-$logs += & $scriptPath -Level Info -Operation "Session" -Message "Session started" -CorrelationId $sessionId -Quiet
-Start-Sleep -Milliseconds 200
+Write-Host "Background job completed (no console output from logs)`n" -ForegroundColor Green
 
-$logs += & $scriptPath -Level Info -Operation "Session" -Message "User authenticated" -CorrelationId $sessionId -Quiet
-Start-Sleep -Milliseconds 200
-
-$logs += & $scriptPath -Level Warn -Operation "Session" -Message "Password expires in 5 days" -CorrelationId $sessionId -Quiet
-Start-Sleep -Milliseconds 200
-
-$logs += & $scriptPath -Level Info -Operation "Session" -Message "Session ended" -CorrelationId $sessionId -Quiet
-
-Write-Host "Captured $($logs.Count) log entries for programmatic analysis:" -ForegroundColor Cyan
-$logs | ForEach-Object { Write-Host "  [$($_.level)] $($_.operation): $($_.message)" -ForegroundColor DarkGray }
+Write-Host "---`n" -ForegroundColor Gray
 
 Write-Host "`n=== Examples Complete ===" -ForegroundColor Cyan
 Write-Host "Check stderr output above to see the JSON-formatted logs" -ForegroundColor Yellow
