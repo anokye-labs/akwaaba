@@ -126,6 +126,66 @@ $result = ./Invoke-GraphQL.ps1 -Query $query -Variables $vars
 $result = ./Invoke-GraphQL.ps1 -Query $query -DryRun
 ```
 
+### New-IssueHierarchy.ps1
+
+Create a complete Epic → Feature → Task tree in one call.
+
+**Features:**
+- Creates issues in correct order (leaves first, root last)
+- Automatically wires up tasklist relationships between parent and child issues
+- Optionally adds all issues to a project board
+- Returns structured result with issue numbers and URLs
+- DryRun mode for testing without creating issues
+- Full support for correlation IDs and structured logging
+
+**Usage:**
+
+```powershell
+# Simple Epic with direct Tasks
+$hierarchy = @{
+    Type = "Epic"
+    Title = "Phase 0: Project Setup"
+    Body = "Initial project setup"
+    Children = @(
+        @{ Type = "Task"; Title = "Initialize repository" }
+        @{ Type = "Task"; Title = "Setup CI/CD" }
+    )
+}
+
+$result = ./New-IssueHierarchy.ps1 `
+    -Owner "anokye-labs" `
+    -Repo "akwaaba" `
+    -HierarchyDefinition $hierarchy
+
+# Epic → Feature → Task hierarchy with project board
+$hierarchy = @{
+    Type = "Epic"
+    Title = "Phase 2: Core Features"
+    Children = @(
+        @{
+            Type = "Feature"
+            Title = "User Authentication"
+            Children = @(
+                @{ Type = "Task"; Title = "Implement login" }
+                @{ Type = "Task"; Title = "Add OAuth" }
+            )
+        }
+    )
+}
+
+$result = ./New-IssueHierarchy.ps1 `
+    -Owner "anokye-labs" `
+    -Repo "akwaaba" `
+    -HierarchyDefinition $hierarchy `
+    -ProjectNumber 3
+
+# Check result
+if ($result.Success) {
+    Write-Host "Created Epic #$($result.Root.Number)"
+    Write-Host "Total issues: $($result.AllIssues.Count)"
+}
+```
+
 ## Best Practices
 
 1. **Always use Invoke-GraphQL.ps1** instead of calling `gh api graphql` directly
