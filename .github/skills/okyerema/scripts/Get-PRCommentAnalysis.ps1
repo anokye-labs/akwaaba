@@ -93,7 +93,8 @@ function Invoke-GraphQLQuery {
         [hashtable]$Variables = @{}
     )
     
-    $graphQLScript = Join-Path (Split-Path $PSScriptRoot -Parent) "../../scripts/Invoke-GraphQL.ps1"
+    $graphQLScript = Join-Path (Split-Path $PSScriptRoot -Parent) "..\..\..\..\scripts\Invoke-GraphQL.ps1"
+    $graphQLScript = [System.IO.Path]::GetFullPath($graphQLScript)
     if (Test-Path $graphQLScript) {
         return & $graphQLScript -Query $Query -Variables $Variables
     }
@@ -110,10 +111,10 @@ function Get-CommentCategory {
     
     # Check for suggestion/consider phrases first to avoid false blocking categorization
     # e.g., "Consider adding error handling" should be suggestion, not blocking
-    $suggestivePhrase = $bodyLower -match '\b(consider|suggest|recommend|could|should|would|might)\b.*\b(error|bug|fail)'
+    $hasSuggestiveLanguage = $bodyLower -match '\b(consider|suggest|recommend|could|should|would|might)\b.*\b(error|bug|fail)'
     
     # Blocking indicators (highest priority) - but not if it's a suggestion
-    if (-not $suggestivePhrase) {
+    if (-not $hasSuggestiveLanguage) {
         $blockingPatterns = @(
             '\b(security|vulnerability|exploit|injection)\b',
             '\b(critical|blocker|blocking|must fix)\b',
@@ -311,7 +312,7 @@ function Format-ConsoleOutput {
                 }
                 Write-Host ""
                 
-                # Show preview (first 3 lines)
+                # Show preview (first 3 lines for brevity)
                 $bodyLines = $comment.Body -split "`n" | Select-Object -First 3
                 foreach ($line in $bodyLines) {
                     Write-Host "      $line" -ForegroundColor Gray
@@ -462,6 +463,8 @@ function Format-JsonOutput {
 Write-Log -Message "Starting PR comment analysis for $Owner/$Repo #$PullNumber" -Level Info
 
 # Build GraphQL query to fetch review threads
+# Note: GitHub limits queries to 100 threads and 10 comments per thread
+# For PRs with more data, consider implementing pagination in a future enhancement
 $query = @"
 query(`$owner: String!, `$repo: String!, `$pullNumber: Int!) {
   repository(owner: `$owner, name: `$repo) {

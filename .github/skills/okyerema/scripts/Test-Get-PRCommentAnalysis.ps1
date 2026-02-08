@@ -20,10 +20,10 @@ function Get-CommentCategory {
     
     # Check for suggestion/consider phrases first to avoid false blocking categorization
     # e.g., "Consider adding error handling" should be suggestion, not blocking
-    $suggestivePhrase = $bodyLower -match '\b(consider|suggest|recommend|could|should|would|might)\b.*\b(error|bug|fail)'
+    $hasSuggestiveLanguage = $bodyLower -match '\b(consider|suggest|recommend|could|should|would|might)\b.*\b(error|bug|fail)'
     
     # Blocking indicators (highest priority) - but not if it's a suggestion
-    if (-not $suggestivePhrase) {
+    if (-not $hasSuggestiveLanguage) {
         $blockingPatterns = @(
             '\b(security|vulnerability|exploit|injection)\b',
             '\b(critical|blocker|blocking|must fix)\b',
