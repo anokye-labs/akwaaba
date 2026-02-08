@@ -136,8 +136,8 @@ $correlationId = [guid]::NewGuid().ToString()
 
 # Determine script directory for accessing dependent scripts
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-# From .github/skills/okyerema/scripts, go up 4 levels to repo root, then to scripts/
-$repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $scriptDir)))
+# From .github/skills/okyerema/scripts, navigate to repo root
+$repoRoot = Resolve-Path (Join-Path $scriptDir '..\..\..\..')
 $rootScriptsDir = Join-Path $repoRoot "scripts"
 
 # Helper function to invoke Write-OkyeremaLog.ps1
@@ -269,7 +269,13 @@ if ($FileComments.Count -gt 0) {
         
         # Add optional fields
         if ($comment.Side) {
-            $threadObj.side = $comment.Side
+            # Validate Side is a valid GraphQL enum value
+            if ($comment.Side -notin @("LEFT", "RIGHT")) {
+                Write-Log -Message "Invalid Side value: $($comment.Side). Must be LEFT or RIGHT. Using RIGHT as default." -Level "Warn"
+                $threadObj.side = "RIGHT"
+            } else {
+                $threadObj.side = $comment.Side
+            }
         } else {
             $threadObj.side = "RIGHT"
         }
@@ -371,7 +377,12 @@ if (-not $DryRun) {
     Write-Host "`n✓ Review submitted: $($review.url)" -ForegroundColor Green
     Write-Host "  State: $($review.state)" -ForegroundColor Cyan
     if ($review.body) {
-        Write-Host "  Body: $($review.body.Substring(0, [Math]::Min(100, $review.body.Length)))..." -ForegroundColor Gray
+        $bodyPreview = if ($review.body.Length -gt 100) {
+            $review.body.Substring(0, 100) + "..."
+        } else {
+            $review.body
+        }
+        Write-Host "  Body: $bodyPreview" -ForegroundColor Gray
     }
     if ($review.comments.totalCount -gt 0) {
         Write-Host "  File comments: $($review.comments.totalCount)" -ForegroundColor Cyan

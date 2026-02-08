@@ -80,6 +80,7 @@ Write-Host $example3 -ForegroundColor Yellow
 Write-Host ""
 
 Write-Host "Running Example 3 (DryRun mode)..." -ForegroundColor Magenta
+# Filter out JSON log entries (structured logs from Write-OkyeremaLog.ps1)
 & $scriptPath -Owner 'anokye-labs' -Repo 'akwaaba' -PullNumber 10 -Event COMMENT -Body 'Testing the review system' -DryRun 2>&1 | Where-Object { $_ -notmatch '^{' }
 Write-Host ""
 
