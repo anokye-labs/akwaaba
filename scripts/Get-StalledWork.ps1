@@ -21,10 +21,12 @@
     Number of hours of inactivity to consider work as stalled. Default is 24 hours.
 
 .PARAMETER IncludePRs
-    If specified, includes pull requests in the stalled work detection. Default is true.
+    If specified, includes pull requests in the stalled work detection. 
+    Default behavior: both PRs and Issues are included if neither switch is specified.
 
 .PARAMETER IncludeIssues
-    If specified, includes issues in the stalled work detection. Default is true.
+    If specified, includes issues in the stalled work detection.
+    Default behavior: both PRs and Issues are included if neither switch is specified.
 
 .PARAMETER CorrelationId
     Optional correlation ID for tracing operations.
@@ -72,10 +74,10 @@ param(
     [int]$StalledThresholdHours = 24,
 
     [Parameter(Mandatory = $false)]
-    [switch]$IncludePRs = $true,
+    [switch]$IncludePRs,
 
     [Parameter(Mandatory = $false)]
-    [switch]$IncludeIssues = $true,
+    [switch]$IncludeIssues,
 
     [Parameter(Mandatory = $false)]
     [string]$CorrelationId
@@ -86,6 +88,12 @@ $ErrorActionPreference = "Stop"
 # Generate correlation ID if not provided
 if (-not $CorrelationId) {
     $CorrelationId = [guid]::NewGuid().ToString()
+}
+
+# Default behavior: include both PRs and Issues if neither is explicitly specified
+if (-not $PSBoundParameters.ContainsKey('IncludePRs') -and -not $PSBoundParameters.ContainsKey('IncludeIssues')) {
+    $IncludePRs = $true
+    $IncludeIssues = $true
 }
 
 #region Helper Functions
