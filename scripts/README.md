@@ -24,6 +24,42 @@ A utility function that safely escapes text for use in GraphQL string literals. 
 "Hello `"World`"" | ConvertTo-EscapedGraphQL
 ```
 
+### Get-DagStatus.ps1
+
+Recursively walks an issue hierarchy and reports status with metrics at each level.
+
+**Features:**
+- Tree display with metrics (total, closed count, percentage complete)
+- Identifies blocked items (open with all children done)
+- Identifies ready items (open with no open dependencies)
+- Multiple output formats: Tree (default), JSON, CSV
+- Cycle detection for circular dependencies
+- Configurable maximum depth
+- Structured logging via Write-OkyeremaLog.ps1
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Invoke-GraphQL.ps1
+- Get-RepoContext.ps1
+- Write-OkyeremaLog.ps1
+
+**Usage:**
+
+```powershell
+# Display tree view (default)
+./scripts/Get-DagStatus.ps1 -IssueNumber 14
+
+# Output as JSON
+./scripts/Get-DagStatus.ps1 -IssueNumber 14 -Format JSON
+
+# Export to CSV
+./scripts/Get-DagStatus.ps1 -IssueNumber 14 -Format CSV > status.csv
+
+# Limit depth
+./scripts/Get-DagStatus.ps1 -IssueNumber 14 -MaxDepth 2
+```
+
 ### Get-RepoContext.ps1
 
 Fetches repository context (repo ID, issue types, project IDs, and label IDs) in one query.
