@@ -110,6 +110,9 @@ $result = ./New-IssueHierarchy.ps1 `
     -Repo "akwaaba" `
     -HierarchyDefinition $hierarchy
 
+# Clean up temporary file
+Remove-Item "hierarchy.json"
+
 # Example 4: DryRun mode (test without creating)
 $testHierarchy = @{
     Type = "Epic"
