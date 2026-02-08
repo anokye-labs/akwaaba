@@ -54,14 +54,16 @@ jobs:
             ')
             
             # Check if the closed issue is referenced in the dependencies
-            if ! echo "$DEPS_SECTION" | grep -q "#${CLOSED_ISSUE}\b"; then
+            # Use explicit pattern to match issue number followed by non-digit or end of line
+            if ! echo "$DEPS_SECTION" | grep -qE "#${CLOSED_ISSUE}([^0-9]|$)"; then
               continue
             fi
             
             echo "Issue #${ISSUE_NUMBER} has #${CLOSED_ISSUE} as a dependency"
             
             # Extract all dependency issue numbers (supporting both #123 and owner/repo#123 formats)
-            DEPENDENCY_NUMBERS=$(echo "$DEPS_SECTION" | grep -oE '#[0-9]+' | sed 's/#//' || true)
+            # Match optional repo prefix, then # followed by digits
+            DEPENDENCY_NUMBERS=$(echo "$DEPS_SECTION" | grep -oE '([-a-zA-Z0-9_]+/[-a-zA-Z0-9_]+)?#[0-9]+' | sed 's/.*#//' || true)
             
             if [ -z "$DEPENDENCY_NUMBERS" ]; then
               echo "  No dependency numbers found, skipping"
