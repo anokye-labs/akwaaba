@@ -248,60 +248,96 @@ $repo = $parts[1]
 
 Write-Verbose "Repository: $owner/$repo"
 
-# Fetch additional metadata (createdAt) for prioritization
+# Fetch additional metadata (createdAt, body) for prioritization
 # We need createdAt for "oldest" sorting and for tiebreaking in "priority" mode
 Write-Verbose "Fetching additional metadata for prioritization..."
 
+# Build a batched query to fetch all issue metadata in one GraphQL call
+# This avoids N+1 query pattern
 $issueNumbers = $readyIssues | ForEach-Object { $_.Number }
 $enrichedIssues = @()
 
+# Build query fragments for each issue
+$queryFragments = @()
+$fragmentAliases = @{}
+$fragmentIndex = 0
+
 foreach ($issue in $readyIssues) {
-    # Query for createdAt timestamp
-    $metadataQuery = @"
-query(`$owner: String!, `$repo: String!, `$number: Int!) {
+    $alias = "issue$fragmentIndex"
+    $fragmentAliases[$issue.Number] = $alias
+    $queryFragments += "  ${alias}: issue(number: $($issue.Number)) { number createdAt body }"
+    $fragmentIndex++
+}
+
+$batchQuery = @"
+query(`$owner: String!, `$repo: String!) {
   repository(owner: `$owner, name: `$repo) {
-    issue(number: `$number) {
-      number
-      createdAt
-      body
-    }
+$($queryFragments -join "`n")
   }
 }
 "@
+
+$variables = @{
+    owner = $owner
+    repo = $repo
+}
+
+$result = Invoke-GraphQLHelper -Query $batchQuery -Variables $variables
+
+if ($result.Success) {
+    Write-Log "Successfully fetched metadata for $($readyIssues.Count) issues in batch"
     
-    $variables = @{
-        owner = $owner
-        repo = $repo
-        number = $issue.Number
-    }
-    
-    $result = Invoke-GraphQLHelper -Query $metadataQuery -Variables $variables
-    
-    if ($result.Success -and $result.Data.repository.issue) {
-        $metadata = $result.Data.repository.issue
+    # Enrich each issue with fetched metadata
+    foreach ($issue in $readyIssues) {
+        $alias = $fragmentAliases[$issue.Number]
+        $metadata = $result.Data.repository.$alias
         
-        # Create enriched issue object with all properties
-        $enrichedIssue = [PSCustomObject]@{
-            Number = $issue.Number
-            Title = $issue.Title
-            Type = $issue.Type
-            State = $issue.State
-            Url = $issue.Url
-            Body = $metadata.body
-            Labels = $issue.Labels
-            Assignees = $issue.Assignees
-            Depth = $issue.Depth
-            Priority = Get-PriorityScore -Labels $issue.Labels
-            CreatedAt = $metadata.createdAt
+        if ($metadata) {
+            # Create enriched issue object with all properties
+            $enrichedIssue = [PSCustomObject]@{
+                Number = $issue.Number
+                Title = $issue.Title
+                Type = $issue.Type
+                State = $issue.State
+                Url = $issue.Url
+                Body = $metadata.body
+                Labels = $issue.Labels
+                Assignees = $issue.Assignees
+                Depth = $issue.Depth
+                Priority = Get-PriorityScore -Labels $issue.Labels
+                CreatedAt = $metadata.createdAt
+            }
+            
+            $enrichedIssues += $enrichedIssue
+            Write-Verbose "Enriched issue #$($issue.Number) with metadata"
         }
-        
-        $enrichedIssues += $enrichedIssue
-        Write-Verbose "Enriched issue #$($issue.Number) with metadata"
+        else {
+            Write-Log "Failed to fetch metadata for issue #$($issue.Number), using default values" -Level "Warning"
+            
+            # Use issue without full metadata
+            $enrichedIssue = [PSCustomObject]@{
+                Number = $issue.Number
+                Title = $issue.Title
+                Type = $issue.Type
+                State = $issue.State
+                Url = $issue.Url
+                Body = $null
+                Labels = $issue.Labels
+                Assignees = $issue.Assignees
+                Depth = $issue.Depth
+                Priority = Get-PriorityScore -Labels $issue.Labels
+                CreatedAt = $null
+            }
+            
+            $enrichedIssues += $enrichedIssue
+        }
     }
-    else {
-        Write-Log "Failed to fetch metadata for issue #$($issue.Number), using default values" -Level "Warning"
-        
-        # Use issue without full metadata
+}
+else {
+    Write-Log "Failed to fetch batch metadata, using issues without full metadata" -Level "Warning"
+    
+    # Fall back to using issues without full metadata
+    foreach ($issue in $readyIssues) {
         $enrichedIssue = [PSCustomObject]@{
             Number = $issue.Number
             Title = $issue.Title
