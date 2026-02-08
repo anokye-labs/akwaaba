@@ -390,6 +390,58 @@ Returns an array of PSCustomObject with properties:
 - `Assignees`: Array of assignee logins
 - `Depth`: Depth in the hierarchy (0 = root)
 
+### Start-IssueWork.ps1
+
+Agent workflow to pick up an issue and begin work.
+
+**Features:**
+- Assigns the current user to the issue
+- Creates a feature branch from main (pattern: `issue-{number}-{slug}`)
+- Sets issue status to "In Progress" in the project board
+- Logs all actions with structured logging
+- Returns a context object for the work session
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Git configured and repository initialized
+- Requires: `Invoke-GraphQL.ps1`, `Write-OkyeremaLog.ps1`
+
+**Usage:**
+
+```powershell
+# Start work on issue #42 with default settings
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42
+
+# Start work and update status in a specific project
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42 -ProjectNumber 3
+
+# Start work without creating a new branch
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42 -SkipBranch
+
+# Start work without assigning the issue
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42 -SkipAssignment
+
+# Start work without updating project status
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42 -SkipStatusUpdate
+
+# Custom status field and value
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42 -StatusFieldName "Workflow" -InProgressValue "Active"
+```
+
+**Output:**
+
+Returns a PSCustomObject with properties:
+- `Success`: Boolean indicating if the operation succeeded
+- `IssueNumber`: The issue number
+- `IssueTitle`: The issue title
+- `IssueUrl`: The issue URL
+- `AssignedTo`: The user assigned to the issue
+- `Branch`: The created branch name (if created)
+- `Status`: The new status (if updated)
+- `CorrelationId`: The correlation ID for this session
+- `StartTime`: UTC timestamp when work started
+
 ### Invoke-GraphQL.ps1
 
 Centralized GraphQL executor with retry logic, rate-limit handling, and structured error output.
