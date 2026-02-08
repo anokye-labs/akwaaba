@@ -1,103 +1,74 @@
-# Scripts Directory
+# PowerShell Scripts
 
-This directory contains PowerShell utility scripts for the Akwaaba project.
+This directory contains PowerShell automation scripts for the Akwaaba repository.
 
-## ConvertTo-EscapedGraphQL.ps1
+## Available Scripts
+
+### ConvertTo-EscapedGraphQL.ps1
 
 A utility function that safely escapes text for use in GraphQL string literals. Addresses escaping bugs identified in PR #6 review comments.
 
-### Features
+**Features:**
+- Handles newlines (converts to `\n`)
+- Escapes double quotes (converts to `\"`)
+- Escapes backslashes (converts to `\\`)
+- Preserves emoji and unicode characters
+- Pipe-friendly for easy integration
+- Handles multiline heredocs
+- Tab character escaping (converts to `\t`)
 
-- ✅ Handles newlines (converts to `\n`)
-- ✅ Escapes double quotes (converts to `\"`)
-- ✅ Escapes backslashes (converts to `\\`)
-- ✅ Preserves emoji and unicode characters
-- ✅ Pipe-friendly for easy integration
-- ✅ Handles multiline heredocs
-- ✅ Tab character escaping (converts to `\t`)
-
-### Usage
-
-#### Dot-source the script
+**Usage:**
 
 ```powershell
 . ./scripts/ConvertTo-EscapedGraphQL.ps1
-```
-
-#### Basic usage with pipeline
-
-```powershell
 "Hello `"World`"" | ConvertTo-EscapedGraphQL
-# Output: Hello \"World\"
 ```
 
-#### Using the -Value parameter
+### Invoke-GraphQL.ps1
+
+Centralized GraphQL executor with retry logic, rate-limit handling, and structured error output.
+
+**Features:**
+- Retry with exponential backoff on 502/503/rate-limit errors
+- Structured error objects (not raw stderr)
+- DryRun mode that logs the query without executing
+- Verbose logging with correlation IDs for tracing
+
+**Usage:**
 
 ```powershell
-ConvertTo-EscapedGraphQL -Value "Line 1`nLine 2"
-# Output: Line 1\nLine 2
+$query = 'query { viewer { login } }'
+$result = ./Invoke-GraphQL.ps1 -Query $query
+
+$vars = @{ owner = "octocat"; name = "Hello-World" }
+$result = ./Invoke-GraphQL.ps1 -Query $query -Variables $vars
+
+# DryRun mode
+$result = ./Invoke-GraphQL.ps1 -Query $query -DryRun
 ```
 
-#### Handling heredocs (multiline strings)
+**Response Object:**
 
 ```powershell
-@"
-Multi-line
-text with "quotes"
-and \ backslashes
-"@ | ConvertTo-EscapedGraphQL
-# Output: Multi-line\ntext with \"quotes\"\nand \\ backslashes
+@{
+    Success       = $true/$false
+    Data          = <response data>
+    Errors        = @(<errors>)
+    CorrelationId = "guid"
+    Attempts      = 1
+}
 ```
 
-#### Real-world example: GraphQL mutation
+## Best Practices
 
-```powershell
-$issueBody = @"
-## Issue Description
-This PR fixes:
-- Escaping "quotes"
-- Handling paths like C:\Windows
-- Emoji support 🚀
-"@
+1. **Always use Invoke-GraphQL.ps1** instead of calling `gh api graphql` directly
+2. **Check the Success property** before using the Data
+3. **Use -Verbose** for debugging and troubleshooting
+4. **Use -DryRun** to test queries without executing them
 
-$escapedBody = $issueBody | ConvertTo-EscapedGraphQL
-$mutation = "mutation { createIssue(body: \`"$escapedBody\`") }"
-# Ready to send to GraphQL API
-```
+## Examples
 
-### Testing
-
-Run the test suite to verify functionality:
-
-```powershell
-pwsh -File scripts/Test-ConvertTo-EscapedGraphQL.ps1
-```
-
-The test suite validates:
-- Quote escaping
-- Backslash escaping
-- Newline handling (LF, CRLF, CR)
-- Tab character escaping
-- Emoji preservation
-- Unicode character preservation
-- Empty string handling
-- Complex mixed content
-- Multiple consecutive special characters
-
-### GraphQL Escaping Rules
-
-The utility follows GraphQL string literal escaping rules:
-
-| Character | Escaped As | Description |
-|-----------|------------|-------------|
-| `\`       | `\\`       | Backslash |
-| `"`       | `\"`       | Double quote |
-| Newline   | `\n`       | Line feed (LF) |
-| `\r\n`    | `\n`       | Carriage return + line feed (CRLF) |
-| `\r`      | `\r`       | Carriage return (CR) |
-| Tab       | `\t`       | Tab character |
-| Emoji     | (preserved)| Unicode emoji preserved as-is |
-| Unicode   | (preserved)| Unicode characters preserved as-is |
+See `examples/GraphQL-Examples.ps1` for more usage examples.
 
 ## Contributing
 
