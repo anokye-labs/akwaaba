@@ -71,6 +71,52 @@ $result = ./Invoke-GraphQL.ps1 -Query $query -Variables $vars
 $result = ./Invoke-GraphQL.ps1 -Query $query -DryRun
 ```
 
+### Get-BlockedIssues.ps1
+
+Find issues that are stuck - open but blocked by other open issues.
+
+**Features:**
+- Analyzes dependency text in issue bodies (looks for "## Dependencies" sections)
+- Cross-references with issue states to identify blocking issues
+- Reports what is blocking each item
+- Suggests resolution order using topological sort (Kahn's algorithm)
+- Multiple output formats: Text (default), Json, or Summary
+- Handles both local (#123) and external (owner/repo#123) issue references
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Requires Invoke-GraphQL.ps1, Get-RepoContext.ps1, and Write-OkyeremaLog.ps1
+
+**Usage:**
+
+```powershell
+# Analyze blocked issues in current repository
+./scripts/Get-BlockedIssues.ps1 -Owner "anokye-labs" -Repo "akwaaba"
+
+# Output in JSON format
+./scripts/Get-BlockedIssues.ps1 -Owner "anokye-labs" -Repo "akwaaba" -OutputFormat Json
+
+# Get just a summary
+./scripts/Get-BlockedIssues.ps1 -Owner "anokye-labs" -Repo "akwaaba" -OutputFormat Summary
+
+# Include closed issues in analysis
+./scripts/Get-BlockedIssues.ps1 -Owner "anokye-labs" -Repo "akwaaba" -IncludeClosed
+```
+
+**Expected Issue Format:**
+
+Issues should include a "## Dependencies" section with "Blocked by:" list:
+
+```markdown
+## Dependencies
+
+Blocked by:
+- [ ] anokye-labs/akwaaba#14 - Invoke-GraphQL.ps1
+- [ ] anokye-labs/akwaaba#15 - Get-RepoContext.ps1
+- [ ] #42 - Some local issue
+```
+
 ## Best Practices
 
 1. **Always use Invoke-GraphQL.ps1** instead of calling `gh api graphql` directly
