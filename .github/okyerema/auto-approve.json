@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Auto-approval rules for agent-created PRs",
+  "rules": {
+    "ciMustPass": {
+      "enabled": true,
+      "description": "All CI checks must pass"
+    },
+    "noUnresolvedComments": {
+      "enabled": true,
+      "description": "No unresolved review comments"
+    },
+    "linkedIssueRequired": {
+      "enabled": true,
+      "description": "PR must link to at least one issue"
+    },
+    "commitConventions": {
+      "enabled": true,
+      "description": "Commits must follow conventional commit format",
+      "pattern": "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\\(.+\\))?!?: .{1,100}"
+    },
+    "noSecretsInDiff": {
+      "enabled": true,
+      "description": "No secrets detected in diff",
+      "patterns": [
+        "(?i)(password|passwd|pwd)\\s*[:=]\\s*['\"]?[^'\"\\s]+['\"]?",
+        "(?i)(api[_-]?key|apikey)\\s*[:=]\\s*['\"]?[^'\"\\s]+['\"]?",
+        "(?i)(secret|token)\\s*[:=]\\s*['\"]?[^'\"\\s]+['\"]?",
+        "-----BEGIN (RSA |DSA )?PRIVATE KEY-----",
+        "(?i)bearer\\s+[a-z0-9\\-._~+/]+=*",
+        "ghp_[a-zA-Z0-9]{36}",
+        "github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59}"
+      ]
+    },
+    "expectedScope": {
+      "enabled": true,
+      "description": "Changes are within expected file scope",
+      "allowedPatterns": [
+        "scripts/.*\\.ps1$",
+        "docs/.*\\.md$",
+        ".github/.*\\.yml$",
+        ".github/.*\\.json$",
+        "README\\.md$",
+        "how-we-work/.*\\.md$"
+      ]
+    },
+    "noProtectedPathChanges": {
+      "enabled": true,
+      "description": "No changes to protected paths",
+      "protectedPaths": [
+        ".github/workflows/production-deploy.yml",
+        ".github/CODEOWNERS",
+        "LICENSE"
+      ]
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2026-02-08"
+  }
+}
