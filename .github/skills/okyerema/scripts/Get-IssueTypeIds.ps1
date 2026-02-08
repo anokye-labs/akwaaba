@@ -10,9 +10,14 @@ param(
     [switch]$Refresh
 )
 
-# Import Get-RepoContext from scripts directory
+# Find repository root and Get-RepoContext.ps1
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$getRepoContextPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $scriptDir))) "scripts" "Get-RepoContext.ps1"
+$repoRoot = $scriptDir
+# Navigate up from .github/skills/okyerema/scripts to repository root
+for ($i = 0; $i -lt 4; $i++) {
+    $repoRoot = Split-Path -Parent $repoRoot
+}
+$getRepoContextPath = Join-Path $repoRoot "scripts" "Get-RepoContext.ps1"
 
 # Get repository context (includes issue types)
 $context = & $getRepoContextPath -Refresh:$Refresh

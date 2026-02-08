@@ -11,9 +11,14 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Get path to Get-DagStatus.ps1 in scripts directory
+# Find repository root and Get-DagStatus.ps1
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$getDagStatusPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $scriptDir))) "scripts" "Get-DagStatus.ps1"
+$repoRoot = $scriptDir
+# Navigate up from .github/skills/okyerema/scripts to repository root
+for ($i = 0; $i -lt 4; $i++) {
+    $repoRoot = Split-Path -Parent $repoRoot
+}
+$getDagStatusPath = Join-Path $repoRoot "scripts" "Get-DagStatus.ps1"
 
 # Delegate to Get-DagStatus.ps1 with Tree format
 Write-Host "`nHierarchy for #${IssueNumber}:" -ForegroundColor Yellow

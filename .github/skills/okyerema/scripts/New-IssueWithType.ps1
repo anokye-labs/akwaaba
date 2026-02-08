@@ -13,9 +13,16 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Import foundation layer scripts
+# Find repository root and foundation layer scripts
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$scriptsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $scriptDir))) "scripts"
+$repoRoot = $scriptDir
+# Navigate up from .github/skills/okyerema/scripts to repository root
+for ($i = 0; $i -lt 4; $i++) {
+    $repoRoot = Split-Path -Parent $repoRoot
+}
+$scriptsPath = Join-Path $repoRoot "scripts"
+
+# Import foundation layer scripts
 . (Join-Path $scriptsPath "Invoke-GraphQL.ps1")
 . (Join-Path $scriptsPath "ConvertTo-EscapedGraphQL.ps1")
 
