@@ -66,6 +66,9 @@ What else did we evaluate and why didn't we choose it?
 
 ## References
 Links to issues, PRs, discussions, docs, articles
+
+## Notes
+Optional section for additional context, clarifications, or implementation details
 ```
 
 See [docs/adr/template.md](../docs/adr/template.md) for the full template.

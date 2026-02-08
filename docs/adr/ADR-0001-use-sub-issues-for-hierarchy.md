@@ -104,7 +104,8 @@ This means:
 - [GitHub GraphQL API: createIssueRelationship](https://docs.github.com/en/graphql/reference/mutations#createissuerelationship)
 - [GitHub Docs: Sub-issues](https://docs.github.com/en/issues/tracking-your-work-with-issues/about-task-lists)
 - [Okyerema Skill Documentation](/.github/skills/okyerema/SKILL.md)
-- Issue motivating this ADR: Establish ADR process for architectural decisions
+- [Relationships Reference](/.github/skills/okyerema/references/relationships.md)
+- This ADR was created as part of establishing the ADR process itself
 
 ## Notes
 
