@@ -1,0 +1,78 @@
+{
+  "nodes": [
+    {
+      "id": "epic-1",
+      "title": "Build API Integration Layer",
+      "type": "Epic",
+      "body": "Create a comprehensive API integration layer for external services.\n\nThis epic tracks all features needed for robust API integration."
+    },
+    {
+      "id": "feature-1",
+      "title": "Authentication Module",
+      "type": "Feature",
+      "body": "Implement OAuth 2.0 authentication flow"
+    },
+    {
+      "id": "feature-2",
+      "title": "Rate Limiting",
+      "type": "Feature",
+      "body": "Add rate limiting and retry logic"
+    },
+    {
+      "id": "task-1",
+      "title": "Implement OAuth token refresh",
+      "type": "Task",
+      "body": "Handle automatic token refresh when tokens expire"
+    },
+    {
+      "id": "task-2",
+      "title": "Add authentication tests",
+      "type": "Task",
+      "body": "Unit and integration tests for auth module"
+    },
+    {
+      "id": "task-3",
+      "title": "Implement exponential backoff",
+      "type": "Task",
+      "body": "Add exponential backoff for rate limit errors"
+    },
+    {
+      "id": "task-4",
+      "title": "Add rate limit tests",
+      "type": "Task",
+      "body": "Test rate limiting behavior"
+    }
+  ],
+  "edges": [
+    {
+      "from": "epic-1",
+      "to": "feature-1",
+      "relationship": "tracks"
+    },
+    {
+      "from": "epic-1",
+      "to": "feature-2",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-1",
+      "to": "task-1",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-1",
+      "to": "task-2",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-2",
+      "to": "task-3",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-2",
+      "to": "task-4",
+      "relationship": "tracks"
+    }
+  ]
+}
