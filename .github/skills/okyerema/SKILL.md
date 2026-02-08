@@ -16,7 +16,7 @@ The Okyerema coordinates adwoma (work) across the asafo (team). This skill teach
 ## Core Principles
 
 1. **Use GitHub organization issue types** (Epic, Feature, Task, Bug) — never labels or title prefixes
-2. **Use GraphQL API for all write operations** — gh CLI is insufficient
+2. **Use GraphQL API for all write operations** — gh CLI is insufficient (Exception: BOT assignees require REST API)
 3. **Use Tasklists for parent-child relationships** — markdown checkboxes in issue body
 4. **Use labels only for categorization** — never for structure
 5. **Wait 2-5 minutes** after tasklist updates for GitHub to parse relationships
@@ -88,6 +88,22 @@ query {
 }
 ```
 
+### Copilot Assignment
+
+**⚠️ IMPORTANT:** GitHub Copilot has a BOT-type node ID. GraphQL `addAssigneesToAssignable` **does NOT work** for BOT IDs.
+
+**Use REST API only:**
+
+```bash
+# Via gh CLI
+gh issue edit NUMBER --add-assignee "@copilot"
+
+# Via REST API directly
+gh api repos/OWNER/REPO/issues/NUMBER/assignees --method POST -f 'assignees[]=Copilot'
+```
+
+**Why this matters:** If you try to assign Copilot via GraphQL, you'll get a `NOT_FOUND` error. The REST API is the only supported method for BOT-type assignees.
+
 ## Hierarchy Patterns
 
 ### Pattern A: Epic → Feature → Task
@@ -122,6 +138,7 @@ Epic #1: Phase 0 Setup
 ❌ Expect instant relationship updates — GitHub needs 2-5 minutes
 ❌ Use gh CLI for project field manipulation — Use GraphQL
 ❌ Use labels for structure — Labels are for categorization only
+❌ Use GraphQL to assign Copilot — BOT IDs don't work with `addAssigneesToAssignable`
 
 ## References (Load When Needed)
 
@@ -142,6 +159,7 @@ Invoke these scripts for common operations:
 - **[scripts/New-IssueWithType.ps1](scripts/New-IssueWithType.ps1)** — Create issue with proper type
 - **[scripts/Update-IssueHierarchy.ps1](scripts/Update-IssueHierarchy.ps1)** — Build tasklist relationships
 - **[scripts/Test-Hierarchy.ps1](scripts/Test-Hierarchy.ps1)** — Verify relationships via GraphQL
+- **Set-IssueAssignment.ps1** (Coming in #47) — Assign users/bots to issues (uses REST API for Copilot)
 
 ## Labels: Use Sparingly
 
