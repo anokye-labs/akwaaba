@@ -246,16 +246,33 @@ else {
     Write-OkyeremaLogHelper -Message "Found $($potentialParents.Count) potential parent issues" -Level "Info" -Operation "GetOrphanedIssues" -CorrelationId $correlationId
 }
 
-# Helper function to calculate similarity between two strings (simple word overlap)
+# Constants for similarity scoring
+$HIERARCHY_MATCH_BOOST = 10  # Boost when parent-child types match expected hierarchy
+$HIERARCHY_WEAK_BOOST = 5    # Smaller boost for less ideal but acceptable hierarchy
+
+# Helper function to tokenize strings into words
+function Get-Words {
+    param([string]$text)
+    # Convert to lowercase, remove punctuation, split on whitespace, filter short words
+    return ($text.ToLower() -replace '[^\w\s]', ' ' -split '\s+') | Where-Object { $_.Length -gt 2 }
+}
+
+# Helper function to calculate similarity between two strings (Jaccard similarity coefficient)
 function Get-StringSimilarity {
+    <#
+    .SYNOPSIS
+        Calculates Jaccard similarity coefficient between two strings.
+    .OUTPUTS
+        Returns a percentage (0-100) representing the similarity between the two strings.
+    #>
     param(
         [string]$str1,
         [string]$str2
     )
     
-    # Convert to lowercase and split into words
-    $words1 = ($str1.ToLower() -replace '[^\w\s]', ' ' -split '\s+') | Where-Object { $_.Length -gt 2 }
-    $words2 = ($str2.ToLower() -replace '[^\w\s]', ' ' -split '\s+') | Where-Object { $_.Length -gt 2 }
+    # Get word tokens
+    $words1 = Get-Words -text $str1
+    $words2 = Get-Words -text $str2
     
     if ($words1.Count -eq 0 -or $words2.Count -eq 0) {
         return 0
@@ -264,7 +281,7 @@ function Get-StringSimilarity {
     # Count common words
     $commonWords = @($words1 | Where-Object { $words2 -contains $_ })
     
-    # Calculate Jaccard similarity coefficient
+    # Calculate Jaccard similarity coefficient as percentage
     $union = @($words1 + $words2 | Select-Object -Unique)
     if ($union.Count -eq 0) {
         return 0
@@ -286,13 +303,13 @@ foreach ($orphan in $orphanedIssues) {
         
         # Prefer Features for Tasks/Bugs, Epics for Features
         if ($orphan.issueType.name -eq "Feature" -and $parent.issueType.name -eq "Epic") {
-            $score += 10  # Boost for correct hierarchy level
+            $score += $HIERARCHY_MATCH_BOOST  # Boost for correct hierarchy level
         }
         elseif (($orphan.issueType.name -eq "Task" -or $orphan.issueType.name -eq "Bug") -and $parent.issueType.name -eq "Feature") {
-            $score += 10  # Boost for correct hierarchy level
+            $score += $HIERARCHY_MATCH_BOOST  # Boost for correct hierarchy level
         }
         elseif (($orphan.issueType.name -eq "Task" -or $orphan.issueType.name -eq "Bug") -and $parent.issueType.name -eq "Epic") {
-            $score += 5  # Smaller boost for Epic as direct parent of Task/Bug
+            $score += $HIERARCHY_WEAK_BOOST  # Smaller boost for Epic as direct parent of Task/Bug
         }
         
         if ($score -gt $bestScore) {
