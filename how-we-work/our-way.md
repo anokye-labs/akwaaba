@@ -99,6 +99,76 @@ AI agents in our repositories follow a disciplined workflow:
 
 The [Okyerema skill](../.github/skills/okyerema/SKILL.md) gives agents the technical tools to do all of this correctly.
 
+## Read Docs Before Debug
+
+When something doesn't work as expected, agents must follow this workflow:
+
+### The Workflow
+
+1. **Read reference docs FIRST** — Check documentation, changelogs, and migration guides
+2. **Check for API/feature changes** — Look for deprecations, retirements, or breaking changes
+3. **THEN run diagnostics** — Only if docs don't explain the issue
+
+### Why This Matters
+
+Running diagnostic commands without understanding the system wastes time and context. Thirty seconds of reading often reveals what dozens of trial-and-error commands cannot.
+
+### Real Example: The trackedIssues Mystery
+
+**What happened:** During Okyerema development, an agent spent multiple turns running GraphQL queries trying to debug why `trackedIssues` returned 0 results:
+
+```graphql
+# Tried queries like this repeatedly:
+query {
+  repository(owner: "anokye-labs", name: "akwaaba") {
+    issue(number: 1) {
+      trackedIssues(first: 10) {
+        totalCount
+        nodes { ... }
+      }
+    }
+  }
+}
+```
+
+**What should have happened:**
+
+1. **Read GitHub's changelog** → Discover that [tasklist blocks were retired](https://github.blog/changelog/2024-08-15-sunset-notice-tasklists-in-issues-markdown/)
+2. **Check GraphQL schema docs** → See that `trackedIssues` depends on deprecated tasklist syntax
+3. **Understand the change** → GitHub migrated from tasklists to sub-issues
+4. **Apply the solution** → Use `closingIssuesReferences` or sub-issue relationships instead
+
+**Time difference:**
+- ❌ **Trial-and-error approach:** Multiple turns, wasted context tokens, no progress
+- ✅ **Read-docs-first approach:** 30 seconds to find the answer, immediate solution
+
+### How to Apply This
+
+**Before running diagnostic commands, ask:**
+- Have I checked the official documentation?
+- Have I looked at recent changelogs or migration guides?
+- Have I searched for deprecation notices?
+- Do I understand what the API/feature is supposed to do?
+
+**After reading docs, if still unclear:**
+- Now run targeted diagnostic commands
+- Use the knowledge from docs to interpret results
+- Focus diagnostics on gaps in the documentation
+
+### Anti-Patterns to Avoid
+
+❌ **Don't do this:**
+- Run `gh api` commands blindly hoping for clues
+- Try variations without understanding why
+- Debug for multiple turns without consulting docs
+- Assume the API works the same as it did before
+
+✅ **Do this instead:**
+- Start with the source of truth (official docs)
+- Understand the intended behavior first
+- Use diagnostics to verify your understanding
+- Check changelogs when behavior seems wrong
+
 ## Blocking Relationships
 
 GitHub doesn't have native "blocks/blocked by" relationships. We handle this by:
@@ -118,6 +188,7 @@ These rules exist because we made every mistake in the book:
 | Created flat hierarchies | Epic → 95 Tasks was unmanageable | Use Features to group tasks |
 | Used gh CLI | Couldn't set types or relationships | Use GraphQL for all structured ops |
 | Expected instant updates | Relationships didn't appear immediately | Wait 2-5 minutes after tasklist changes |
+| Debugged before reading docs | Wasted turns on trackedIssues that was deprecated | Check changelogs and docs first, then debug |
 
 ---
 
