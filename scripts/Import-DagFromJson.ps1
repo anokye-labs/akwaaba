@@ -108,7 +108,19 @@ if (-not $CorrelationId) {
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 . "$scriptDir/ConvertTo-EscapedGraphQL.ps1"
 $invokeGraphQLPath = "$scriptDir/Invoke-GraphQL.ps1"
-$writeLogPath = "$scriptDir/../.github/skills/okyerema/scripts/Write-OkyeremaLog.ps1"
+
+# Locate Write-OkyeremaLog.ps1 relative to repository root
+$repoRoot = git rev-parse --show-toplevel 2>$null
+if ($repoRoot) {
+    $writeLogPath = Join-Path $repoRoot ".github/skills/okyerema/scripts/Write-OkyeremaLog.ps1"
+} else {
+    # Fallback to relative path
+    $writeLogPath = "$scriptDir/../.github/skills/okyerema/scripts/Write-OkyeremaLog.ps1"
+}
+
+if (-not (Test-Path $writeLogPath)) {
+    throw "Write-OkyeremaLog.ps1 not found at: $writeLogPath"
+}
 
 # Helper function to write logs
 function Write-Log {
@@ -417,6 +429,9 @@ try {
     
     $issueTypes = @{}
     foreach ($issueType in $issueTypesResult.Data.repository.owner.issueTypes.nodes) {
+        if ($issueTypes.ContainsKey($issueType.name)) {
+            Write-Log -Message "Warning: Duplicate issue type name '$($issueType.name)' - using last occurrence" -Level "Warn"
+        }
         $issueTypes[$issueType.name] = $issueType.id
     }
     
@@ -568,7 +583,9 @@ Write-Log -Message "DAG import completed successfully" -Level "Info"
 Write-Host ""
 Write-Host "✓ DAG import completed successfully" -ForegroundColor Green
 Write-Host "  Created $($createdIssues.Count) issues" -ForegroundColor Gray
-Write-Host "  ⏰ Wait 2-5 minutes for GitHub to parse tasklist relationships" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  ⏰ Note: GitHub parses tasklist relationships asynchronously" -ForegroundColor Yellow
+Write-Host "     Wait 2-5 minutes before verifying parent-child relationships" -ForegroundColor Yellow
 
 return [PSCustomObject]@{
     Success       = $true
