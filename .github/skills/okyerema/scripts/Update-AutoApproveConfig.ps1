@@ -432,7 +432,7 @@ try {
                 $newRule = [PSCustomObject]@{
                     id = $RuleId
                     name = $RuleName
-                    enabled = if ($PSBoundParameters.ContainsKey('RuleEnabled')) { $RuleEnabled } else { $true }
+                    enabled = if ($PSBoundParameters.ContainsKey('RuleEnabled')) { [bool]$RuleEnabled } else { $true }
                     conditions = Convert-ToHashtable -InputObject $RuleConditions
                 }
                 
@@ -523,7 +523,7 @@ try {
                 }
                 
                 if ($PSBoundParameters.ContainsKey('RuleEnabled')) {
-                    $rule.enabled = $RuleEnabled
+                    $rule.enabled = [bool]$RuleEnabled
                     $changes += "enabled"
                 }
                 

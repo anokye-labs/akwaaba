@@ -148,7 +148,7 @@ $newConditions = '{"author":"bot","filesChanged":{"patterns":["tests/**"],"maxCo
 | `Operation` | String | Yes | Operation to perform: `List`, `Get`, `Add`, `Update`, `Remove` |
 | `RuleId` | String | Conditional | Rule ID (required for Get, Update, Remove, Add) |
 | `RuleName` | String | Conditional | Rule name (required for Add, optional for Update) |
-| `RuleEnabled` | Boolean | No | Enable/disable rule (Add/Update) |
+| `RuleEnabled` | Nullable[Boolean] | No | Enable/disable rule (Add/Update). For Add: defaults to `$true` if not provided. For Update: only changes if explicitly provided. |
 | `RuleDescription` | String | No | Rule description (Add/Update) |
 | `RuleConditions` | Object/JSON | Conditional | Rule conditions (required for Add, optional for Update) |
 | `RuleChecks` | Object/JSON | No | Rule checks (Add/Update) |
