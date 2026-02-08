@@ -397,9 +397,9 @@ function Format-MarkdownOutput {
                 $md += ""
                 $md += "**@$($comment.Author)**"
                 $md += ""
-                $md += "```"
+                $md += '```'
                 $md += $comment.Body
-                $md += "```"
+                $md += '```'
                 $md += ""
             }
         }
