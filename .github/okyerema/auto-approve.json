@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0",
+  "rules": [
+    {
+      "id": "agent-docs-only",
+      "name": "Auto-approve documentation-only changes by agents",
+      "enabled": true,
+      "conditions": {
+        "author": "copilot",
+        "filesChanged": {
+          "patterns": ["docs/**", "*.md"],
+          "maxCount": 10
+        },
+        "excludePatterns": ["CHANGELOG.md", "SECURITY.md"]
+      },
+      "checks": {
+        "requireCI": true,
+        "requireReviews": 0,
+        "noConflicts": true
+      },
+      "description": "Automatically approve PRs from agents that only modify documentation files"
+    },
+    {
+      "id": "agent-tests-only",
+      "name": "Auto-approve test-only changes by agents",
+      "enabled": true,
+      "conditions": {
+        "author": "copilot",
+        "filesChanged": {
+          "patterns": ["**/Test-*.ps1", "tests/**"],
+          "maxCount": 5
+        }
+      },
+      "checks": {
+        "requireCI": true,
+        "requireReviews": 0,
+        "noConflicts": true
+      },
+      "description": "Automatically approve PRs from agents that only modify test files"
+    }
+  ]
+}
