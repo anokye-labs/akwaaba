@@ -17,10 +17,9 @@
 .PARAMETER HierarchyDefinition
     A hashtable defining the issue hierarchy structure. Expected format:
     @{
-        Type = "Epic"          # Epic, Feature, or Task
+        Type = "Epic"          # Epic, Feature, Task, or Bug
         Title = "Epic title"
-        Body = "Description"
-        Labels = @("label1")   # Optional
+        Body = "Description"   # Optional
         Children = @(          # Optional array of child issues
             @{
                 Type = "Feature"
@@ -59,7 +58,7 @@
     }
     
     $result = ./New-IssueHierarchy.ps1 -Owner "anokye-labs" -Repo "akwaaba" -HierarchyDefinition $hierarchy
-    Write-Host "Created Epic: #$($result.Epic.Number)"
+    Write-Host "Created Epic: #$($result.Root.Number)"
 
 .EXAMPLE
     # Create from JSON file
@@ -240,8 +239,7 @@ function New-SingleIssue {
     param(
         [string]$Title,
         [string]$Body,
-        [string]$TypeName,
-        [string[]]$Labels = @()
+        [string]$TypeName
     )
     
     $typeId = $issueTypes[$TypeName]
@@ -282,12 +280,6 @@ mutation {
     $issue = $result.Data.createIssue.issue
     
     Write-Log -Message "Created #$($issue.number) [$($issue.issueType.name)] $($issue.title)" -Level Info
-    
-    # Add labels if provided
-    if ($Labels.Count -gt 0) {
-        # TODO: Implement label addition via GraphQL if needed
-        Write-Log -Message "Label addition not yet implemented" -Level Warn
-    }
     
     return $issue
 }
@@ -380,8 +372,7 @@ function New-IssueTreeRecursive {
     $issue = New-SingleIssue `
         -Title $Definition.Title `
         -Body ($Definition.Body ?? "") `
-        -TypeName $Definition.Type `
-        -Labels ($Definition.Labels ?? @())
+        -TypeName $Definition.Type
     
     # Add to project
     Add-IssueToProject -IssueId $issue.id
@@ -390,9 +381,21 @@ function New-IssueTreeRecursive {
     if ($Definition.Children -and $Definition.Children.Count -gt 0) {
         $childNumbers = $createdIssues | ForEach-Object { $_.number }
         
-        # Determine child type plural
-        $childType = $Definition.Children[0].Type
-        $childTypePlural = if ($childType -eq "Feature") { "Features" } else { "Tasks" }
+        # Determine child type plural - check all children for consistency
+        $childTypes = $Definition.Children | ForEach-Object { $_.Type } | Select-Object -Unique
+        if ($childTypes.Count -gt 1) {
+            # Mixed types - use generic "Items"
+            $childTypePlural = "Items"
+        } else {
+            # Single type - use appropriate plural
+            $childType = $childTypes[0]
+            $childTypePlural = switch ($childType) {
+                "Feature" { "Features" }
+                "Task" { "Tasks" }
+                "Bug" { "Bugs" }
+                default { "Items" }
+            }
+        }
         
         Update-ParentTasklist `
             -ParentId $issue.id `
