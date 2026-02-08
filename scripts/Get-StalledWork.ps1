@@ -68,6 +68,7 @@ param(
     [string]$Repo,
 
     [Parameter(Mandatory = $false)]
+    [ValidateRange(1, [int]::MaxValue)]
     [int]$StalledThresholdHours = 24,
 
     [Parameter(Mandatory = $false)]
@@ -177,13 +178,13 @@ function Get-HoursSince {
         [string]$DateTimeString
     )
     
-    try {
-        $dateTime = [datetime]::Parse($DateTimeString)
+    $dateTime = [datetime]::MinValue
+    if ([datetime]::TryParse($DateTimeString, [ref]$dateTime)) {
         $now = Get-Date
         $timeSpan = $now - $dateTime
         return [math]::Round($timeSpan.TotalHours, 2)
     }
-    catch {
+    else {
         Write-OkyeremaLogHelper -Level Warn -Message "Failed to parse datetime: $DateTimeString" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
         return 0
     }
@@ -219,10 +220,6 @@ if (-not $Owner -or -not $Repo) {
 }
 
 Write-OkyeremaLogHelper -Level Debug -Message "Using repository: $Owner/$Repo" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-
-# Calculate threshold datetime
-$thresholdDate = (Get-Date).AddHours(-$StalledThresholdHours)
-Write-OkyeremaLogHelper -Level Debug -Message "Threshold date: $($thresholdDate.ToString('o'))" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
 
 $stalledItems = @()
 
