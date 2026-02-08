@@ -546,11 +546,11 @@ query {
             $inTasklist = $false
             
             foreach ($line in $lines) {
-                if ($line -match '^## [\p{So}\s]*Tracked (Tasks|Features|Items)') {
+                if ($line -match '^## \s*Tracked (Tasks|Features|Items)') {
                     $inTasklist = $true
                     continue
                 }
-                if ($inTasklist -and $line -match '^- \[') { continue }
+                if ($inTasklist -and $line -match '^\s*-\s*\[') { continue }
                 if ($inTasklist -and $line -match '^\s*$') { continue }
                 if ($inTasklist -and $line -match '^##') { $inTasklist = $false }
                 if (-not $inTasklist) { $cleanLines += $line }
@@ -568,8 +568,9 @@ query {
             
             # Build new tasklist
             $tasklist = "`n`n## Tracked $sectionName`n`n"
-            foreach ($child in ($children | Sort-Object { $_.Number })) {
-                $tasklist += "- [ ] #$($child.Number)`n"
+            foreach ($child in ($children | Sort-Object { if ($DryRun) { $_.Index } else { $_.Number } })) {
+                $childRef = if ($DryRun) { "#$($child.Index)" } else { "#$($child.Number)" }
+                $tasklist += "- [ ] $childRef`n"
             }
             
             $newBody = $cleanBody + $tasklist
@@ -633,7 +634,10 @@ else {
     Write-Host ""
     Write-Host "=== Created Issues ===" -ForegroundColor Green
     foreach ($issue in $createdIssues) {
-        $parentInfo = if ($issue.Parent) { " (child of #$($createdIssues[$issue.Parent - 1].Number))" } else { "" }
+        $parentInfo = if ($issue.Parent) { 
+            $parentIssue = $createdIssues | Where-Object { $_.Index -eq $issue.Parent }
+            " (child of #$($parentIssue.Number))"
+        } else { "" }
         Write-Host "  #$($issue.Number) [$($issue.Type)] $($issue.Title)$parentInfo" -ForegroundColor White
         Write-Host "  $($issue.Url)" -ForegroundColor Gray
     }
