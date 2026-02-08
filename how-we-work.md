@@ -21,6 +21,7 @@ We use GitHub Issues and Projects as our primary coordination mechanism. Our app
 - **[Getting Started](./how-we-work/getting-started.md)** — New to GitHub Issues? Start here
 - **[Our Way](./how-we-work/our-way.md)** — How we structure and coordinate work
 - **[Glossary](./how-we-work/glossary.md)** — Akan terms and concepts we use
+- **[ADR Process](./how-we-work/adr-process.md)** — How we document architectural decisions
 
 ### For Agents
 - **[Okyerema Skill](/.github/skills/okyerema/SKILL.md)** — The agent skill with GraphQL examples and helper scripts
