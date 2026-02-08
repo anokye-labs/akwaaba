@@ -48,6 +48,61 @@ Write-Host "Repository ID: $($context.RepoId)"
 $context = ./scripts/Get-RepoContext.ps1 -Refresh
 ```
 
+### Import-DagFromJson.ps1
+
+Create issue graph from a JSON DAG (Directed Acyclic Graph) definition.
+
+**Features:**
+- Parses and validates JSON DAG input
+- Performs topological sort to determine creation order
+- Creates issues in dependency order
+- Builds tasklist relationships automatically
+- DryRun mode for validation without execution
+- Structured logging via Write-OkyeremaLog
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Invoke-GraphQL.ps1
+- ConvertTo-EscapedGraphQL.ps1
+- Write-OkyeremaLog.ps1
+
+**Input Format:**
+
+```json
+{
+  "nodes": [
+    {
+      "id": "epic-1",
+      "title": "Epic Issue Title",
+      "type": "Epic",
+      "body": "Issue description"
+    }
+  ],
+  "edges": [
+    {
+      "from": "epic-1",
+      "to": "feature-1",
+      "relationship": "tracks"
+    }
+  ]
+}
+```
+
+**Usage:**
+
+```powershell
+# Create issues from JSON file
+./scripts/Import-DagFromJson.ps1 -JsonPath "dag.json"
+
+# Validate without creating issues
+./scripts/Import-DagFromJson.ps1 -JsonPath "dag.json" -DryRun
+
+# Use JSON string directly
+$json = '{"nodes":[{"id":"epic-1","title":"My Epic","type":"Epic","body":"Description"}],"edges":[]}'
+./scripts/Import-DagFromJson.ps1 -JsonString $json
+```
+
 ### Invoke-GraphQL.ps1
 
 Centralized GraphQL executor with retry logic, rate-limit handling, and structured error output.
@@ -69,6 +124,66 @@ $result = ./Invoke-GraphQL.ps1 -Query $query -Variables $vars
 
 # DryRun mode
 $result = ./Invoke-GraphQL.ps1 -Query $query -DryRun
+```
+
+### New-IssueHierarchy.ps1
+
+Create a complete Epic → Feature → Task tree in one call.
+
+**Features:**
+- Creates issues in correct order (leaves first, root last)
+- Automatically wires up tasklist relationships between parent and child issues
+- Optionally adds all issues to a project board
+- Returns structured result with issue numbers and URLs
+- DryRun mode for testing without creating issues
+- Full support for correlation IDs and structured logging
+
+**Usage:**
+
+```powershell
+# Simple Epic with direct Tasks
+$hierarchy = @{
+    Type = "Epic"
+    Title = "Phase 0: Project Setup"
+    Body = "Initial project setup"
+    Children = @(
+        @{ Type = "Task"; Title = "Initialize repository" }
+        @{ Type = "Task"; Title = "Setup CI/CD" }
+    )
+}
+
+$result = ./New-IssueHierarchy.ps1 `
+    -Owner "anokye-labs" `
+    -Repo "akwaaba" `
+    -HierarchyDefinition $hierarchy
+
+# Epic → Feature → Task hierarchy with project board
+$hierarchy = @{
+    Type = "Epic"
+    Title = "Phase 2: Core Features"
+    Children = @(
+        @{
+            Type = "Feature"
+            Title = "User Authentication"
+            Children = @(
+                @{ Type = "Task"; Title = "Implement login" }
+                @{ Type = "Task"; Title = "Add OAuth" }
+            )
+        }
+    )
+}
+
+$result = ./New-IssueHierarchy.ps1 `
+    -Owner "anokye-labs" `
+    -Repo "akwaaba" `
+    -HierarchyDefinition $hierarchy `
+    -ProjectNumber 3
+
+# Check result
+if ($result.Success) {
+    Write-Host "Created Epic #$($result.Root.Number)"
+    Write-Host "Total issues: $($result.AllIssues.Count)"
+}
 ```
 
 ### New-IssueBatch.ps1
@@ -135,10 +250,9 @@ title,type,body,labels,parent
 ## Best Practices
 
 1. **Always use Invoke-GraphQL.ps1** instead of calling `gh api graphql` directly
-2. **Use New-IssueBatch.ps1** for creating multiple related issues at once
-3. **Check the Success property** before using the Data
-4. **Use -Verbose** for debugging and troubleshooting
-5. **Use -DryRun** to test queries and operations without executing them
+2. **Check the Success property** before using the Data
+3. **Use -Verbose** for debugging and troubleshooting
+4. **Use -DryRun** to test queries without executing them
 
 ## Examples
 
