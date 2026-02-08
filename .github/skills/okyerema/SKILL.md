@@ -29,6 +29,7 @@ The Okyerema coordinates adwoma (work) across the asafo (team). This skill teach
 - Querying or manipulating GitHub Projects
 - Checking issue relationships
 - Responding to and resolving PR review threads
+- Automating PR completion workflows
 - Understanding how work is structured
 
 ## Quick Operations
@@ -142,6 +143,7 @@ Invoke these scripts for common operations:
 - **[scripts/New-IssueWithType.ps1](scripts/New-IssueWithType.ps1)** — Create issue with proper type
 - **[scripts/Update-IssueHierarchy.ps1](scripts/Update-IssueHierarchy.ps1)** — Build tasklist relationships
 - **[scripts/Test-Hierarchy.ps1](scripts/Test-Hierarchy.ps1)** — Verify relationships via GraphQL
+- **[scripts/Invoke-PRCompletion.ps1](scripts/Invoke-PRCompletion.ps1)** — Orchestrate review-fix-push-resolve cycle for PR completion
 
 ## Labels: Use Sparingly
 
