@@ -83,6 +83,7 @@ if (-not $CorrelationId) {
 # Import dependencies
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 . "$scriptDir/Invoke-GraphQL.ps1"
+# Write-OkyeremaLog is part of the Okyerema skill framework and located in .github/skills/
 . "$scriptDir/../.github/skills/okyerema/scripts/Write-OkyeremaLog.ps1"
 
 Write-OkyeremaLog -Message "Starting DAG status walk for issue #$IssueNumber" -Level Info -Operation "Get-DagStatus" -CorrelationId $CorrelationId
@@ -260,6 +261,7 @@ function Calculate-NodeMetrics {
 
     if ($Node.TotalChildren -gt 0) {
         # Count closed direct children
+        # Wrap in @() to ensure .Count works even if Where-Object returns null or single item
         $Node.ClosedChildren = @($Node.Children | Where-Object { $_.State -eq "CLOSED" }).Count
 
         # Calculate percentage complete (based on direct children only)

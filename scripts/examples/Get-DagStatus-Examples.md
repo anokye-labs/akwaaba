@@ -177,20 +177,18 @@ if ($status.PercentComplete -lt 80) {
     Write-Warning "Epic is less than 80% complete"
 }
 
-# Find blocked items
-$script:blocked = @()
+# Find blocked items using functional approach
 function Find-Blocked($node) {
-    if ($node.IsBlocked) {
-        $script:blocked += $node
-    }
-    foreach ($child in $node.Children) {
-        Find-Blocked $child
-    }
+    # Return this node if blocked
+    if ($node.IsBlocked) { $node }
+    # Recursively check all children
+    $node.Children | ForEach-Object { Find-Blocked $_ }
 }
-Find-Blocked $status
 
-if ($script:blocked.Count -gt 0) {
-    Write-Warning "Found $($script:blocked.Count) blocked items that need attention"
+$blocked = @(Find-Blocked $status)
+
+if ($blocked.Count -gt 0) {
+    Write-Warning "Found $($blocked.Count) blocked items that need attention"
 }
 ```
 
@@ -224,13 +222,17 @@ This script is a key component of the Okyerema orchestration skill. It provides 
 All outputs can be piped to other PowerShell commands:
 
 ```powershell
-# Count open issues
+# Count open issues using functional approach
 $json = ./scripts/Get-DagStatus.ps1 -IssueNumber 14 -Format JSON | ConvertFrom-Json
-$script:openCount = 0
+
 function Count-Open($node) {
-    if ($node.State -eq "OPEN") { $script:openCount++ }
-    foreach ($child in $node.Children) { Count-Open $child }
+    # Count this node if open
+    $count = if ($node.State -eq "OPEN") { 1 } else { 0 }
+    # Add counts from all children
+    $childCounts = $node.Children | ForEach-Object { Count-Open $_ }
+    $count + ($childCounts | Measure-Object -Sum).Sum
 }
-Count-Open $json
-Write-Host "Total open issues: $script:openCount"
+
+$openCount = Count-Open $json
+Write-Host "Total open issues: $openCount"
 ```
