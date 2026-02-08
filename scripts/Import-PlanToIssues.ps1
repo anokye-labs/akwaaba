@@ -200,21 +200,26 @@ function Parse-PlanMarkdown {
 
     if ($content -match '\*\*Dependencies:\*\*\s*(.+)') {
         $depLine = $Matches[1].Trim()
-        # Parse comma-separated or single dependency
-        $plan.Dependencies = $depLine -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_ -ne 'None' }
+        # Parse comma-separated or single dependency (case-insensitive filtering)
+        $plan.Dependencies = $depLine -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_ -notmatch '^(None|N/A|n/a)$' }
     }
 
-    # Parse Overview section
-    if ($content -match '(?s)##\s+Overview\s*\n\n(.+?)(?=\n##(?!#)|\z)') {
+    # Parse Overview section (flexible whitespace after heading)
+    if ($content -match '(?s)##\s+Overview\s*\n+(.+?)(?=\n##(?!#)|\z)') {
         $plan.Overview = $Matches[1].Trim()
     }
 
-    # Parse Tasks section
-    if ($content -match '(?s)##\s+(?:Key\s+)?Tasks\s*\n(.+?)(?=\n##(?!#)|\z)') {
+    # Parse Tasks section (flexible whitespace after heading)
+    if ($content -match '(?s)##\s+(?:Key\s+)?Tasks\s*\n+(.+?)(?=\n##(?!#)|\z)') {
         $tasksSection = $Matches[1]
         
         # Split by task headers (### Task N:)
         $taskMatches = [regex]::Matches($tasksSection, '(?s)###\s+Task\s+\d+:\s*(.+?)(?=\n###|\z)')
+        
+        # Log warning if expected tasks section exists but no tasks were parsed
+        if ($taskMatches.Count -eq 0 -and $tasksSection.Length -gt 0) {
+            Write-OkyeremaLogHelper -Level Warn -Message "Tasks section found but no task headers matching '### Task N:' were parsed. Check markdown formatting." -Operation "Parse-PlanMarkdown" -CorrelationId $CorrelationId
+        }
         
         foreach ($taskMatch in $taskMatches) {
             $taskContent = $taskMatch.Groups[1].Value.Trim()
@@ -239,15 +244,15 @@ function Parse-PlanMarkdown {
         }
     }
 
-    # Parse Acceptance Criteria section
-    if ($content -match '(?s)##\s+Acceptance\s+Criteria\s*\n\n(.+?)(?=\n##(?!#)|\z)') {
+    # Parse Acceptance Criteria section (flexible whitespace after heading)
+    if ($content -match '(?s)##\s+Acceptance\s+Criteria\s*\n+(.+?)(?=\n##(?!#)|\z)') {
         $criteriaSection = $Matches[1].Trim()
         $criteriaLines = $criteriaSection -split '\n' | Where-Object { $_ -match '^\s*-\s+(.+)' }
         $plan.AcceptanceCriteria = $criteriaLines | ForEach-Object { $_ -replace '^\s*-\s+', '' }
     }
 
-    # Parse Notes section
-    if ($content -match '(?s)##\s+Notes\s*\n\n(.+?)(?=\n##(?!#)|\z)') {
+    # Parse Notes section (flexible whitespace after heading)
+    if ($content -match '(?s)##\s+Notes\s*\n+(.+?)(?=\n##(?!#)|\z)') {
         $plan.Notes = $Matches[1].Trim()
     }
 
@@ -339,11 +344,10 @@ function New-IssueFromPlan {
         TaskIssues = @()
     }
 
-    # Determine parent issue type (Feature for most, Epic for phase-level)
+    # Determine parent issue type
+    # All planning feature files create Feature issues
+    # (Phase README files are excluded from directory processing and would require explicit -PlanFile)
     $parentType = "Feature"
-    if ($Plan.FilePath -match 'README\.md$') {
-        $parentType = "Epic"
-    }
 
     $parentTypeId = Get-IssueTypeId -IssueTypes $IssueTypes -TypeName $parentType
 
@@ -370,7 +374,7 @@ function New-IssueFromPlan {
     foreach ($task in $Plan.Tasks) {
         $taskTypeId = Get-IssueTypeId -IssueTypes $IssueTypes -TypeName "Task"
         
-        $taskTitle = "$($task.Title)"
+        $taskTitle = $task.Title
         $taskBody = $task.Content
 
         if ($DryRun) {
@@ -423,7 +427,7 @@ mutation {
 
     # Add tasklist to parent body if there are tasks
     if ($taskNumbers.Count -gt 0) {
-        $parentBody += "## 📋 Tasks`n`n"
+        $parentBody += "## Tasks`n`n"
         foreach ($taskNum in $taskNumbers) {
             $parentBody += "- [ ] $taskNum`n"
         }
@@ -502,6 +506,8 @@ try {
         if (-not (Test-Path $PlanDirectory)) {
             throw "Plan directory not found: $PlanDirectory"
         }
+        # Exclude phase README files from directory processing
+        # (They can be explicitly processed with -PlanFile if needed)
         $filesToProcess = Get-ChildItem -Path $PlanDirectory -Filter "*.md" | Where-Object { $_.Name -ne "README.md" } | ForEach-Object { $_.FullName }
         
         if ($filesToProcess.Count -eq 0) {
