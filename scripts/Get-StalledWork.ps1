@@ -190,6 +190,29 @@ function Get-HoursSince {
     }
 }
 
+# Helper function to safely compare two datetime strings
+function Test-IsDateNewer {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$DateString1,
+        
+        [Parameter(Mandatory = $true)]
+        [string]$DateString2
+    )
+    
+    $date1 = [datetime]::MinValue
+    $date2 = [datetime]::MinValue
+    
+    $parsed1 = [datetime]::TryParse($DateString1, [ref]$date1)
+    $parsed2 = [datetime]::TryParse($DateString2, [ref]$date2)
+    
+    if ($parsed1 -and $parsed2) {
+        return $date1 -gt $date2
+    }
+    
+    return $false
+}
+
 #endregion
 
 #region Main Logic
@@ -312,7 +335,7 @@ query(`$owner: String!, `$repo: String!) {
         # Check last commit date
         if ($pr.commits.nodes.Count -gt 0 -and $pr.commits.nodes[0].commit.committedDate) {
             $commitDate = $pr.commits.nodes[0].commit.committedDate
-            if ([datetime]::Parse($commitDate) -gt [datetime]::Parse($lastActivityDate)) {
+            if (Test-IsDateNewer -DateString1 $commitDate -DateString2 $lastActivityDate) {
                 $lastActivityDate = $commitDate
             }
         }
@@ -320,7 +343,7 @@ query(`$owner: String!, `$repo: String!) {
         # Check last comment date
         if ($pr.comments.nodes.Count -gt 0 -and $pr.comments.nodes[0].createdAt) {
             $commentDate = $pr.comments.nodes[0].createdAt
-            if ([datetime]::Parse($commentDate) -gt [datetime]::Parse($lastActivityDate)) {
+            if (Test-IsDateNewer -DateString1 $commentDate -DateString2 $lastActivityDate) {
                 $lastActivityDate = $commentDate
             }
         }
@@ -328,7 +351,7 @@ query(`$owner: String!, `$repo: String!) {
         # Check last review date
         if ($pr.reviews.nodes.Count -gt 0 -and $pr.reviews.nodes[0].createdAt) {
             $reviewDate = $pr.reviews.nodes[0].createdAt
-            if ([datetime]::Parse($reviewDate) -gt [datetime]::Parse($lastActivityDate)) {
+            if (Test-IsDateNewer -DateString1 $reviewDate -DateString2 $lastActivityDate) {
                 $lastActivityDate = $reviewDate
             }
         }
@@ -344,7 +367,7 @@ query(`$owner: String!, `$repo: String!) {
                     $itemDate = $item.createdAt
                 }
                 
-                if ($itemDate -and [datetime]::Parse($itemDate) -gt [datetime]::Parse($lastActivityDate)) {
+                if ($itemDate -and (Test-IsDateNewer -DateString1 $itemDate -DateString2 $lastActivityDate)) {
                     $lastActivityDate = $itemDate
                 }
             }
@@ -481,7 +504,7 @@ query(`$owner: String!, `$repo: String!) {
         # Check last comment date
         if ($issue.comments.nodes.Count -gt 0 -and $issue.comments.nodes[0].createdAt) {
             $commentDate = $issue.comments.nodes[0].createdAt
-            if ([datetime]::Parse($commentDate) -gt [datetime]::Parse($lastActivityDate)) {
+            if (Test-IsDateNewer -DateString1 $commentDate -DateString2 $lastActivityDate) {
                 $lastActivityDate = $commentDate
             }
         }
