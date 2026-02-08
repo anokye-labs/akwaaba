@@ -1,5 +1,6 @@
 # Update-IssueHierarchy.ps1
 # Build parent-child relationships by adding tasklists to issue bodies
+# Now uses Invoke-GraphQL.ps1 and ConvertTo-EscapedGraphQL.ps1
 
 param(
     [Parameter(Mandatory)][string]$Owner,
@@ -12,11 +13,17 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Import foundation layer scripts
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$scriptsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $scriptDir))) "scripts"
+. (Join-Path $scriptsPath "Invoke-GraphQL.ps1")
+. (Join-Path $scriptsPath "ConvertTo-EscapedGraphQL.ps1")
+
 # Get parent issue
 $parentQuery = @"
-query {
-  repository(owner: `"$Owner`", name: `"$Repo`") {
-    issue(number: $ParentNumber) {
+query(`$owner: String!, `$repo: String!, `$number: Int!) {
+  repository(owner: `$owner, name: `$repo) {
+    issue(number: `$number) {
       id
       title
       body
@@ -25,10 +32,23 @@ query {
 }
 "@
 
-$result = gh api graphql -f query="$parentQuery" | ConvertFrom-Json
-$parentId = $result.data.repository.issue.id
-$parentTitle = $result.data.repository.issue.title
-$parentBody = $result.data.repository.issue.body
+$variables = @{
+    owner = $Owner
+    repo = $Repo
+    number = $ParentNumber
+}
+
+$result = Invoke-GraphQL -Query $parentQuery -Variables $variables
+
+if (-not $result.Success) {
+    $errorMsg = if ($result.Errors.Count -gt 0) { $result.Errors[0].Message } else { "Unknown error" }
+    Write-Error "Failed to fetch parent issue: $errorMsg"
+    return
+}
+
+$parentId = $result.Data.repository.issue.id
+$parentTitle = $result.Data.repository.issue.title
+$parentBody = $result.Data.repository.issue.body
 
 Write-Host "Parent: #$ParentNumber - $parentTitle" -ForegroundColor Cyan
 
@@ -58,21 +78,32 @@ foreach ($num in $ChildNumbers | Sort-Object) {
 
 $newBody = $cleanBody + $tasklist
 
-# Update parent
-$escapedBody = $newBody.Replace('\', '\\').Replace('"', '\"').Replace("`n", '\n')
+# Update parent with proper escaping
+$escapedBody = $newBody | ConvertTo-EscapedGraphQL
 
 $updateMutation = @"
-mutation {
+mutation(`$id: ID!, `$body: String!) {
   updateIssue(input: {
-    id: `"$parentId`"
-    body: `"$escapedBody`"
+    id: `$id
+    body: `$body
   }) {
     issue { number }
   }
 }
 "@
 
-gh api graphql -f query="$updateMutation" | Out-Null
+$mutationVars = @{
+    id = $parentId
+    body = $escapedBody
+}
+
+$updateResult = Invoke-GraphQL -Query $updateMutation -Variables $mutationVars
+
+if (-not $updateResult.Success) {
+    $errorMsg = if ($updateResult.Errors.Count -gt 0) { $updateResult.Errors[0].Message } else { "Unknown error" }
+    Write-Error "Failed to update issue: $errorMsg"
+    return
+}
 
 Write-Host "✓ Updated #$ParentNumber with $($ChildNumbers.Count) tracked $ChildType" -ForegroundColor Green
 Write-Host "  Children: #$($ChildNumbers -join ', #')" -ForegroundColor Gray
