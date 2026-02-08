@@ -4,9 +4,6 @@
 
 param(
     [Parameter(Mandatory=$false)]
-    [string]$Owner,
-    
-    [Parameter(Mandatory=$false)]
     [switch]$Refresh
 )
 

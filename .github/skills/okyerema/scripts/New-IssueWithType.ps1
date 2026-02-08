@@ -1,6 +1,6 @@
 # New-IssueWithType.ps1
 # Create a GitHub issue with proper organization issue type
-# Now uses Invoke-GraphQL.ps1 and ConvertTo-EscapedGraphQL.ps1
+# Now uses Invoke-GraphQL.ps1 for robust GraphQL operations
 
 param(
     [Parameter(Mandatory)][string]$Owner,
@@ -24,7 +24,6 @@ $scriptsPath = Join-Path $repoRoot "scripts"
 
 # Import foundation layer scripts
 . (Join-Path $scriptsPath "Invoke-GraphQL.ps1")
-. (Join-Path $scriptsPath "ConvertTo-EscapedGraphQL.ps1")
 
 # Get repo ID and type IDs
 $query = @"
@@ -63,10 +62,7 @@ if (-not $typeId) {
     return
 }
 
-# Create issue with proper escaping
-$escapedTitle = $Title | ConvertTo-EscapedGraphQL
-$escapedBody = $Body | ConvertTo-EscapedGraphQL
-
+# Create issue (variables are already properly handled by Invoke-GraphQL)
 $mutation = @"
 mutation(`$repoId: ID!, `$title: String!, `$body: String!, `$typeId: ID!) {
   createIssue(input: {
@@ -88,8 +84,8 @@ mutation(`$repoId: ID!, `$title: String!, `$body: String!, `$typeId: ID!) {
 
 $mutationVars = @{
     repoId = $repoId
-    title = $escapedTitle
-    body = $escapedBody
+    title = $Title
+    body = $Body
     typeId = $typeId
 }
 

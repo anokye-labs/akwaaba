@@ -1,6 +1,6 @@
 # Update-IssueHierarchy.ps1
 # Build parent-child relationships by adding tasklists to issue bodies
-# Now uses Invoke-GraphQL.ps1 and ConvertTo-EscapedGraphQL.ps1
+# Now uses Invoke-GraphQL.ps1 for robust GraphQL operations
 
 param(
     [Parameter(Mandatory)][string]$Owner,
@@ -24,7 +24,6 @@ $scriptsPath = Join-Path $repoRoot "scripts"
 
 # Import foundation layer scripts
 . (Join-Path $scriptsPath "Invoke-GraphQL.ps1")
-. (Join-Path $scriptsPath "ConvertTo-EscapedGraphQL.ps1")
 
 # Get parent issue
 $parentQuery = @"
@@ -85,9 +84,7 @@ foreach ($num in $ChildNumbers | Sort-Object) {
 
 $newBody = $cleanBody + $tasklist
 
-# Update parent with proper escaping
-$escapedBody = $newBody | ConvertTo-EscapedGraphQL
-
+# Update parent (variables are already properly handled by Invoke-GraphQL)
 $updateMutation = @"
 mutation(`$id: ID!, `$body: String!) {
   updateIssue(input: {
@@ -101,7 +98,7 @@ mutation(`$id: ID!, `$body: String!) {
 
 $mutationVars = @{
     id = $parentId
-    body = $escapedBody
+    body = $newBody
 }
 
 $updateResult = Invoke-GraphQL -Query $updateMutation -Variables $mutationVars
