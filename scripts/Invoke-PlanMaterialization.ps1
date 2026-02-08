@@ -259,8 +259,14 @@ foreach ($phaseDir in $phaseDirs) {
     
     # Extract Epic body (everything except first heading and Dependencies section)
     $epicBody = $phaseReadme -replace '(?m)^#\s+.+$', '' # Remove title
-    $epicBody = $epicBody -replace '(?ms)## Dependencies.*?(?=\n##|\z)', '' # Remove Dependencies section
-    $epicBody = $epicBody.Trim()
+    # Remove Dependencies section - match either until next section or until end
+    if ($epicBody -match '(?ms)(.*?)## Dependencies') {
+        # Dependencies found, take everything before it
+        $epicBody = $Matches[1].Trim()
+    } else {
+        # No Dependencies section, use as-is
+        $epicBody = $epicBody.Trim()
+    }
     
     # Parse dependencies from README if present
     $phaseDependencies = @()
@@ -284,7 +290,17 @@ foreach ($phaseDir in $phaseDirs) {
         Write-Host ""
         Write-Host "=== DryRun: Phase $phaseName ===" -ForegroundColor Cyan
         Write-Host "Epic Title: $epicTitle" -ForegroundColor Yellow
-        Write-Host "Epic Body (preview): $($epicBody.Substring(0, [Math]::Min(100, $epicBody.Length)))..." -ForegroundColor Gray
+        
+        # Show body preview only if not empty
+        if ($epicBody.Length -gt 0) {
+            $previewLength = [Math]::Min(100, $epicBody.Length)
+            $preview = $epicBody.Substring(0, $previewLength)
+            if ($epicBody.Length -gt 100) {
+                $preview += "..."
+            }
+            Write-Host "Epic Body (preview): $preview" -ForegroundColor Gray
+        }
+        
         Write-Host "Feature Files: $($featureFiles.Count)" -ForegroundColor Yellow
         if ($phaseDependencies.Count -gt 0) {
             Write-Host "Dependencies: $($phaseDependencies -join ', ')" -ForegroundColor Yellow
@@ -357,7 +373,7 @@ foreach ($phaseDir in $phaseDirs) {
             $hierarchyDef.Children += @{
                 Type = "Feature"
                 Title = $featureResult.Plan.Title
-                Body = "Feature details"
+                Body = $featureResult.Result.ParentIssue.Body
                 Children = @()
             }
         }
@@ -408,7 +424,9 @@ mutation {
             Write-Log -Message "Wiring Epic to Features via tasklist" -Level Info
             
             $tasklist = "`n`n## 📋 Tracked Features`n"
-            foreach ($featureNum in $featureIssueNumbers | Sort-Object) {
+            # Sort numerically - filter out TBD placeholders from DryRun
+            $numericIssues = $featureIssueNumbers | Where-Object { $_ -match '^\d+$' } | Sort-Object { [int]$_ }
+            foreach ($featureNum in $numericIssues) {
                 $tasklist += "`n- [ ] #$featureNum"
             }
             
@@ -488,11 +506,17 @@ mutation {
         }
         
         # Store phase result
+        # Flatten TaskIssues array properly
+        $allTaskIssues = @()
+        foreach ($featureResult in $featureResults) {
+            $allTaskIssues += $featureResult.Result.TaskIssues
+        }
+        
         $allPhases += @{
             PhaseName = $phaseName
             EpicIssue = $epicIssue
             FeatureIssues = $featureResults | ForEach-Object { $_.Result.ParentIssue }
-            TaskIssues = $featureResults | ForEach-Object { $_.Result.TaskIssues } | ForEach-Object { $_ }
+            TaskIssues = $allTaskIssues
         }
     }
 }
