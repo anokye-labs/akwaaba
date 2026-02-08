@@ -24,6 +24,42 @@ A utility function that safely escapes text for use in GraphQL string literals. 
 "Hello `"World`"" | ConvertTo-EscapedGraphQL
 ```
 
+### Get-DagStatus.ps1
+
+Recursively walks an issue hierarchy and reports status with metrics at each level.
+
+**Features:**
+- Tree display with metrics (total, closed count, percentage complete)
+- Identifies blocked items (open with all children done)
+- Identifies ready items (open with no open dependencies)
+- Multiple output formats: Tree (default), JSON, CSV
+- Cycle detection for circular dependencies
+- Configurable maximum depth
+- Structured logging via Write-OkyeremaLog.ps1
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Invoke-GraphQL.ps1
+- Get-RepoContext.ps1
+- Write-OkyeremaLog.ps1
+
+**Usage:**
+
+```powershell
+# Display tree view (default)
+./scripts/Get-DagStatus.ps1 -IssueNumber 14
+
+# Output as JSON
+./scripts/Get-DagStatus.ps1 -IssueNumber 14 -Format JSON
+
+# Export to CSV
+./scripts/Get-DagStatus.ps1 -IssueNumber 14 -Format CSV > status.csv
+
+# Limit depth
+./scripts/Get-DagStatus.ps1 -IssueNumber 14 -MaxDepth 2
+```
+
 ### Get-RepoContext.ps1
 
 Fetches repository context (repo ID, issue types, project IDs, and label IDs) in one query.
@@ -184,6 +220,197 @@ if ($result.Success) {
     Write-Host "Created Epic #$($result.Root.Number)"
     Write-Host "Total issues: $($result.AllIssues.Count)"
 }
+```
+
+### Add-IssuesToProject.ps1
+
+Bulk-add issues to a GitHub Project V2 and optionally set field values.
+
+**Features:**
+- Accepts issue numbers as array or pipeline input
+- Automatically resolves project and issue IDs
+- Sets custom field values (Status, Priority, etc.)
+- Rate limiting between mutations to respect API limits
+- Structured logging with correlation IDs
+
+**Dependencies:**
+- Invoke-GraphQL.ps1
+- Get-RepoContext.ps1
+- Write-OkyeremaLog.ps1
+
+**Usage:**
+
+```powershell
+# Basic usage
+./scripts/Add-IssuesToProject.ps1 -IssueNumbers 101,102,103 -ProjectNumber 3
+
+# With field values
+./scripts/Add-IssuesToProject.ps1 -IssueNumbers 101,102 -ProjectNumber 3 `
+    -FieldValues @{ Status = "In Progress"; Priority = "High" }
+
+# Pipeline input
+101, 102, 103 | ./scripts/Add-IssuesToProject.ps1 -ProjectNumber 3
+
+# Explicit owner/repo
+./scripts/Add-IssuesToProject.ps1 -IssueNumbers 101 -ProjectNumber 3 `
+    -Owner "anokye-labs" -Repo "akwaaba"
+```
+
+### Set-IssueDependency.ps1
+
+Express blocking/dependency relationships between GitHub issues through body-text convention.
+
+**Features:**
+- Updates issue body with Dependencies section
+- Cross-references both directions (blocks/blocked-by)
+- Supports Wave indicators for work start timing
+- DryRun mode for testing changes
+- Automatic title fetching for referenced issues
+
+**Usage:**
+
+```powershell
+# Set issue #20 to depend on issues #14, #16, and #17
+./Set-IssueDependency.ps1 -IssueNumber 20 -DependsOn @(14, 16, 17) -Wave 1
+
+# Set issue #14 to block issue #20
+./Set-IssueDependency.ps1 -IssueNumber 14 -Blocks @(20)
+
+# Test changes without executing
+./Set-IssueDependency.ps1 -IssueNumber 20 -DependsOn @(14, 16, 17) -DryRun
+```
+
+**Note:** GitHub has no native dependency tracking, so this uses body-text convention.
+
+### New-IssueBatch.ps1
+
+Create multiple GitHub issues from a JSON or CSV input file with type support and relationship wiring.
+
+**Features:**
+- Batch create issues from JSON or CSV input
+- Support for all organization issue types (Epic, Feature, Task, Bug)
+- Automatic parent-child relationship wiring via tasklists
+- Progress bar for large batches
+- DryRun mode to preview operations
+- Structured logging via Write-OkyeremaLog
+- Label assignment support
+
+**Input Format:**
+
+JSON example:
+```json
+[
+  {
+    "title": "Epic: Phase 3 Development",
+    "type": "Epic",
+    "body": "Description",
+    "labels": ["documentation", "enhancement"],
+    "parent": null
+  },
+  {
+    "title": "Child Task",
+    "type": "Task",
+    "body": "Task description",
+    "labels": ["bug"],
+    "parent": 1
+  }
+]
+```
+
+CSV example:
+```csv
+title,type,body,labels,parent
+"Epic: Phase 3 Development",Epic,"Description","documentation;enhancement",
+"Child Task",Task,"Task description","bug",1
+```
+
+**Usage:**
+
+```powershell
+# Create issues from JSON file
+./New-IssueBatch.ps1 -InputFile issues.json -Owner anokye-labs -Repo akwaaba
+
+# Preview operations without creating issues
+./New-IssueBatch.ps1 -InputFile issues.csv -Owner anokye-labs -Repo akwaaba -DryRun
+
+# Create with quiet logging
+./New-IssueBatch.ps1 -InputFile issues.json -Owner anokye-labs -Repo akwaaba -Quiet
+```
+
+**Notes:**
+- Parent references use 1-based indexing
+- Parents must be defined before children in the input file
+- Relationships are wired after all issues are created
+- GitHub needs 2-5 minutes to parse tasklist relationships
+
+### Get-ReadyIssues.ps1
+
+Finds issues that are ready to work on - all dependencies met, not assigned.
+
+**Features:**
+- Walks the DAG (Directed Acyclic Graph) from a root Epic
+- Filters to leaf tasks where parent is open and no blocking issues are open
+- Optionally filters by label, type, or assignee
+- Returns sorted list suitable for agent consumption
+- Supports multiple sort orders (priority, number, title)
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Requires: `Invoke-GraphQL.ps1`, `Get-RepoContext.ps1`, `Write-OkyeremaLog.ps1`
+
+**Usage:**
+
+```powershell
+# Find all ready issues under Epic #14
+$readyIssues = ./scripts/Get-ReadyIssues.ps1 -RootIssue 14
+
+# Find ready issues with specific labels
+$readyIssues = ./scripts/Get-ReadyIssues.ps1 -RootIssue 14 -Labels @("priority:high", "backend")
+
+# Find unassigned Task issues
+$readyIssues = ./scripts/Get-ReadyIssues.ps1 -RootIssue 14 -IssueType "Task" -Assignee "none"
+
+# Include assigned issues in results
+$readyIssues = ./scripts/Get-ReadyIssues.ps1 -RootIssue 14 -IncludeAssigned
+
+# Sort by number instead of priority
+$readyIssues = ./scripts/Get-ReadyIssues.ps1 -RootIssue 14 -SortBy "number"
+```
+
+**Output:**
+
+Returns an array of PSCustomObject with properties:
+- `Number`: Issue number
+- `Title`: Issue title
+- `Type`: Issue type name
+- `State`: Issue state (OPEN/CLOSED)
+- `Url`: Issue URL
+- `Labels`: Array of label names
+- `Assignees`: Array of assignee logins
+- `Depth`: Depth in the hierarchy (0 = root)
+
+### Invoke-GraphQL.ps1
+
+Centralized GraphQL executor with retry logic, rate-limit handling, and structured error output.
+
+**Features:**
+- Retry with exponential backoff on 502/503/rate-limit errors
+- Structured error objects (not raw stderr)
+- DryRun mode that logs the query without executing
+- Verbose logging with correlation IDs for tracing
+
+**Usage:**
+
+```powershell
+$query = 'query { viewer { login } }'
+$result = ./Invoke-GraphQL.ps1 -Query $query
+
+$vars = @{ owner = "octocat"; name = "Hello-World" }
+$result = ./Invoke-GraphQL.ps1 -Query $query -Variables $vars
+
+# DryRun mode
+$result = ./Invoke-GraphQL.ps1 -Query $query -DryRun
 ```
 
 ### Get-BlockedIssues.ps1
