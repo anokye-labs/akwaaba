@@ -3,7 +3,7 @@
 # Now delegates to Get-RepoContext.ps1 for retrieving issue types
 
 param(
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [switch]$Refresh
 )
 
