@@ -1,165 +1,100 @@
 <#
 .SYNOPSIS
-    Detect stalled agent work — PRs or issues that have been assigned but show no activity beyond a configurable threshold.
+    Find stale issues that have been open too long with no activity.
 
 .DESCRIPTION
-    Get-StalledWork.ps1 detects stalled agent work by identifying:
-    - PRs with no commits or comments beyond the threshold
-    - Assigned issues with no linked PR and no activity beyond the threshold
-    
-    This script helps identify work that may need intervention or reassignment.
+    Get-StalledWork.ps1 queries open issues in a repository and identifies
+    those that have been stale (no updates) beyond a configured threshold.
+    Returns issues sorted by staleness (longest stale first).
 
-.PARAMETER Owner
-    Repository owner (username or organization). If not specified, attempts to
-    detect from current repository context.
+.PARAMETER DaysStale
+    Number of days without activity to consider an issue stale. Default is 30.
 
-.PARAMETER Repo
-    Repository name. If not specified, attempts to detect from current
-    repository context.
-
-.PARAMETER StalledThresholdHours
-    Number of hours of inactivity to consider work as stalled. Default is 24 hours.
-
-.PARAMETER IncludePRs
-    If specified, includes pull requests in the stalled work detection. 
-    Default behavior: both PRs and Issues are included if neither switch is specified.
-
-.PARAMETER IncludeIssues
-    If specified, includes issues in the stalled work detection.
-    Default behavior: both PRs and Issues are included if neither switch is specified.
-
-.PARAMETER CorrelationId
-    Optional correlation ID for tracing operations.
+.PARAMETER DryRun
+    If specified, logs the query without executing it against the API.
 
 .OUTPUTS
-    Returns an array of PSCustomObject with:
-    - Number: PR or Issue number
-    - Title: PR or Issue title
-    - Type: "PR" or "Issue"
-    - Assignee: Current assignee login
-    - LastActivityDate: Date of last activity (ISO 8601 format)
-    - HoursSinceActivity: Hours since last activity
-    - Status: Draft/Open/InProgress
+    Returns an array of PSCustomObject with stalled issues:
+    - Number: Issue number
+    - Title: Issue title
+    - IssueType: Type of the issue (e.g., Epic, Feature, Task, Bug)
+    - State: Issue state (should be OPEN)
+    - Url: Issue URL
+    - UpdatedAt: Last update timestamp
+    - DaysSinceUpdate: Days since last update
+    - CreatedAt: Creation timestamp
 
 .EXAMPLE
-    .\Get-StalledWork.ps1 -Owner "anokye-labs" -Repo "akwaaba"
-    
-    Detects all stalled work (PRs and issues) with default 24-hour threshold.
+    PS> .\Get-StalledWork.ps1
+    Finds all open issues stale for more than 30 days.
 
 .EXAMPLE
-    .\Get-StalledWork.ps1 -StalledThresholdHours 48 -IncludePRs -IncludeIssues:$false
-    
-    Detects only stalled PRs with a 48-hour threshold.
+    PS> .\Get-StalledWork.ps1 -DaysStale 14
+    Finds issues stale for more than 14 days.
 
 .EXAMPLE
-    .\Get-StalledWork.ps1 -Owner "anokye-labs" -Repo "akwaaba" -StalledThresholdHours 12
-    
-    Detects stalled work with a 12-hour threshold.
+    PS> .\Get-StalledWork.ps1 -DryRun
+    Shows the query that would be executed without running it.
 
 .NOTES
     Requires GitHub CLI (gh) to be installed and authenticated.
-    Depends on: Invoke-GraphQL.ps1, Get-RepoContext.ps1, Write-OkyeremaLog.ps1
+    Dependencies:
+    - Invoke-GraphQL.ps1
+    - Get-RepoContext.ps1
+    - Write-OkyeremaLog.ps1
 #>
 
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
-    [string]$Owner,
+    [int]$DaysStale = 30,
 
     [Parameter(Mandatory = $false)]
-    [string]$Repo,
-
-    [Parameter(Mandatory = $false)]
-    [ValidateRange(1, 8760)] # Maximum 1 year (365 days)
-    [int]$StalledThresholdHours = 24,
-
-    [Parameter(Mandatory = $false)]
-    [switch]$IncludePRs,
-
-    [Parameter(Mandatory = $false)]
-    [switch]$IncludeIssues,
-
-    [Parameter(Mandatory = $false)]
-    [string]$CorrelationId
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
 
-# Generate correlation ID if not provided
-if (-not $CorrelationId) {
-    $CorrelationId = [guid]::NewGuid().ToString()
-}
+# Generate correlation ID for tracking
+$correlationId = [guid]::NewGuid().ToString()
 
-# Default behavior: include both PRs and Issues if neither is explicitly specified
-if (-not $PSBoundParameters.ContainsKey('IncludePRs') -and -not $PSBoundParameters.ContainsKey('IncludeIssues')) {
-    $IncludePRs = $true
-    $IncludeIssues = $true
-}
+# Get script directory for relative paths
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-#region Helper Functions
-
-# Helper function to invoke Invoke-GraphQL.ps1
+# Helper function to call Invoke-GraphQL.ps1
 function Invoke-GraphQLHelper {
     param(
-        [Parameter(Mandatory = $true)]
         [string]$Query,
-        
-        [Parameter(Mandatory = $false)]
         [hashtable]$Variables = @{},
-        
-        [Parameter(Mandatory = $false)]
+        [switch]$DryRun,
         [string]$CorrelationId
     )
     
+    $invokeGraphQLPath = Join-Path $scriptDir "Invoke-GraphQL.ps1"
+    
     $params = @{
         Query = $Query
+        Variables = $Variables
+        CorrelationId = $CorrelationId
     }
     
-    if ($Variables.Count -gt 0) {
-        $params.Variables = $Variables
+    if ($DryRun) {
+        $params.DryRun = $true
     }
     
-    if ($CorrelationId) {
-        $params.CorrelationId = $CorrelationId
-    }
-    
-    # Call Invoke-GraphQL.ps1 as a script
-    & "$PSScriptRoot/Invoke-GraphQL.ps1" @params
+    return & $invokeGraphQLPath @params
 }
 
-# Helper function to invoke Get-RepoContext.ps1
-function Get-RepoContextHelper {
-    param(
-        [Parameter(Mandatory = $false)]
-        [switch]$Refresh
-    )
-    
-    $params = @{}
-    
-    if ($Refresh) {
-        $params.Refresh = $true
-    }
-    
-    # Call Get-RepoContext.ps1 as a script
-    & "$PSScriptRoot/Get-RepoContext.ps1" @params
-}
-
-# Helper function to invoke Write-OkyeremaLog.ps1
+# Helper function to call Write-OkyeremaLog.ps1
 function Write-OkyeremaLogHelper {
     param(
-        [Parameter(Mandatory = $true)]
         [string]$Message,
-
-        [Parameter(Mandatory = $false)]
-        [ValidateSet("Info", "Warn", "Error", "Debug")]
         [string]$Level = "Info",
-
-        [Parameter(Mandatory = $false)]
         [string]$Operation = "",
-
-        [Parameter(Mandatory = $false)]
         [string]$CorrelationId = ""
     )
+    
+    $writeLogPath = Join-Path (Split-Path $scriptDir -Parent) ".github" "skills" "okyerema" "scripts" "Write-OkyeremaLog.ps1"
     
     $params = @{
         Message = $Message
@@ -174,143 +109,68 @@ function Write-OkyeremaLogHelper {
         $params.CorrelationId = $CorrelationId
     }
     
-    # Call Write-OkyeremaLog.ps1 as a script
-    $scriptPath = Join-Path $PSScriptRoot ".." ".github" "skills" "okyerema" "scripts" "Write-OkyeremaLog.ps1"
-    & $scriptPath @params
+    & $writeLogPath @params
 }
 
-# Helper function to calculate hours since a datetime
-function Get-HoursSince {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$DateTimeString
-    )
-    
-    $dateTime = [datetime]::MinValue
-    if ([datetime]::TryParse($DateTimeString, [ref]$dateTime)) {
-        $now = Get-Date
-        $timeSpan = $now - $dateTime
-        return [math]::Round($timeSpan.TotalHours, 2)
-    }
-    else {
-        Write-OkyeremaLogHelper -Level Warn -Message "Failed to parse datetime: $DateTimeString, returning very high value to indicate error" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-        # Return a very high value (1 year) to indicate parsing failure
-        # This prevents failed parsing from making items appear as "not stalled"
-        return 8760
-    }
+# Helper function to call Get-RepoContext.ps1
+function Get-RepoContextHelper {
+    $getRepoContextPath = Join-Path $scriptDir "Get-RepoContext.ps1"
+    return & $getRepoContextPath
 }
 
-# Helper function to safely compare two datetime strings
-function Test-IsDateNewer {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$DateString1,
-        
-        [Parameter(Mandatory = $true)]
-        [string]$DateString2
-    )
-    
-    $date1 = [datetime]::MinValue
-    $date2 = [datetime]::MinValue
-    
-    $parsed1 = [datetime]::TryParse($DateString1, [ref]$date1)
-    $parsed2 = [datetime]::TryParse($DateString2, [ref]$date2)
-    
-    if ($parsed1 -and $parsed2) {
-        return $date1 -gt $date2
-    }
-    
-    return $false
-}
+# Main execution
+Write-OkyeremaLogHelper -Message "Starting stalled work search (threshold: $DaysStale days)" -Level "Info" -Operation "GetStalledWork" -CorrelationId $correlationId
 
-#endregion
-
-#region Main Logic
-
-Write-OkyeremaLogHelper -Level Info -Message "Starting stalled work detection (threshold: $StalledThresholdHours hours)" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-
-# Get repository context if Owner/Repo not provided
-if (-not $Owner -or -not $Repo) {
-    Write-OkyeremaLogHelper -Level Info -Message "Fetching repository context" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-    $context = Get-RepoContextHelper
+# Get repository context
+try {
+    Write-OkyeremaLogHelper -Message "Fetching repository context" -Level "Info" -Operation "GetStalledWork" -CorrelationId $correlationId
+    $repoContext = Get-RepoContextHelper
     
-    if ($context -and $context.RepoId) {
-        # Parse owner and repo from context
-        $repoViewResult = & gh repo view --json nameWithOwner | ConvertFrom-Json
-        if ($repoViewResult -and $repoViewResult.nameWithOwner) {
-            $parts = $repoViewResult.nameWithOwner.Split('/')
-            if ($parts.Length -eq 2) {
-                if (-not $Owner) { $Owner = $parts[0] }
-                if (-not $Repo) { $Repo = $parts[1] }
-            }
-        }
-    }
-    
-    if (-not $Owner -or -not $Repo) {
-        Write-OkyeremaLogHelper -Level Error -Message "Could not determine repository owner and name" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-        throw "Owner and Repo parameters are required, or must be run from a Git repository"
+    if (-not $repoContext.RepoId) {
+        Write-OkyeremaLogHelper -Message "Failed to get repository context" -Level "Error" -Operation "GetStalledWork" -CorrelationId $correlationId
+        throw "Could not retrieve repository context"
     }
 }
+catch {
+    Write-OkyeremaLogHelper -Message "Error getting repository context: $_" -Level "Error" -Operation "GetStalledWork" -CorrelationId $correlationId
+    throw
+}
 
-Write-OkyeremaLogHelper -Level Debug -Message "Using repository: $Owner/$Repo" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
+# Extract owner and repo from gh cli
+try {
+    $repoInfo = gh repo view --json nameWithOwner | ConvertFrom-Json
+    $parts = $repoInfo.nameWithOwner.Split('/')
+    $owner = $parts[0]
+    $repo = $parts[1]
+    Write-OkyeremaLogHelper -Message "Repository: $owner/$repo" -Level "Info" -Operation "GetStalledWork" -CorrelationId $correlationId
+}
+catch {
+    Write-OkyeremaLogHelper -Message "Error getting repository info: $_" -Level "Error" -Operation "GetStalledWork" -CorrelationId $correlationId
+    throw
+}
 
-$stalledItems = @()
+# Calculate cutoff date
+$cutoffDate = (Get-Date).AddDays(-$DaysStale).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+Write-OkyeremaLogHelper -Message "Cutoff date: $cutoffDate" -Level "Debug" -Operation "GetStalledWork" -CorrelationId $correlationId
 
-#region Detect Stalled PRs
-
-if ($IncludePRs) {
-    Write-OkyeremaLogHelper -Level Info -Message "Detecting stalled pull requests" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-    
-    # Build GraphQL query to fetch open/draft PRs with assignees
-    $prQuery = @"
+# Build GraphQL query to fetch open issues with update timestamps
+# Note: GitHub GraphQL API doesn't support date filtering directly,
+# so we fetch all open issues and filter client-side
+$query = @"
 query(`$owner: String!, `$repo: String!) {
   repository(owner: `$owner, name: `$repo) {
-    pullRequests(first: 100, states: [OPEN], orderBy: {field: UPDATED_AT, direction: ASC}) {
+    issues(first: 100, filterBy: { states: OPEN }, orderBy: { field: UPDATED_AT, direction: ASC }) {
       nodes {
+        id
         number
         title
-        isDraft
-        createdAt
+        url
+        state
         updatedAt
-        assignees(first: 10) {
-          nodes {
-            login
-          }
-        }
-        commits(last: 1) {
-          nodes {
-            commit {
-              committedDate
-            }
-          }
-        }
-        comments(last: 1) {
-          nodes {
-            createdAt
-          }
-        }
-        reviews(last: 1) {
-          nodes {
-            createdAt
-          }
-        }
-        timelineItems(last: 1, itemTypes: [ISSUE_COMMENT, PULL_REQUEST_COMMIT, PULL_REQUEST_REVIEW]) {
-          nodes {
-            ... on IssueComment {
-              createdAt
-              __typename
-            }
-            ... on PullRequestCommit {
-              commit {
-                committedDate
-              }
-              __typename
-            }
-            ... on PullRequestReview {
-              createdAt
-              __typename
-            }
-          }
+        createdAt
+        issueType {
+          id
+          name
         }
       }
     }
@@ -318,254 +178,73 @@ query(`$owner: String!, `$repo: String!) {
 }
 "@
 
-    $prVariables = @{
-        owner = $Owner
-        repo = $Repo
-    }
-    
-    $prResult = Invoke-GraphQLHelper -Query $prQuery -Variables $prVariables -CorrelationId $CorrelationId
-    
-    if (-not $prResult.Success) {
-        Write-OkyeremaLogHelper -Level Error -Message "Failed to fetch PRs: $($prResult.Errors[0].Message)" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-        throw "Failed to fetch PRs: $($prResult.Errors[0].Message)"
-    }
-    
-    $prs = $prResult.Data.repository.pullRequests.nodes
-    Write-OkyeremaLogHelper -Level Info -Message "Found $($prs.Count) open PRs" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-    
-    foreach ($pr in $prs) {
-        # Skip PRs without assignees
-        if ($pr.assignees.nodes.Count -eq 0) {
-            continue
-        }
-        
-        # Determine last activity date
-        $lastActivityDate = $pr.updatedAt
-        
-        # Check last commit date
-        # Note: GraphQL 'last: 1' returns the most recent commit, accessed as nodes[0]
-        if ($pr.commits.nodes.Count -gt 0 -and $pr.commits.nodes[0].commit.committedDate) {
-            $commitDate = $pr.commits.nodes[0].commit.committedDate
-            if (Test-IsDateNewer -DateString1 $commitDate -DateString2 $lastActivityDate) {
-                $lastActivityDate = $commitDate
-            }
-        }
-        
-        # Check last comment date
-        if ($pr.comments.nodes.Count -gt 0 -and $pr.comments.nodes[0].createdAt) {
-            $commentDate = $pr.comments.nodes[0].createdAt
-            if (Test-IsDateNewer -DateString1 $commentDate -DateString2 $lastActivityDate) {
-                $lastActivityDate = $commentDate
-            }
-        }
-        
-        # Check last review date
-        if ($pr.reviews.nodes.Count -gt 0 -and $pr.reviews.nodes[0].createdAt) {
-            $reviewDate = $pr.reviews.nodes[0].createdAt
-            if (Test-IsDateNewer -DateString1 $reviewDate -DateString2 $lastActivityDate) {
-                $lastActivityDate = $reviewDate
-            }
-        }
-        
-        # Check timeline items for most recent activity
-        if ($pr.timelineItems.nodes.Count -gt 0) {
-            foreach ($item in $pr.timelineItems.nodes) {
-                $itemDate = $null
-                if ($item.__typename -eq "PullRequestCommit" -and $item.commit.committedDate) {
-                    $itemDate = $item.commit.committedDate
-                }
-                elseif ($item.createdAt) {
-                    $itemDate = $item.createdAt
-                }
-                
-                if ($itemDate -and (Test-IsDateNewer -DateString1 $itemDate -DateString2 $lastActivityDate)) {
-                    $lastActivityDate = $itemDate
-                }
-            }
-        }
-        
-        # Calculate hours since last activity
-        $hoursSinceActivity = Get-HoursSince -DateTimeString $lastActivityDate
-        
-        # Check if stalled (no activity beyond threshold)
-        if ($hoursSinceActivity -ge $StalledThresholdHours) {
-            $status = if ($pr.isDraft) { "Draft" } else { "Open" }
-            
-            # Get assignee (just the first one for simplicity)
-            $assignee = if ($pr.assignees.nodes.Count -gt 0) {
-                $pr.assignees.nodes[0].login
-            } else {
-                "none"
-            }
-            
-            $stalledItems += [PSCustomObject]@{
-                Number = $pr.number
-                Title = $pr.title
-                Type = "PR"
-                Assignee = $assignee
-                LastActivityDate = $lastActivityDate
-                HoursSinceActivity = $hoursSinceActivity
-                Status = $status
-            }
-            
-            Write-OkyeremaLogHelper -Level Debug -Message "Found stalled PR #$($pr.number): $hoursSinceActivity hours since activity" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-        }
-    }
-    
-    Write-OkyeremaLogHelper -Level Info -Message "Found $($stalledItems.Count) stalled PRs" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
+$variables = @{
+    owner = $owner
+    repo = $repo
 }
 
-#endregion
+Write-OkyeremaLogHelper -Message "Querying for open issues" -Level "Info" -Operation "GetStalledWork" -CorrelationId $correlationId
 
-#region Detect Stalled Issues
+# Execute the query
+$result = Invoke-GraphQLHelper -Query $query -Variables $variables -DryRun:$DryRun -CorrelationId $correlationId
 
-if ($IncludeIssues) {
-    Write-OkyeremaLogHelper -Level Info -Message "Detecting stalled issues" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-    
-    # Build GraphQL query to fetch assigned, open issues
-    $issueQuery = @"
-query(`$owner: String!, `$repo: String!) {
-  repository(owner: `$owner, name: `$repo) {
-    issues(first: 100, states: OPEN, orderBy: {field: UPDATED_AT, direction: ASC}) {
-      nodes {
-        number
-        title
-        createdAt
-        updatedAt
-        assignees(first: 10) {
-          nodes {
-            login
-          }
-        }
-        comments(last: 1) {
-          nodes {
-            createdAt
-          }
-        }
-        timelineItems(first: 100, itemTypes: [CONNECTED_EVENT, DISCONNECTED_EVENT]) {
-          nodes {
-            ... on ConnectedEvent {
-              createdAt
-              subject {
-                ... on PullRequest {
-                  number
-                  state
-                  updatedAt
-                }
-              }
-              __typename
-            }
-            ... on DisconnectedEvent {
-              createdAt
-              __typename
-            }
-          }
-        }
-        labels(first: 50) {
-          nodes {
-            name
-          }
-        }
-      }
-    }
-  }
-}
-"@
-
-    $issueVariables = @{
-        owner = $Owner
-        repo = $Repo
-    }
-    
-    $issueResult = Invoke-GraphQLHelper -Query $issueQuery -Variables $issueVariables -CorrelationId $CorrelationId
-    
-    if (-not $issueResult.Success) {
-        Write-OkyeremaLogHelper -Level Error -Message "Failed to fetch issues: $($issueResult.Errors[0].Message)" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-        throw "Failed to fetch issues: $($issueResult.Errors[0].Message)"
-    }
-    
-    $issues = $issueResult.Data.repository.issues.nodes
-    Write-OkyeremaLogHelper -Level Info -Message "Found $($issues.Count) open issues" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-    
-    foreach ($issue in $issues) {
-        # Skip issues without assignees
-        if ($issue.assignees.nodes.Count -eq 0) {
-            continue
-        }
-        
-        # Check if issue has a linked, open PR
-        $hasOpenLinkedPR = $false
-        foreach ($timelineItem in $issue.timelineItems.nodes) {
-            if ($timelineItem.__typename -eq "ConnectedEvent" -and 
-                $timelineItem.subject -and 
-                $timelineItem.subject.state -eq "OPEN") {
-                $hasOpenLinkedPR = $true
-                break
-            }
-        }
-        
-        # Skip issues with open linked PRs (they're tracked via PR detection)
-        if ($hasOpenLinkedPR) {
-            continue
-        }
-        
-        # Determine last activity date
-        $lastActivityDate = $issue.updatedAt
-        
-        # Check last comment date
-        if ($issue.comments.nodes.Count -gt 0 -and $issue.comments.nodes[0].createdAt) {
-            $commentDate = $issue.comments.nodes[0].createdAt
-            if (Test-IsDateNewer -DateString1 $commentDate -DateString2 $lastActivityDate) {
-                $lastActivityDate = $commentDate
-            }
-        }
-        
-        # Calculate hours since last activity
-        $hoursSinceActivity = Get-HoursSince -DateTimeString $lastActivityDate
-        
-        # Check if stalled (no activity beyond threshold)
-        if ($hoursSinceActivity -ge $StalledThresholdHours) {
-            # Check for "In Progress" label or similar
-            $status = "Open"
-            foreach ($label in $issue.labels.nodes) {
-                if ($label.name -match "(?i)in[- ]?progress|working|started") {
-                    $status = "InProgress"
-                    break
-                }
-            }
-            
-            # Get assignee (just the first one for simplicity)
-            $assignee = if ($issue.assignees.nodes.Count -gt 0) {
-                $issue.assignees.nodes[0].login
-            } else {
-                "none"
-            }
-            
-            $stalledItems += [PSCustomObject]@{
-                Number = $issue.number
-                Title = $issue.title
-                Type = "Issue"
-                Assignee = $assignee
-                LastActivityDate = $lastActivityDate
-                HoursSinceActivity = $hoursSinceActivity
-                Status = $status
-            }
-            
-            Write-OkyeremaLogHelper -Level Debug -Message "Found stalled issue #$($issue.number): $hoursSinceActivity hours since activity" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-        }
-    }
-    
-    Write-OkyeremaLogHelper -Level Info -Message "Found $($stalledItems.Count) total stalled items" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
+if ($DryRun) {
+    Write-OkyeremaLogHelper -Message "DryRun mode - query not executed" -Level "Info" -Operation "GetStalledWork" -CorrelationId $correlationId
+    return $result
 }
 
-#endregion
+if (-not $result.Success) {
+    Write-OkyeremaLogHelper -Message "GraphQL query failed" -Level "Error" -Operation "GetStalledWork" -CorrelationId $correlationId
+    foreach ($error in $result.Errors) {
+        Write-OkyeremaLogHelper -Message "Error: $($error.Message)" -Level "Error" -Operation "GetStalledWork" -CorrelationId $correlationId
+    }
+    throw "Failed to query issues"
+}
 
-# Sort by hours since activity (most stalled first)
-$stalledItems = $stalledItems | Sort-Object -Property HoursSinceActivity -Descending
+$issues = $result.Data.repository.issues.nodes
+Write-OkyeremaLogHelper -Message "Found $($issues.Count) open issues" -Level "Info" -Operation "GetStalledWork" -CorrelationId $correlationId
 
-Write-OkyeremaLogHelper -Level Info -Message "Stalled work detection complete. Found $($stalledItems.Count) stalled items." -Operation "Get-StalledWork" -CorrelationId $CorrelationId
+# Filter to stalled issues (updated before cutoff date)
+$cutoffDateTime = [DateTime]::Parse($cutoffDate)
+$stalledIssues = @($issues | Where-Object {
+    $updatedAt = [DateTime]::Parse($_.updatedAt)
+    $updatedAt -lt $cutoffDateTime
+})
 
-# Return structured output
-return $stalledItems
+Write-OkyeremaLogHelper -Message "Found $($stalledIssues.Count) stalled issues (> $DaysStale days)" -Level "Info" -Operation "GetStalledWork" -CorrelationId $correlationId
 
-#endregion
+# Build output with calculated days since update
+$output = @()
+$now = Get-Date
+foreach ($issue in $stalledIssues) {
+    $updatedAt = [DateTime]::Parse($issue.updatedAt)
+    $daysSinceUpdate = [math]::Floor(($now - $updatedAt).TotalDays)
+    
+    $output += [PSCustomObject]@{
+        Number = $issue.number
+        Title = $issue.title
+        IssueType = if ($issue.issueType) { $issue.issueType.name } else { "Unknown" }
+        State = $issue.state
+        Url = $issue.url
+        UpdatedAt = $issue.updatedAt
+        DaysSinceUpdate = $daysSinceUpdate
+        CreatedAt = $issue.createdAt
+    }
+}
+
+# Sort by days since update (most stale first)
+$output = $output | Sort-Object -Property DaysSinceUpdate -Descending
+
+if ($output.Count -eq 0) {
+    Write-Host "`nNo stalled issues found! 🎉" -ForegroundColor Green
+}
+else {
+    Write-Host "`nFound $($output.Count) stalled issue(s):" -ForegroundColor Yellow
+    foreach ($item in $output) {
+        Write-Host "  #$($item.Number): $($item.Title) [$($item.IssueType)] - $($item.DaysSinceUpdate) days stale" -ForegroundColor Gray
+    }
+}
+
+Write-OkyeremaLogHelper -Message "Stalled work search completed" -Level "Info" -Operation "GetStalledWork" -CorrelationId $correlationId
+
+return $output
