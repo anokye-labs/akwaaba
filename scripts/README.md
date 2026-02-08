@@ -186,6 +186,40 @@ if ($result.Success) {
 }
 ```
 
+### Add-IssuesToProject.ps1
+
+Bulk-add issues to a GitHub Project V2 and optionally set field values.
+
+**Features:**
+- Accepts issue numbers as array or pipeline input
+- Automatically resolves project and issue IDs
+- Sets custom field values (Status, Priority, etc.)
+- Rate limiting between mutations to respect API limits
+- Structured logging with correlation IDs
+
+**Dependencies:**
+- Invoke-GraphQL.ps1
+- Get-RepoContext.ps1
+- Write-OkyeremaLog.ps1
+
+**Usage:**
+
+```powershell
+# Basic usage
+./scripts/Add-IssuesToProject.ps1 -IssueNumbers 101,102,103 -ProjectNumber 3
+
+# With field values
+./scripts/Add-IssuesToProject.ps1 -IssueNumbers 101,102 -ProjectNumber 3 `
+    -FieldValues @{ Status = "In Progress"; Priority = "High" }
+
+# Pipeline input
+101, 102, 103 | ./scripts/Add-IssuesToProject.ps1 -ProjectNumber 3
+
+# Explicit owner/repo
+./scripts/Add-IssuesToProject.ps1 -IssueNumbers 101 -ProjectNumber 3 `
+    -Owner "anokye-labs" -Repo "akwaaba"
+```
+
 ## Best Practices
 
 1. **Always use Invoke-GraphQL.ps1** instead of calling `gh api graphql` directly
