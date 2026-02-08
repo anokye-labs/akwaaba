@@ -31,7 +31,7 @@ When you need to use a skill (e.g., "use the okyerema skill"):
 
 Scripts in `.github/skills/<skill>/scripts/` are PowerShell helpers that:
 - Provide reusable implementations of common operations
-- Can be called directly by agents using `pwsh` or PowerShell
+- Can be called directly by agents using the `pwsh` command
 - Are documented within the skill's SKILL.md file
 
 When a script exists for an operation, **use it** instead of reimplementing the logic.
