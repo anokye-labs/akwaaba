@@ -2,6 +2,40 @@
 
 AI agents working in Anokye Labs repositories should use the **Okyerema** skill for all project management operations.
 
+## What is a Skill?
+
+**A skill is documentation, not a tool.**
+
+Skills in `.github/skills/` provide **context and guidance** that agents should read and follow. They are NOT tools that get invoked or called.
+
+### Anatomy of a Skill
+
+A skill consists of:
+
+1. **SKILL.md** — The core documentation with principles, patterns, and examples
+2. **references/** — Detailed guides for specific operations (loaded when needed)
+3. **scripts/** — Helper PowerShell scripts that agents can call
+
+### How to Use a Skill
+
+When you need to use a skill (e.g., "use the okyerema skill"):
+
+1. **Read** the SKILL.md file
+2. **Follow** its principles and patterns
+3. **Reference** the guides in `references/` for detailed workflows
+4. **Call** the scripts in `scripts/` when you need to perform operations
+
+**Do NOT** try to "invoke" a skill as if it were a function or tool. The skill IS the documentation — read it, understand it, apply it.
+
+### Helper Scripts
+
+Scripts in `.github/skills/<skill>/scripts/` are PowerShell helpers that:
+- Provide reusable implementations of common operations
+- Can be called directly by agents using the `pwsh` command
+- Are documented within the skill's SKILL.md file
+
+When a script exists for an operation, **use it** instead of reimplementing the logic.
+
 ## The Okyerema Skill
 
 **Location:** [.github/skills/okyerema/SKILL.md](.github/skills/okyerema/SKILL.md)
