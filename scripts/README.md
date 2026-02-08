@@ -24,6 +24,40 @@ A utility function that safely escapes text for use in GraphQL string literals. 
 "Hello `"World`"" | ConvertTo-EscapedGraphQL
 ```
 
+### Get-PRsByIssue.ps1
+
+Find all PRs linked to specific issue(s).
+
+**Features:**
+- Searches for PRs by issue reference in body/title (e.g., "fixes #123")
+- Checks branch naming convention (issue-{number}-*)
+- Returns PR numbers, states, and review status
+- Supports multiple output formats: Console (colored), Markdown (table), JSON
+- DryRun mode for testing queries
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Invoke-GraphQL.ps1
+- Get-RepoContext.ps1
+- Write-OkyeremaLog.ps1
+
+**Usage:**
+
+```powershell
+# Find PRs for a single issue
+./scripts/Get-PRsByIssue.ps1 -IssueNumbers 14
+
+# Find PRs for multiple issues with Markdown output
+./scripts/Get-PRsByIssue.ps1 -IssueNumbers 14,15,17 -OutputFormat Markdown
+
+# JSON output for automation
+./scripts/Get-PRsByIssue.ps1 -IssueNumbers 14 -OutputFormat Json
+
+# DryRun mode to see queries
+./scripts/Get-PRsByIssue.ps1 -IssueNumbers 14 -DryRun
+```
+
 ### Get-RepoContext.ps1
 
 Fetches repository context (repo ID, issue types, project IDs, and label IDs) in one query.
