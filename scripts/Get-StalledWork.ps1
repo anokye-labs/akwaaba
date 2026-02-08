@@ -70,7 +70,7 @@ param(
     [string]$Repo,
 
     [Parameter(Mandatory = $false)]
-    [ValidateRange(1, [int]::MaxValue)]
+    [ValidateRange(1, 8760)] # Maximum 1 year (365 days)
     [int]$StalledThresholdHours = 24,
 
     [Parameter(Mandatory = $false)]
@@ -193,8 +193,10 @@ function Get-HoursSince {
         return [math]::Round($timeSpan.TotalHours, 2)
     }
     else {
-        Write-OkyeremaLogHelper -Level Warn -Message "Failed to parse datetime: $DateTimeString" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
-        return 0
+        Write-OkyeremaLogHelper -Level Warn -Message "Failed to parse datetime: $DateTimeString, returning very high value to indicate error" -Operation "Get-StalledWork" -CorrelationId $CorrelationId
+        # Return a very high value (1 year) to indicate parsing failure
+        # This prevents failed parsing from making items appear as "not stalled"
+        return 8760
     }
 }
 
@@ -341,6 +343,7 @@ query(`$owner: String!, `$repo: String!) {
         $lastActivityDate = $pr.updatedAt
         
         # Check last commit date
+        # Note: GraphQL 'last: 1' returns the most recent commit, accessed as nodes[0]
         if ($pr.commits.nodes.Count -gt 0 -and $pr.commits.nodes[0].commit.committedDate) {
             $commitDate = $pr.commits.nodes[0].commit.committedDate
             if (Test-IsDateNewer -DateString1 $commitDate -DateString2 $lastActivityDate) {
