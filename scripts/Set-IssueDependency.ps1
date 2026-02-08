@@ -202,11 +202,11 @@ function Get-ExistingDependencies {
     }
     
     # Look for Dependencies section
-    if ($Body -match '(?ms)^## Dependencies\s*$(.*?)(?=^##|\z)') {
+    if ($Body -match '(?ms)^## Dependencies\s*\n(.*?)(?=\n##|\z)') {
         $depsSection = $Matches[1]
         
         # Parse Blocked by items
-        if ($depsSection -match '(?ms)Blocked by:\s*$(.*?)(?=^Blocks:|^$|\z)') {
+        if ($depsSection -match '(?ms)Blocked by:\s*\n(.*?)(?=\n+Blocks:|\z)') {
             $blockedByText = $Matches[1]
             $blockedByMatches = [regex]::Matches($blockedByText, '- \[ \] ([^\s]+)')
             foreach ($match in $blockedByMatches) {
@@ -215,7 +215,7 @@ function Get-ExistingDependencies {
         }
         
         # Parse Blocks items
-        if ($depsSection -match '(?ms)Blocks:\s*$(.*?)(?=^Wave:|\*\*Wave:|\z)') {
+        if ($depsSection -match '(?ms)Blocks:\s*\n(.*?)(?=\n+\*\*Wave:|\z)') {
             $blocksText = $Matches[1]
             $blocksMatches = [regex]::Matches($blocksText, '- \[ \] ([^\s]+)')
             foreach ($match in $blocksMatches) {
@@ -241,10 +241,10 @@ function Remove-DependenciesSection {
     }
     
     # Remove everything from ## Dependencies to next ## or end of text
-    $cleaned = $Body -replace '(?ms)^## Dependencies\s*$.*?(?=^##|\z)', ''
+    $cleaned = $Body -replace '(?ms)^## Dependencies\s*\n.*?(?=\n##|\z)', ''
     
-    # Clean up excessive newlines
-    $cleaned = $cleaned -replace '(?m)^\s*$\n', "`n"
+    # Clean up excessive newlines (consolidate multiple newlines into double newlines)
+    $cleaned = $cleaned -replace '\n\s*\n\s*\n+', "`n`n"
     $cleaned = $cleaned.TrimEnd()
     
     return $cleaned
