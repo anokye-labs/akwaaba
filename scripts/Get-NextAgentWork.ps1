@@ -240,7 +240,17 @@ if ($AgentCapabilityTags.Count -gt 0) {
     }
 }
 
-# Parse owner and repo from environment
+# Get repository context to extract owner and repo
+# Using Get-RepoContext.ps1 for consistency with other scripts
+$contextScript = Join-Path $PSScriptRoot "Get-RepoContext.ps1"
+$repoContext = & $contextScript
+
+if (-not $repoContext -or -not $repoContext.RepoId) {
+    Write-Log "Failed to fetch repository context" -Level "Error"
+    throw "Failed to fetch repository context"
+}
+
+# Parse owner and repo from gh CLI as fallback for owner/repo strings
 $repoInfo = gh repo view --json nameWithOwner | ConvertFrom-Json
 $parts = $repoInfo.nameWithOwner -split '/'
 $owner = $parts[0]
@@ -265,7 +275,15 @@ $fragmentIndex = 0
 foreach ($issue in $readyIssues) {
     $alias = "issue$fragmentIndex"
     $fragmentAliases[$issue.Number] = $alias
-    $queryFragments += "  ${alias}: issue(number: $($issue.Number)) { number createdAt body }"
+    # Each fragment fetches the issue's metadata
+    $fragment = @"
+    ${alias}: issue(number: $($issue.Number)) {
+      number
+      createdAt
+      body
+    }
+"@
+    $queryFragments += $fragment
     $fragmentIndex++
 }
 
