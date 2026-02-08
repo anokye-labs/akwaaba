@@ -48,6 +48,53 @@ Write-Host "Repository ID: $($context.RepoId)"
 $context = ./scripts/Get-RepoContext.ps1 -Refresh
 ```
 
+### Get-ReadyIssues.ps1
+
+Finds issues that are ready to work on - all dependencies met, not assigned.
+
+**Features:**
+- Walks the DAG (Directed Acyclic Graph) from a root Epic
+- Filters to leaf tasks where parent is open and no blocking issues are open
+- Optionally filters by label, type, or assignee
+- Returns sorted list suitable for agent consumption
+- Supports multiple sort orders (priority, number, title)
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Requires: `Invoke-GraphQL.ps1`, `Get-RepoContext.ps1`, `Write-OkyeremaLog.ps1`
+
+**Usage:**
+
+```powershell
+# Find all ready issues under Epic #14
+$readyIssues = ./scripts/Get-ReadyIssues.ps1 -RootIssue 14
+
+# Find ready issues with specific labels
+$readyIssues = ./scripts/Get-ReadyIssues.ps1 -RootIssue 14 -Labels @("priority:high", "backend")
+
+# Find unassigned Task issues
+$readyIssues = ./scripts/Get-ReadyIssues.ps1 -RootIssue 14 -IssueType "Task" -Assignee "none"
+
+# Include assigned issues in results
+$readyIssues = ./scripts/Get-ReadyIssues.ps1 -RootIssue 14 -IncludeAssigned
+
+# Sort by number instead of priority
+$readyIssues = ./scripts/Get-ReadyIssues.ps1 -RootIssue 14 -SortBy "number"
+```
+
+**Output:**
+
+Returns an array of PSCustomObject with properties:
+- `Number`: Issue number
+- `Title`: Issue title
+- `Type`: Issue type name
+- `State`: Issue state (OPEN/CLOSED)
+- `Url`: Issue URL
+- `Labels`: Array of label names
+- `Assignees`: Array of assignee logins
+- `Depth`: Depth in the hierarchy (0 = root)
+
 ### Invoke-GraphQL.ps1
 
 Centralized GraphQL executor with retry logic, rate-limit handling, and structured error output.
