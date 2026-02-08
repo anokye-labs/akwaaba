@@ -256,20 +256,23 @@ function Get-EpicStatistics {
 function Get-BurndownData {
     param([object]$Root)
     
-    # Use ArrayList for better performance with large hierarchies
+    # Use List[object] for better performance with large hierarchies
     $allIssues = [System.Collections.Generic.List[object]]::new()
     
     function Collect-Issues {
-        param([object]$Issue)
+        param(
+            [object]$Issue,
+            [System.Collections.Generic.List[object]]$Collection
+        )
         
-        $allIssues.Add($Issue)
+        $Collection.Add($Issue)
         
         foreach ($child in $Issue.Children) {
-            Collect-Issues -Issue $child
+            Collect-Issues -Issue $child -Collection $Collection
         }
     }
     
-    Collect-Issues -Issue $Root
+    Collect-Issues -Issue $Root -Collection $allIssues
     
     # Filter closed issues and group by date
     $closedIssues = $allIssues | Where-Object { $_.State -eq "CLOSED" -and $_.ClosedAt }
