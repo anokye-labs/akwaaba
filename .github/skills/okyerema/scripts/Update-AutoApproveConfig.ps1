@@ -26,7 +26,8 @@
     The display name for the rule (required for Add, optional for Update).
 
 .PARAMETER RuleEnabled
-    Whether the rule is enabled (optional for Add/Update, defaults to $true).
+    Whether the rule is enabled (optional for Add/Update). For Add operation, defaults to $true if not specified.
+    For Update operation, only updates if explicitly provided.
 
 .PARAMETER RuleDescription
     Description of what the rule does (optional for Add/Update).
@@ -114,7 +115,7 @@ param(
     [string]$RuleName,
 
     [Parameter(Mandatory = $false)]
-    [bool]$RuleEnabled,
+    [Nullable[bool]]$RuleEnabled,
 
     [Parameter(Mandatory = $false)]
     [string]$RuleDescription,
@@ -212,7 +213,7 @@ function Test-ConfigSchema {
     if (-not $Config.PSObject.Properties['rules']) {
         $errors += "Missing required field: rules"
     }
-    elseif (-not ($Config.rules -is [System.Array] -or $Config.rules -is [System.Collections.IList] -or $null -ne $Config.rules.Count)) {
+    elseif (-not ($Config.rules -is [System.Collections.IEnumerable] -and $Config.rules -isnot [string])) {
         $errors += "Field 'rules' must be an array"
     }
     

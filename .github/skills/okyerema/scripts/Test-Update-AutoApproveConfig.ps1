@@ -133,7 +133,7 @@ $scriptContent = Get-Content $scriptPath -Raw
 Test-Assert -TestName "Script has Operation parameter" -Condition ($scriptContent -match '\[Parameter.*\]\s*\[ValidateSet.*List.*Add.*Remove.*Update.*Get.*\]\s*\[string\]\$Operation')
 Test-Assert -TestName "Script has RuleId parameter" -Condition ($scriptContent -match '\[Parameter.*\]\s*\[string\]\$RuleId')
 Test-Assert -TestName "Script has RuleName parameter" -Condition ($scriptContent -match '\[Parameter.*\]\s*\[string\]\$RuleName')
-Test-Assert -TestName "Script has RuleEnabled parameter" -Condition ($scriptContent -match '\[Parameter.*\]\s*\[bool\]\$RuleEnabled')
+Test-Assert -TestName "Script has RuleEnabled parameter" -Condition ($scriptContent -match '\[Parameter.*\]\s*\[Nullable\[bool\]\]\$RuleEnabled')
 Test-Assert -TestName "Script has RuleDescription parameter" -Condition ($scriptContent -match '\[Parameter.*\]\s*\[string\]\$RuleDescription')
 Test-Assert -TestName "Script has RuleConditions parameter" -Condition ($scriptContent -match '\[Parameter.*\]\s*\[object\]\$RuleConditions')
 Test-Assert -TestName "Script has RuleChecks parameter" -Condition ($scriptContent -match '\[Parameter.*\]\s*\[object\]\$RuleChecks')
