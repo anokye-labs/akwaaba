@@ -76,6 +76,9 @@ param(
     [string]$CorrelationId
 )
 
+# Set strict error handling for PowerShell 7+ conventions
+$ErrorActionPreference = "Stop"
+
 # Generate correlation ID if not provided
 if (-not $CorrelationId) {
     $CorrelationId = [guid]::NewGuid().ToString()
@@ -154,8 +157,31 @@ function ConvertTo-StructuredError {
     # Try to parse JSON error if present (use non-greedy quantifiers)
     if ($ErrorMessage -match '\{.*?"errors".*?\}') {
         try {
-            $jsonMatch = [regex]::Match($ErrorMessage, '\{.*\}').Value
-            $errorObj = $jsonMatch | ConvertFrom-Json
+            # Extract first complete JSON object by counting balanced braces
+            $jsonStart = $ErrorMessage.IndexOf('{')
+            if ($jsonStart -ge 0) {
+                $braceCount = 0
+                $jsonEnd = -1
+                for ($i = $jsonStart; $i -lt $ErrorMessage.Length; $i++) {
+                    if ($ErrorMessage[$i] -eq '{') { $braceCount++ }
+                    elseif ($ErrorMessage[$i] -eq '}') { 
+                        $braceCount--
+                        if ($braceCount -eq 0) {
+                            $jsonEnd = $i
+                            break
+                        }
+                    }
+                }
+                
+                if ($jsonEnd -gt $jsonStart) {
+                    $jsonMatch = $ErrorMessage.Substring($jsonStart, $jsonEnd - $jsonStart + 1)
+                    $errorObj = $jsonMatch | ConvertFrom-Json
+                } else {
+                    throw "Could not find complete JSON object"
+                }
+            } else {
+                throw "No JSON object found"
+            }
             
             if ($errorObj.errors) {
                 return $errorObj.errors | ForEach-Object {
@@ -209,6 +235,11 @@ while ($attempt -lt ($MaxRetries + 1)) {
             # Handle different value types
             if ($varValue -is [int] -or $varValue -is [bool]) {
                 $ghArgs += @('-F', "$($var.Key)=$varValue")
+            }
+            elseif ($varValue -is [array]) {
+                # Convert arrays to JSON format for GraphQL
+                $jsonValue = $varValue | ConvertTo-Json -Compress
+                $ghArgs += @('-f', "$($var.Key)=$jsonValue")
             }
             else {
                 $ghArgs += @('-f', "$($var.Key)=$varValue")
