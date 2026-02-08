@@ -138,6 +138,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Capture script root at script level for use in functions
+$script:ScriptRoot = $PSScriptRoot
+
 #region Helper Functions
 
 function Get-ConfigFilePath {
@@ -146,10 +149,19 @@ function Get-ConfigFilePath {
     }
     
     # Try to find repository root
-    $repoRoot = git rev-parse --show-toplevel 2>$null
-    if (-not $repoRoot) {
+    try {
+        $repoRoot = git rev-parse --show-toplevel 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            throw "Not in a git repository"
+        }
+    }
+    catch {
         # Fallback: assume script is in .github/skills/okyerema/scripts
-        $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+        # Use script-level PSScriptRoot captured at script start
+        $scriptDir = $script:ScriptRoot
+        if (-not $scriptDir) {
+            throw "Unable to determine script location or repository root. Please specify -ConfigPath parameter."
+        }
         $repoRoot = Resolve-Path "$scriptDir/../../../.."
     }
     
@@ -200,7 +212,7 @@ function Test-ConfigSchema {
     if (-not $Config.PSObject.Properties['rules']) {
         $errors += "Missing required field: rules"
     }
-    elseif ($Config.rules -isnot [Array]) {
+    elseif (-not ($Config.rules -is [System.Array] -or $Config.rules -is [System.Collections.IList] -or $null -ne $Config.rules.Count)) {
         $errors += "Field 'rules' must be an array"
     }
     
