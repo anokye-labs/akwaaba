@@ -179,7 +179,7 @@ query {
         CreatedAt = $issue.createdAt
         ClosedAt = $issue.closedAt
         Level = $Level
-        Children = @()
+        Children = [System.Collections.Generic.List[object]]::new()
         TotalCount = $issue.trackedIssues.totalCount
         ClosedCount = 0
         OpenCount = 0
@@ -190,7 +190,7 @@ query {
         foreach ($child in $issue.trackedIssues.nodes) {
             $childObj = Get-IssueHierarchy -Owner $Owner -Repo $Repo -Number $child.number -Level ($Level + 1) -Visited $Visited
             if ($childObj) {
-                $issueObj.Children += $childObj
+                $issueObj.Children.Add($childObj) | Out-Null
                 
                 # Update counts
                 if ($child.state -eq "CLOSED") {
@@ -213,7 +213,7 @@ function Get-EpicStatistics {
         Epic = $Epic.Title
         EpicNumber = $Epic.Number
         EpicState = $Epic.State
-        Features = @()
+        Features = [System.Collections.Generic.List[object]]::new()
         TotalTasks = 0
         CompletedTasks = 0
         TotalFeatures = 0
@@ -234,7 +234,7 @@ function Get-EpicStatistics {
             $featureStats.Progress = [math]::Round(($feature.ClosedCount / $feature.TotalCount) * 100, 2)
         }
         
-        $stats.Features += $featureStats
+        $stats.Features.Add($featureStats) | Out-Null
         $stats.TotalTasks += $feature.TotalCount
         $stats.CompletedTasks += $feature.ClosedCount
         $stats.TotalFeatures++
@@ -484,16 +484,16 @@ Write-OkyeremaLogHelper -Message "Issue hierarchy fetched successfully" -Level "
 
 # Calculate statistics for each Epic (child of root)
 Write-OkyeremaLogHelper -Message "Calculating statistics" -Level "Debug"
-$epicStats = @()
+$epicStats = [System.Collections.Generic.List[object]]::new()
 
 if ($rootIssue.Type -eq "Epic") {
     # If root is an Epic, treat it as a single phase
-    $epicStats += Get-EpicStatistics -Epic $rootIssue
+    $epicStats.Add((Get-EpicStatistics -Epic $rootIssue)) | Out-Null
 } else {
     # If root has Epic children, process each Epic
     foreach ($epic in $rootIssue.Children) {
         if ($epic.Type -eq "Epic" -or $epic.Children.Count -gt 0) {
-            $epicStats += Get-EpicStatistics -Epic $epic
+            $epicStats.Add((Get-EpicStatistics -Epic $epic)) | Out-Null
         }
     }
 }
