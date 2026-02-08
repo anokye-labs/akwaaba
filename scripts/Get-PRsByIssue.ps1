@@ -203,7 +203,7 @@ query(`$searchQuery: String!) {
                         Number = $pr.number
                         Title = $pr.title
                         State = $pr.state
-                        IsMerged = ($pr.mergedAt -ne $null)
+                        IsMerged = ($null -ne $pr.mergedAt)
                         ReviewDecision = $pr.reviewDecision
                         ReviewCount = $pr.reviews.totalCount
                         HeadBranch = $pr.headRefName
@@ -285,7 +285,7 @@ query(`$owner: String!, `$repo: String!, `$branchPattern: String!) {
                         Number = $pr.number
                         Title = $pr.title
                         State = $pr.state
-                        IsMerged = ($pr.mergedAt -ne $null)
+                        IsMerged = ($null -ne $pr.mergedAt)
                         ReviewDecision = $pr.reviewDecision
                         ReviewCount = $pr.reviews.totalCount
                         HeadBranch = $pr.headRefName
