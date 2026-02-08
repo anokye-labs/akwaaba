@@ -24,6 +24,53 @@ A utility function that safely escapes text for use in GraphQL string literals. 
 "Hello `"World`"" | ConvertTo-EscapedGraphQL
 ```
 
+### Get-PRStatus.ps1
+
+Comprehensive PR status check with merge, review, issues, threads, and time metrics.
+
+**Features:**
+- Merge status (mergeable, conflicts, CI checks passing)
+- Review status (approved, changes requested, pending)
+- Linked issues and their states
+- Comment thread summary (resolved vs unresolved)
+- Time-in-state metrics (time in draft, time since created, time since last update)
+- Multiple output formats (Console, Markdown, Json)
+- DryRun mode for query validation
+- Automatic repository detection from current context
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Invoke-GraphQL.ps1
+- Get-RepoContext.ps1
+- Write-OkyeremaLog.ps1
+
+**Usage:**
+
+```powershell
+# Check status of PR #42 with console output
+./scripts/Get-PRStatus.ps1 -PRNumber 42
+
+# Generate markdown report
+./scripts/Get-PRStatus.ps1 -PRNumber 42 -OutputFormat Markdown
+
+# Get JSON output for scripting
+./scripts/Get-PRStatus.ps1 -PRNumber 42 -OutputFormat Json | ConvertFrom-Json
+
+# Specify repository explicitly
+./scripts/Get-PRStatus.ps1 -PRNumber 42 -Owner anokye-labs -Repo akwaaba
+
+# Test query without execution
+./scripts/Get-PRStatus.ps1 -PRNumber 42 -DryRun
+```
+
+**Output Sections:**
+- **Merge Status**: State, mergeable, CI checks with individual check details
+- **Review Status**: Decision, approval counts, pending reviewers
+- **Linked Issues**: Issues that will be closed by the PR
+- **Comment Threads**: Total, resolved, unresolved, and outdated counts
+- **Time Metrics**: Age, time since update, time in draft vs ready
+
 ### Get-RepoContext.ps1
 
 Fetches repository context (repo ID, issue types, project IDs, and label IDs) in one query.
