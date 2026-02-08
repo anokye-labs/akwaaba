@@ -1,0 +1,133 @@
+{
+  "nodes": [
+    {
+      "id": "epic-migration",
+      "title": "Database Migration to PostgreSQL",
+      "type": "Epic",
+      "body": "Migrate legacy MySQL database to PostgreSQL 14.\n\nThis is a critical infrastructure upgrade that will improve performance and enable advanced features.\n\n## Goals\n- Zero downtime migration\n- Data integrity validation\n- Performance benchmarking"
+    },
+    {
+      "id": "feature-schema",
+      "title": "Schema Migration",
+      "type": "Feature",
+      "body": "Convert MySQL schema to PostgreSQL format"
+    },
+    {
+      "id": "feature-data",
+      "title": "Data Migration Pipeline",
+      "type": "Feature",
+      "body": "Build and test data migration pipeline"
+    },
+    {
+      "id": "feature-validation",
+      "title": "Validation Framework",
+      "type": "Feature",
+      "body": "Create automated validation and comparison tools"
+    },
+    {
+      "id": "task-analyze",
+      "title": "Analyze existing MySQL schema",
+      "type": "Task",
+      "body": "Document all tables, indexes, constraints, and relationships"
+    },
+    {
+      "id": "task-convert",
+      "title": "Convert schema to PostgreSQL",
+      "type": "Task",
+      "body": "Handle data type differences, stored procedures, and triggers"
+    },
+    {
+      "id": "task-test-schema",
+      "title": "Test schema in staging",
+      "type": "Task",
+      "body": "Validate schema against test dataset"
+    },
+    {
+      "id": "task-pipeline",
+      "title": "Build data export pipeline",
+      "type": "Task",
+      "body": "Create efficient data extraction from MySQL"
+    },
+    {
+      "id": "task-transform",
+      "title": "Implement data transformations",
+      "type": "Task",
+      "body": "Handle encoding, null values, and data type conversions"
+    },
+    {
+      "id": "task-import",
+      "title": "Build PostgreSQL import process",
+      "type": "Task",
+      "body": "Optimize bulk import with COPY and parallel loading"
+    },
+    {
+      "id": "task-checksum",
+      "title": "Implement checksum validation",
+      "type": "Task",
+      "body": "Compare row counts and data checksums between databases"
+    },
+    {
+      "id": "task-compare",
+      "title": "Build query comparison tool",
+      "type": "Task",
+      "body": "Run identical queries on both databases and compare results"
+    }
+  ],
+  "edges": [
+    {
+      "from": "epic-migration",
+      "to": "feature-schema",
+      "relationship": "tracks"
+    },
+    {
+      "from": "epic-migration",
+      "to": "feature-data",
+      "relationship": "tracks"
+    },
+    {
+      "from": "epic-migration",
+      "to": "feature-validation",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-schema",
+      "to": "task-analyze",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-schema",
+      "to": "task-convert",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-schema",
+      "to": "task-test-schema",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-data",
+      "to": "task-pipeline",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-data",
+      "to": "task-transform",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-data",
+      "to": "task-import",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-validation",
+      "to": "task-checksum",
+      "relationship": "tracks"
+    },
+    {
+      "from": "feature-validation",
+      "to": "task-compare",
+      "relationship": "tracks"
+    }
+  ]
+}
