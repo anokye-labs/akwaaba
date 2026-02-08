@@ -20,10 +20,10 @@
     Optional correlation ID for tracing related operations.
 
 .PARAMETER Quiet
-    If specified, suppresses console output. The JSON is still written to stderr.
+    If specified, suppresses all log output. No JSON will be written to stderr.
 
 .OUTPUTS
-    Writes structured JSON to stderr. Format:
+    Writes structured JSON to stderr (unless -Quiet is specified). Format:
     {"timestamp":"2026-02-08T22:15:23.505Z","level":"Info","message":"...","operation":"...","correlationId":"..."}
 
 .EXAMPLE
@@ -36,8 +36,9 @@
     Write-OkyeremaLog -Message "Failed to create issue" -Level Error -Operation "CreateIssue" -Quiet
 
 .NOTES
-    Logs are written exclusively to stderr. Stdout remains clean for pipeline data.
-    Use -Quiet to suppress console output while still logging to stderr.
+    Logs are written exclusively to stderr (unless -Quiet is specified). 
+    Stdout remains clean for pipeline data.
+    Use -Quiet to completely suppress log output for specific operations.
 #>
 
 [CmdletBinding()]
