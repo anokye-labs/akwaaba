@@ -131,12 +131,17 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Constants
+$BODY_PREVIEW_LENGTH = 100
+
 # Generate correlation ID for this operation
 $correlationId = [guid]::NewGuid().ToString()
 
 # Determine script directory for accessing dependent scripts
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 # From .github/skills/okyerema/scripts, navigate to repo root
+# NOTE: This assumes the script is always in .github/skills/okyerema/scripts
+# If the script location changes, update the path calculation accordingly
 $repoRoot = Resolve-Path (Join-Path $scriptDir '..\..\..\..')
 $rootScriptsDir = Join-Path $repoRoot "scripts"
 
@@ -377,8 +382,8 @@ if (-not $DryRun) {
     Write-Host "`n✓ Review submitted: $($review.url)" -ForegroundColor Green
     Write-Host "  State: $($review.state)" -ForegroundColor Cyan
     if ($review.body) {
-        $bodyPreview = if ($review.body.Length -gt 100) {
-            $review.body.Substring(0, 100) + "..."
+        $bodyPreview = if ($review.body.Length -gt $BODY_PREVIEW_LENGTH) {
+            $review.body.Substring(0, $BODY_PREVIEW_LENGTH) + "..."
         } else {
             $review.body
         }
