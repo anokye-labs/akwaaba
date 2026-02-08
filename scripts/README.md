@@ -186,6 +186,66 @@ if ($result.Success) {
 }
 ```
 
+### Add-IssuesToProject.ps1
+
+Bulk-add issues to a GitHub Project V2 and optionally set field values.
+
+**Features:**
+- Accepts issue numbers as array or pipeline input
+- Automatically resolves project and issue IDs
+- Sets custom field values (Status, Priority, etc.)
+- Rate limiting between mutations to respect API limits
+- Structured logging with correlation IDs
+
+**Dependencies:**
+- Invoke-GraphQL.ps1
+- Get-RepoContext.ps1
+- Write-OkyeremaLog.ps1
+
+**Usage:**
+
+```powershell
+# Basic usage
+./scripts/Add-IssuesToProject.ps1 -IssueNumbers 101,102,103 -ProjectNumber 3
+
+# With field values
+./scripts/Add-IssuesToProject.ps1 -IssueNumbers 101,102 -ProjectNumber 3 `
+    -FieldValues @{ Status = "In Progress"; Priority = "High" }
+
+# Pipeline input
+101, 102, 103 | ./scripts/Add-IssuesToProject.ps1 -ProjectNumber 3
+
+# Explicit owner/repo
+./scripts/Add-IssuesToProject.ps1 -IssueNumbers 101 -ProjectNumber 3 `
+    -Owner "anokye-labs" -Repo "akwaaba"
+```
+
+### Set-IssueDependency.ps1
+
+Express blocking/dependency relationships between GitHub issues through body-text convention.
+
+**Features:**
+- Updates issue body with Dependencies section
+- Cross-references both directions (blocks/blocked-by)
+- Supports Wave indicators for work start timing
+- DryRun mode for testing changes
+- Automatic title fetching for referenced issues
+
+**Usage:**
+
+```powershell
+# Set issue #20 to depend on issues #14, #16, and #17
+./Set-IssueDependency.ps1 -IssueNumber 20 -DependsOn @(14, 16, 17) -Wave 1
+
+# Set issue #14 to block issue #20
+./Set-IssueDependency.ps1 -IssueNumber 14 -Blocks @(20)
+
+# Test changes without executing
+./Set-IssueDependency.ps1 -IssueNumber 20 -DependsOn @(14, 16, 17) -DryRun
+```
+
+**Note:** GitHub has no native dependency tracking, so this uses body-text convention.
+
 ### New-IssueBatch.ps1
 
 Create multiple GitHub issues from a JSON or CSV input file with type support and relationship wiring.
