@@ -1,0 +1,102 @@
+name: Auto-assign Unblocked Tasks
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  assign-unblocked:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Find and assign unblocked issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Issue #${{ github.event.issue.number }} was closed"
+          echo "Checking for newly unblocked issues..."
+          
+          # Get the closed issue number
+          CLOSED_ISSUE="${{ github.event.issue.number }}"
+          
+          # Get all open issues with their bodies and assignees
+          OPEN_ISSUES=$(gh issue list --state open --json number,body,assignees --limit 1000)
+          
+          # Parse each open issue to check dependencies
+          echo "$OPEN_ISSUES" | jq -c '.[]' | while read -r issue_json; do
+            ISSUE_NUMBER=$(echo "$issue_json" | jq -r '.number')
+            ISSUE_BODY=$(echo "$issue_json" | jq -r '.body // ""')
+            ASSIGNEE_COUNT=$(echo "$issue_json" | jq -r '.assignees | length')
+            
+            # Skip if already assigned
+            if [ "$ASSIGNEE_COUNT" != "0" ]; then
+              continue
+            fi
+            
+            # Check if this issue has a Dependencies section that references the closed issue
+            if ! echo "$ISSUE_BODY" | grep -q "## Dependencies"; then
+              continue
+            fi
+            
+            # Extract the "Blocked by:" section from Dependencies
+            # Format: lines starting with "- [ ]" or "- [x]" after "Blocked by:"
+            DEPS_SECTION=$(echo "$ISSUE_BODY" | awk '
+              /Blocked by:/ { in_blocked=1; next }
+              /^[^-]/ && in_blocked { in_blocked=0 }
+              in_blocked && /^- / { print }
+            ')
+            
+            # Check if the closed issue is referenced in the dependencies
+            if ! echo "$DEPS_SECTION" | grep -q "#${CLOSED_ISSUE}\b"; then
+              continue
+            fi
+            
+            echo "Issue #${ISSUE_NUMBER} has #${CLOSED_ISSUE} as a dependency"
+            
+            # Extract all dependency issue numbers (supporting both #123 and owner/repo#123 formats)
+            DEPENDENCY_NUMBERS=$(echo "$DEPS_SECTION" | grep -oE '#[0-9]+' | sed 's/#//' || true)
+            
+            if [ -z "$DEPENDENCY_NUMBERS" ]; then
+              echo "  No dependency numbers found, skipping"
+              continue
+            fi
+            
+            # Check if all dependencies are closed
+            ALL_CLOSED=true
+            for DEP in $DEPENDENCY_NUMBERS; do
+              # Get the state of the dependency issue
+              DEP_STATE=$(gh issue view "$DEP" --json state --jq '.state' 2>/dev/null || echo "UNKNOWN")
+              
+              if [ "$DEP_STATE" = "OPEN" ]; then
+                echo "  Dependency #${DEP} is still OPEN"
+                ALL_CLOSED=false
+                break
+              else
+                echo "  Dependency #${DEP} is ${DEP_STATE}"
+              fi
+            done
+            
+            # If all dependencies are closed, assign to Copilot
+            if [ "$ALL_CLOSED" = true ]; then
+              echo "All dependencies for issue #${ISSUE_NUMBER} are closed!"
+              echo "Assigning issue #${ISSUE_NUMBER} to @copilot"
+              
+              if gh issue edit "$ISSUE_NUMBER" --add-assignee "@copilot"; then
+                echo "Successfully assigned issue #${ISSUE_NUMBER}"
+                
+                # Add a comment to notify about the assignment
+                gh issue comment "$ISSUE_NUMBER" --body "🤖 This issue has been automatically assigned because all blocking dependencies are now closed."
+              else
+                echo "Failed to assign issue #${ISSUE_NUMBER}"
+              fi
+            fi
+          done
+          
+          echo "Completed checking for unblocked issues"
