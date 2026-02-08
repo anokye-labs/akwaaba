@@ -265,7 +265,7 @@ function Get-BurndownData {
             [System.Collections.Generic.List[object]]$Collection
         )
         
-        $Collection.Add($Issue)
+        $Collection.Add($Issue) | Out-Null
         
         foreach ($child in $Issue.Children) {
             Collect-Issues -Issue $child -Collection $Collection
@@ -460,7 +460,7 @@ try {
     $repoInfo = gh repo view --json nameWithOwner 2>&1 | Out-String
     if ($LASTEXITCODE -ne 0) {
         Write-OkyeremaLogHelper -Message "Failed to get repository info: $repoInfo" -Level "Error"
-        throw "GitHub CLI command failed. Ensure 'gh' is installed, authenticated, and run from a repository directory."
+        throw "GitHub CLI command failed: $repoInfo. Ensure 'gh' is installed, authenticated, and run from a repository directory."
     }
     $repoInfoObj = $repoInfo | ConvertFrom-Json
     $parts = $repoInfoObj.nameWithOwner.Split('/')
@@ -471,7 +471,7 @@ try {
 }
 catch {
     Write-OkyeremaLogHelper -Message "Failed to get repository context: $_" -Level "Error"
-    throw "Failed to determine repository owner and name. Ensure you are running this from a repository directory and GitHub CLI is properly configured."
+    throw $_
 }
 
 # Fetch the issue hierarchy
