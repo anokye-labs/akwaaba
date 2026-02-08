@@ -546,11 +546,11 @@ query {
             $inTasklist = $false
             
             foreach ($line in $lines) {
-                if ($line -match '^## \s*Tracked (Tasks|Features|Items)') {
+                if ($line -match '^##\s*Tracked (Tasks|Features|Items)') {
                     $inTasklist = $true
                     continue
                 }
-                if ($inTasklist -and $line -match '^\s*-\s*\[') { continue }
+                if ($inTasklist -and $line -match '^\s*-\s*\[\s*[xX\s]?\s*\]') { continue }
                 if ($inTasklist -and $line -match '^\s*$') { continue }
                 if ($inTasklist -and $line -match '^##') { $inTasklist = $false }
                 if (-not $inTasklist) { $cleanLines += $line }
@@ -568,7 +568,8 @@ query {
             
             # Build new tasklist
             $tasklist = "`n`n## Tracked $sectionName`n`n"
-            foreach ($child in ($children | Sort-Object { if ($DryRun) { $_.Index } else { $_.Number } })) {
+            $sortProperty = if ($DryRun) { "Index" } else { "Number" }
+            foreach ($child in ($children | Sort-Object $sortProperty)) {
                 $childRef = if ($DryRun) { "#$($child.Index)" } else { "#$($child.Number)" }
                 $tasklist += "- [ ] $childRef`n"
             }
