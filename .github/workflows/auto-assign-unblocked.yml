@@ -27,6 +27,8 @@ jobs:
           CLOSED_ISSUE="${{ github.event.issue.number }}"
           
           # Get all open issues with their bodies and assignees
+          # Note: Limited to 1000 issues. For repositories with more open issues,
+          # consider implementing pagination or filtering by labels.
           OPEN_ISSUES=$(gh issue list --state open --json number,body,assignees --limit 1000)
           
           # Parse each open issue to check dependencies
@@ -78,6 +80,11 @@ jobs:
               
               if [ "$DEP_STATE" = "OPEN" ]; then
                 echo "  Dependency #${DEP} is still OPEN"
+                ALL_CLOSED=false
+                break
+              elif [ "$DEP_STATE" = "UNKNOWN" ]; then
+                echo "  WARNING: Could not verify state of dependency #${DEP} (cross-repo or access issue)"
+                # Treat UNKNOWN as blocking to avoid premature assignment
                 ALL_CLOSED=false
                 break
               else

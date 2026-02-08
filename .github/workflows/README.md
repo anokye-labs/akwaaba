@@ -61,10 +61,11 @@ When issue #14 is closed:
 
 ### Limitations
 
-- Processes up to 1000 open issues per run
+- Processes up to 1000 open issues per run (configurable in the workflow)
 - Only assigns unassigned issues
 - Requires issues to use the standard Dependencies format
-- Dependencies must be in the same repository or accessible via `gh issue view`
+- Cross-repository dependencies must be accessible via `gh issue view`
+- Dependencies that cannot be verified (UNKNOWN state) are treated as blocking to avoid premature assignment
 
 ### Related Scripts
 
