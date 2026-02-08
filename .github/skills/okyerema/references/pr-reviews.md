@@ -82,6 +82,8 @@ mutation {
 
 ## Workflow: Address Review Feedback
 
+### Manual Workflow
+
 1. **Analyze** PR comments for actionability → `Get-PRCommentAnalysis.ps1`
 2. **Prioritize** blocking and high-priority comments
 3. **Read** unresolved threads → `Get-UnresolvedThreads.ps1`
@@ -89,6 +91,30 @@ mutation {
 5. **Commit & push** to the PR branch
 6. **Reply** to each thread explaining the fix → `Reply-ReviewThread.ps1 -Resolve`
 7. **Verify** no unresolved threads remain → `Get-UnresolvedThreads.ps1`
+
+### Automated Workflow (Agent-Driven)
+
+Use `Invoke-PRCompletion.ps1` for iterative review-fix-push-resolve cycles:
+
+```powershell
+.\Invoke-PRCompletion.ps1 -Owner ORG -Repo REPO -PullNumber 6
+```
+
+This orchestrates the complete cycle:
+1. Fetches unresolved threads
+2. Classifies by severity (blocking, suggestion, nitpick, question, praise)
+3. Presents threads for the agent to fix
+4. Waits for code changes
+5. Commits and pushes fixes
+6. Replies to and resolves threads
+7. Waits for reviewers
+8. Loops until PR is clean or max iterations reached
+
+Options:
+- `-DryRun` - Preview what would be done without making changes
+- `-MaxIterations 5` - Limit iteration count (default: 5)
+- `-ReviewWaitSeconds 90` - Time to wait for reviewers after each push (default: 90)
+- `-AutoFixScope All|BugsOnly` - What to auto-fix (default: All)
 
 ## Helper Scripts
 
@@ -98,6 +124,7 @@ mutation {
 | `Get-PRCommentAnalysis.ps1` | Analyze PR comments for actionability with categorization (blocking, suggestion, nitpick, question, praise) |
 | `Reply-ReviewThread.ps1` | Reply to a thread by ID or index, optionally resolve |
 | `Resolve-ReviewThreads.ps1` | Bulk resolve/unresolve threads |
+| `Invoke-PRCompletion.ps1` | Orchestrate iterative review-fix-push-resolve cycles to drive PR to completion |
 
 ## Common Patterns
 
@@ -141,4 +168,19 @@ $analysis.byFile.PSObject.Properties | ForEach-Object {
 ### Generate Markdown report
 ```powershell
 .\Get-PRCommentAnalysis.ps1 -Owner ORG -Repo REPO -PullNumber 6 -OutputFormat Markdown > pr-analysis.md
+```
+
+### Automate PR completion (agent-driven)
+```powershell
+# Run iterative fix loop with dry-run to see what would happen
+.\Invoke-PRCompletion.ps1 -Owner ORG -Repo REPO -PullNumber 6 -DryRun
+
+# Run actual completion workflow
+$result = .\Invoke-PRCompletion.ps1 -Owner ORG -Repo REPO -PullNumber 6 -MaxIterations 3
+if ($result.Status -eq 'Clean') {
+    Write-Host "PR is ready to merge!"
+}
+else {
+    Write-Host "PR still has $($result.Remaining) unresolved threads"
+}
 ```

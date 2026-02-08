@@ -29,6 +29,7 @@ The Okyerema coordinates adwoma (work) across the asafo (team). This skill teach
 - Querying or manipulating GitHub Projects
 - Checking issue relationships
 - Responding to and resolving PR review threads
+- Automating PR completion workflows (iterative review-fix-push-resolve cycles)
 - Understanding how work is structured
 
 ## Quick Operations
@@ -87,6 +88,26 @@ query {
   }
 }
 ```
+
+### Automate PR Completion
+
+Drive PR to completion with iterative review-fix-push-resolve cycles:
+
+```powershell
+# Dry-run to preview what would happen
+.\Invoke-PRCompletion.ps1 -Owner anokye-labs -Repo akwaaba -PullNumber 6 -DryRun
+
+# Run actual completion workflow
+.\Invoke-PRCompletion.ps1 -Owner anokye-labs -Repo akwaaba -PullNumber 6 -MaxIterations 5
+```
+
+Returns structured result:
+- `Status`: Clean | Partial | Failed | DryRun
+- `Iterations`: number of cycles completed
+- `TotalFixed`: threads addressed
+- `Remaining`: unresolved threads left
+
+See [pr-reviews.md](references/pr-reviews.md) for details.
 
 ## Hierarchy Patterns
 
