@@ -24,6 +24,30 @@ A utility function that safely escapes text for use in GraphQL string literals. 
 "Hello `"World`"" | ConvertTo-EscapedGraphQL
 ```
 
+### Get-RepoContext.ps1
+
+Fetches repository context (repo ID, issue types, project IDs, and label IDs) in one query.
+
+**Features:**
+- One-shot query to fetch all repository metadata
+- Returns PSCustomObject with `.RepoId`, `.IssueTypes`, `.ProjectId`, `.Labels`
+- Session-based caching for efficient reuse
+- `-Refresh` switch to force re-fetch
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+
+**Usage:**
+
+```powershell
+$context = ./scripts/Get-RepoContext.ps1
+Write-Host "Repository ID: $($context.RepoId)"
+
+# Force refresh the cache
+$context = ./scripts/Get-RepoContext.ps1 -Refresh
+```
+
 ### Invoke-GraphQL.ps1
 
 Centralized GraphQL executor with retry logic, rate-limit handling, and structured error output.
@@ -45,18 +69,6 @@ $result = ./Invoke-GraphQL.ps1 -Query $query -Variables $vars
 
 # DryRun mode
 $result = ./Invoke-GraphQL.ps1 -Query $query -DryRun
-```
-
-**Response Object:**
-
-```powershell
-@{
-    Success       = $true/$false
-    Data          = <response data>
-    Errors        = @(<errors>)
-    CorrelationId = "guid"
-    Attempts      = 1
-}
 ```
 
 ## Best Practices
