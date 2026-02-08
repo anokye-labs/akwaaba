@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Epic: Phase 3 Development",
+    "type": "Epic",
+    "body": "This epic tracks all work for Phase 3 of the project.\n\nGoals:\n- Complete core features\n- Implement advanced functionality\n- Ensure quality standards",
+    "labels": ["documentation", "enhancement"],
+    "parent": null
+  },
+  {
+    "title": "Feature: User Authentication System",
+    "type": "Feature",
+    "body": "Implement a complete user authentication system with:\n- Login/logout\n- Password reset\n- Multi-factor authentication",
+    "labels": ["security"],
+    "parent": 1
+  },
+  {
+    "title": "Feature: Dashboard UI",
+    "type": "Feature",
+    "body": "Create a dashboard interface for users:\n- Overview statistics\n- Quick actions\n- Recent activity feed",
+    "labels": ["ui", "enhancement"],
+    "parent": 1
+  },
+  {
+    "title": "Task: Implement login endpoint",
+    "type": "Task",
+    "body": "Create POST /api/auth/login endpoint with proper validation and JWT token generation.",
+    "labels": ["backend"],
+    "parent": 2
+  },
+  {
+    "title": "Task: Add password hashing",
+    "type": "Task",
+    "body": "Implement bcrypt password hashing for secure credential storage.",
+    "labels": ["backend", "security"],
+    "parent": 2
+  },
+  {
+    "title": "Task: Design dashboard layout",
+    "type": "Task",
+    "body": "Create responsive dashboard layout with grid system.",
+    "labels": ["ui", "design"],
+    "parent": 3
+  },
+  {
+    "title": "Task: Implement statistics widgets",
+    "type": "Task",
+    "body": "Build reusable widget components for displaying statistics.",
+    "labels": ["ui", "frontend"],
+    "parent": 3
+  },
+  {
+    "title": "Bug: Login form validation error",
+    "type": "Bug",
+    "body": "The login form doesn't properly validate email format before submission.\n\nSteps to reproduce:\n1. Enter invalid email\n2. Click submit\n3. No validation error shown",
+    "labels": ["bug", "ui"],
+    "parent": 2
+  }
+]

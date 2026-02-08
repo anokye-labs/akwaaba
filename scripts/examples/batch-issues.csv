@@ -1,0 +1,25 @@
+title,type,body,labels,parent
+"Epic: Phase 3 Development",Epic,"This epic tracks all work for Phase 3 of the project.
+
+Goals:
+- Complete core features
+- Implement advanced functionality
+- Ensure quality standards","documentation;enhancement",
+"Feature: User Authentication System",Feature,"Implement a complete user authentication system with:
+- Login/logout
+- Password reset
+- Multi-factor authentication",security,1
+"Feature: Dashboard UI",Feature,"Create a dashboard interface for users:
+- Overview statistics
+- Quick actions
+- Recent activity feed","ui;enhancement",1
+"Task: Implement login endpoint",Task,"Create POST /api/auth/login endpoint with proper validation and JWT token generation.",backend,2
+"Task: Add password hashing",Task,"Implement bcrypt password hashing for secure credential storage.","backend;security",2
+"Task: Design dashboard layout",Task,"Create responsive dashboard layout with grid system.","ui;design",3
+"Task: Implement statistics widgets",Task,"Build reusable widget components for displaying statistics.","ui;frontend",3
+"Bug: Login form validation error",Bug,"The login form doesn't properly validate email format before submission.
+
+Steps to reproduce:
+1. Enter invalid email
+2. Click submit
+3. No validation error shown","bug;ui",2

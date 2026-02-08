@@ -246,6 +246,67 @@ Express blocking/dependency relationships between GitHub issues through body-tex
 
 **Note:** GitHub has no native dependency tracking, so this uses body-text convention.
 
+### New-IssueBatch.ps1
+
+Create multiple GitHub issues from a JSON or CSV input file with type support and relationship wiring.
+
+**Features:**
+- Batch create issues from JSON or CSV input
+- Support for all organization issue types (Epic, Feature, Task, Bug)
+- Automatic parent-child relationship wiring via tasklists
+- Progress bar for large batches
+- DryRun mode to preview operations
+- Structured logging via Write-OkyeremaLog
+- Label assignment support
+
+**Input Format:**
+
+JSON example:
+```json
+[
+  {
+    "title": "Epic: Phase 3 Development",
+    "type": "Epic",
+    "body": "Description",
+    "labels": ["documentation", "enhancement"],
+    "parent": null
+  },
+  {
+    "title": "Child Task",
+    "type": "Task",
+    "body": "Task description",
+    "labels": ["bug"],
+    "parent": 1
+  }
+]
+```
+
+CSV example:
+```csv
+title,type,body,labels,parent
+"Epic: Phase 3 Development",Epic,"Description","documentation;enhancement",
+"Child Task",Task,"Task description","bug",1
+```
+
+**Usage:**
+
+```powershell
+# Create issues from JSON file
+./New-IssueBatch.ps1 -InputFile issues.json -Owner anokye-labs -Repo akwaaba
+
+# Preview operations without creating issues
+./New-IssueBatch.ps1 -InputFile issues.csv -Owner anokye-labs -Repo akwaaba -DryRun
+
+# Create with quiet logging
+./New-IssueBatch.ps1 -InputFile issues.json -Owner anokye-labs -Repo akwaaba -Quiet
+```
+
+**Notes:**
+- Parent references use 1-based indexing
+- Parents must be defined before children in the input file
+- Relationships are wired after all issues are created
+- GitHub needs 2-5 minutes to parse tasklist relationships
+
 ## Best Practices
 
 1. **Always use Invoke-GraphQL.ps1** instead of calling `gh api graphql` directly
