@@ -31,6 +31,41 @@ Every agent session should operate in the context of a specific GitHub issue. Be
 4. Do the work
 5. Update and close the issue when done
 
+## Branch-Awareness Guard
+
+Before performing any git operations, agents must verify they're on the expected branch:
+
+### Pre-Flight Check
+
+```bash
+git branch --show-current
+```
+
+### Expected Branches
+
+- **main** — Primary development branch
+- **copilot/*** — Temporary branch created by GitHub Copilot for current task
+
+### Guard Pattern
+
+Before git operations (commit, push, merge, rebase), check current branch:
+
+1. Run `git branch --show-current`
+2. If on an unexpected branch (e.g., leftover `copilot/*` from a previous task):
+   - Switch to the correct branch: `git checkout main` or `git checkout <expected-branch>`
+   - Verify you're on the right branch before proceeding
+3. If uncertain which branch to use, ask the user
+
+### Why This Matters
+
+Agent operations on the wrong branch lead to:
+- Confusion about file state
+- Unintended commits to wrong branches
+- Merge conflicts
+- Lost work
+
+The branch-awareness guard prevents these issues by making branch verification an explicit pre-flight check.
+
 ## Human Documentation
 
 For the human-readable version of how we work, see [how-we-work.md](./how-we-work.md).
