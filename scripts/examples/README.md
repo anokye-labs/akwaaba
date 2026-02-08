@@ -1,8 +1,43 @@
 # DAG Import Examples
 
-This directory contains example JSON DAG files for use with `Import-DagFromJson.ps1`.
+This directory contains example files and scripts demonstrating the usage of various PowerShell automation scripts.
 
-## Example Files
+## Script Examples
+
+### Get-PRReviewTimeline-Examples.ps1
+
+Examples demonstrating how to use `Get-PRReviewTimeline.ps1` for analyzing PR review timelines.
+
+**Includes examples for:**
+- Basic console output with colored timeline
+- Markdown table output for documentation
+- JSON output for programmatic processing
+- Including detailed review comments
+- DryRun mode for testing
+- Custom correlation IDs for tracing
+- Batch analysis of multiple PRs
+- Verbose logging for debugging
+- Saving output to files
+- Processing the returned object
+
+**Usage:**
+```powershell
+# View all examples
+./scripts/examples/Get-PRReviewTimeline-Examples.ps1
+
+# Get detailed help
+Get-Help ./scripts/Get-PRReviewTimeline.ps1 -Full
+```
+
+### GraphQL-Examples.ps1
+
+Examples demonstrating how to use `Invoke-GraphQL.ps1` for making GraphQL queries.
+
+### New-IssueHierarchy-Examples.ps1
+
+Examples demonstrating how to use `New-IssueHierarchy.ps1` for creating issue hierarchies.
+
+## DAG JSON Files
 
 ### sample-dag.json
 
