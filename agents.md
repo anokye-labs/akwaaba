@@ -65,61 +65,69 @@ Every agent session should operate in the context of a specific GitHub issue. Be
 4. Do the work
 5. Update and close the issue when done
 
-## Behavioral Expectations: Action-First
+## Behavioral Conventions
 
-Agents should **do the work first, explain only if asked**. This is not optional — it's how we work.
+AI agents working in Anokye Labs repositories must follow specific behavioral conventions. These conventions emerged from real session failures and are **requirements, not suggestions**.
 
-### Core Principles
+For comprehensive documentation with detailed examples, see **[Agent Behavior Conventions](how-we-work/agent-conventions.md)**.
 
-1. **Bias toward action** — Use your best judgment and proceed. Don't ask permission for decisions that have clear best practices or established patterns.
+### The Five Core Conventions
 
-2. **Never narrate** — Don't announce what you're about to do. Just do it and show the result.
+1. **Action-First Principle** — Do it, don't discuss it. Execute immediately with best judgment. Explain only if asked.
 
-3. **Never repeat back** — Don't paraphrase or summarize what the user said. They already know what they asked for.
+2. **Read-Before-Debug Workflow** — Consult documentation before running diagnostics. Check reference docs, codebase examples, and upstream documentation before trial-and-error.
 
-4. **Show results, not intentions** — Let your output speak for itself. The user cares about what you accomplished, not what you're planning to do.
+3. **Branch Awareness** — Verify current branch with `git branch --show-current` before any git operations. Wrong-branch work wastes time.
 
-5. **Ask only when necessary** — Only stop to ask questions when:
-   - The decision has significant architectural or security impact
-   - Multiple valid approaches exist with no clear winner
-   - You need information that isn't available in the codebase or issue
-   - The user has explicitly asked for your analysis or recommendation
+4. **Skill Loading Patterns** — Skills are documentation you read, not tools you invoke. Read SKILL.md, reference guides in `references/`, and call scripts in `scripts/`.
 
-### Examples
+5. **Minimal Communication** — Use fewest words necessary. No repetition, no narration, no theatrical apologies.
+
+### Quick Examples
 
 **✅ Correct behavior:**
 ```
-[executes command]
-Build completed successfully. All 247 tests passed.
+[checks branch: git branch --show-current]
+[reads .github/skills/okyerema/SKILL.md]
+[executes the operation]
+Created Epic #42 with 5 child Features.
 ```
 
 **❌ Wrong behavior:**
 ```
-"I'm going to run the build command now to check if there are any compilation errors. 
-This will help us verify that the changes we made don't break existing functionality. 
-Let me do that for you."
+"I'm going to check what branch I'm on, then read the documentation to understand 
+how to create the hierarchy. Let me start by examining the skill..."
 ```
 
 **✅ Correct behavior:**
 ```
-[makes the fix using established pattern from codebase]
-Fixed the authentication issue in auth.ts by adding token validation.
+[reads reference docs for the error]
+[implements documented solution]
+Fixed. Build passes.
 ```
 
 **❌ Wrong behavior:**
 ```
-"I see the authentication issue. Should I fix it using approach A (JWT validation) 
-or approach B (session-based validation)? Here are the tradeoffs of each approach..."
+"Let me run some diagnostics to figure out what's wrong..."
+[runs multiple exploratory commands]
+"Now I'll try different approaches to see what works..."
 ```
 
-### In Practice
+### When to Act vs Ask
 
-- If the codebase uses TypeScript, write TypeScript. Don't ask.
-- If tests exist, run them. Don't announce it.
-- If there's a linting error, fix it. Don't narrate.
-- If the pattern is clear from the codebase, follow it. Don't seek permission.
+**Act immediately** when:
+- Established patterns exist in the codebase
+- Documentation provides clear guidance
+- The operation is reversible or low-risk
+- Best practices are well-known
 
-**When in doubt: act.** You can explain your reasoning afterward if the user asks.
+**Ask first** when:
+- Significant architectural or security impact
+- Multiple valid approaches with no clear winner
+- Information is not available in codebase/docs
+- User explicitly requested your recommendation
+
+**Default: act.** Explaining afterward if needed is better than asking permission.
 
 ## Human Documentation
 

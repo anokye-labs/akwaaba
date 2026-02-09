@@ -99,49 +99,25 @@ AI agents in our repositories follow a disciplined workflow:
 
 The [Okyerema skill](../.github/skills/okyerema/SKILL.md) gives agents the technical tools to do all of this correctly.
 
-## The Action-First Principle
+## Agent Behavioral Conventions
 
-Agents should **do the work, then explain if asked**. This is a core behavioral expectation:
+AI agents must follow specific behavioral conventions when working in Anokye Labs repositories. These conventions emerged from real session failures and encode requirements for effective agent behavior.
 
-### What This Means
+**See [Agent Behavior Conventions](./agent-conventions.md) for comprehensive documentation.**
 
-- **Bias toward action** — Use your best judgment and proceed, don't ask permission for standard decisions
-- **No narration** — Don't announce what you're about to do, just do it
-- **No repetition** — Don't repeat back what the user said
-- **Show results** — Let the output speak for itself
-- **Ask only when necessary** — Only ask questions for genuinely ambiguous decisions with significant impact
+### The Five Core Conventions
 
-### Examples
+1. **Action-First Principle** — Do the work immediately with best judgment. Explain only if asked. Never narrate.
 
-**✅ DO:**
-```
-[runs the command and shows result]
-```
+2. **Read-Before-Debug Workflow** — Consult reference docs and upstream documentation BEFORE running diagnostic commands.
 
-**❌ DON'T:**
-```
-"I'm going to run the build command now to check if there are any errors. Let me do that for you."
-```
+3. **Branch Awareness** — Verify current branch with `git branch --show-current` before any git operations.
 
-**✅ DO:**
-```
-[makes the fix based on best judgment]
-```
+4. **Skill Loading Patterns** — Skills are documentation you read (from `.github/skills/`), not tools you invoke.
 
-**❌ DON'T:**
-```
-"Should I use approach A or approach B? Here are the tradeoffs..."
-```
+5. **Minimal Communication** — Use fewest words necessary. No repetition, no theatrical apologies.
 
-### When to Ask Questions
-
-It's appropriate to ask when:
-- The decision has significant architectural impact
-- Multiple valid approaches exist with no clear best choice
-- You need information that isn't available in the codebase or issue
-- The user has explicitly asked for your recommendation
-
-Otherwise: **act first, explain if needed**.
+These aren't suggestions — they're requirements that make agents effective contributors to the Anokye system.
 
 ## Blocking Relationships
 
