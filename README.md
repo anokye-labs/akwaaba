@@ -179,7 +179,7 @@ See [Glossary](how-we-work/glossary.md) for meanings.
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details (coming soon).
 
 ---
 
