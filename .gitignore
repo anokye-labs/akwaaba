@@ -21,6 +21,15 @@ obj/
 *.swo
 *~
 
+# Git merge/patch files
+*.orig
+*.rej
+
+# .NET development tools
+_ReSharper*/
+*.ncrunch*
+*.dotCover
+
 # OS files
 .DS_Store
 Thumbs.db
