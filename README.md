@@ -48,8 +48,8 @@ When the Okyerema beats the drum, the asafo (team) moves in formation.
 ```
 akwaaba/
 ├── .github/                  # GitHub-specific configurations
-│   ├── okyerema/            # Auto-approval configurations
-│   ├── skills/              # Agent skills (Okyerema coordination skill)
+│   ├── okyerema/            # Auto-approval rules and configurations
+│   ├── skills/              # Agent skills (coordination and orchestration)
 │   │   └── okyerema/       # The talking drummer - project orchestration
 │   └── workflows/           # GitHub Actions workflows
 ├── docs/                     # Documentation
@@ -80,7 +80,7 @@ akwaaba/
 
 ### Directory Descriptions
 
-- **`.github/`** — GitHub-specific configurations including the Okyerema skill for agent coordination, auto-approval settings, and workflow automation
+- **`.github/`** — GitHub-specific configurations including agent coordination skills (Okyerema), auto-approval rules, and workflow automation
 - **`docs/`** — Documentation including Architecture Decision Records (ADRs) that explain key technical decisions
 - **`how-we-work/`** — Guides explaining how humans and agents collaborate, including conventions, processes, and glossary
 - **`planning/`** — Detailed implementation plans organized by development phases, each containing feature specifications
