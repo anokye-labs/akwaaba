@@ -2,36 +2,29 @@
 
 **[← Back to SKILL.md](../SKILL.md)**
 
-## How Tasklists Create Relationships
+## How Sub-Issues Create Relationships
 
-GitHub automatically parses markdown tasklists in issue bodies into `trackedIssues` relationships.
+GitHub's sub-issues API provides a formal parent-child relationship mechanism using GraphQL mutations. This replaces the deprecated tasklist-based approach.
 
-### Format
+### API Requirements
 
-```markdown
-## 📋 Tracked Features
+All sub-issues operations require the `GraphQL-Features: sub_issues` header:
 
-- [ ] #106 - Core Skill Creation
-- [ ] #107 - Script Conversion
+```bash
+gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."
 ```
 
-**Requirements:**
-- Must use `- [ ]` checkbox syntax
-- Must reference issue numbers with `#`
-- Must be in issue body (not comments)
-- Text after number is optional
+### Limits
 
-### What GitHub Creates
-
-- Parent gets `trackedIssues: [#106, #107]`
-- Children get `trackedInIssues: [parent]`
-- Checkboxes track completion
+- **100 sub-issues** maximum per parent issue
+- **8 levels** of nesting maximum
+- Relationships are **immediate** (no parsing delay)
 
 ---
 
 ## Creating Relationships
 
-### Step 1: Create Children First
+### Step 1: Create Child Issue
 
 ```graphql
 mutation {
@@ -45,30 +38,37 @@ mutation {
 }
 ```
 
-### Step 2: Update Parent with Tasklist
+### Step 2: Add Sub-Issue Relationship
 
 ```graphql
 mutation {
-  updateIssue(input: {
-    id: "I_xxx"
-    body: "Epic description\n\n## 📋 Tracked Features\n\n- [ ] #106 - Core Skill Creation\n- [ ] #107 - Script Conversion"
+  addSubIssue(input: {
+    issueId: "I_parentNodeId"
+    subIssueId: "I_childNodeId"
   }) {
-    issue { number }
+    subIssue {
+      number
+      title
+      parent {
+        number
+        title
+      }
+    }
   }
 }
 ```
 
-### Step 3: Wait 2-5 Minutes
+Run with: `gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."`
 
-GitHub parses tasklists **asynchronously**. Do not verify immediately.
+### Step 3: Verify Immediately
 
-### Step 4: Verify
+Relationships are available immediately (no wait time):
 
 ```graphql
 query {
   repository(owner: "anokye-labs", name: "repo") {
     issue(number: 14) {
-      trackedIssues(first: 50) {
+      subIssues(first: 50) {
         nodes {
           number
           issueType { name }
@@ -79,6 +79,30 @@ query {
   }
 }
 ```
+
+Run with: `gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."`
+
+---
+
+## Removing Relationships
+
+```graphql
+mutation {
+  removeSubIssue(input: {
+    issueId: "I_parentNodeId"
+    subIssueId: "I_childNodeId"
+  }) {
+    subIssue {
+      number
+      parent {
+        number
+      }
+    }
+  }
+}
+```
+
+Run with: `gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."`
 
 ---
 
@@ -92,17 +116,21 @@ query {
     issue(number: 106) {
       title
       issueType { name }
-      trackedIssues(first: 50) {
+      subIssues(first: 50) {
         totalCount
         nodes { number title issueType { name } state }
       }
-      trackedInIssues(first: 10) {
-        nodes { number title issueType { name } }
+      parent {
+        number
+        title
+        issueType { name }
       }
     }
   }
 }
 ```
+
+Run with: `gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."`
 
 ### Nested Hierarchy (Epic → Features → Tasks)
 
@@ -112,12 +140,12 @@ query {
     issue(number: 14) {
       title
       issueType { name }
-      trackedIssues(first: 50) {
+      subIssues(first: 50) {
         nodes {
           number
           title
           issueType { name }
-          trackedIssues(first: 50) {
+          subIssues(first: 50) {
             nodes {
               number
               title
@@ -131,6 +159,8 @@ query {
 }
 ```
 
+Run with: `gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."`
+
 ### Find Orphaned Issues (No Parent)
 
 ```graphql
@@ -141,8 +171,8 @@ query {
         number
         title
         issueType { name }
-        trackedInIssues(first: 1) {
-          totalCount
+        parent {
+          number
         }
       }
     }
@@ -150,7 +180,9 @@ query {
 }
 ```
 
-Filter in PowerShell: `Where-Object { $_.trackedInIssues.totalCount -eq 0 }`
+Run with: `gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."`
+
+Filter in PowerShell: `Where-Object { -not $_.parent }`
 
 ### Completion Status
 
@@ -159,7 +191,7 @@ query {
   repository(owner: "anokye-labs", name: "repo") {
     issue(number: 14) {
       title
-      trackedIssues(first: 100) {
+      subIssues(first: 100) {
         totalCount
         nodes { number state closed }
       }
@@ -168,68 +200,33 @@ query {
 }
 ```
 
+Run with: `gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."`
+
 Calculate: `closedCount / totalCount * 100` for percentage.
-
----
-
-## Updating Existing Relationships
-
-### Replacing a Tasklist
-
-When changing relationships, **remove the old section completely** before adding a new one:
-
-```powershell
-# Get current body
-$result = gh api graphql -f query="$getBodyQuery" | ConvertFrom-Json
-$body = $result.data.repository.issue.body
-
-# Remove old tasklist (everything from ## 📋 onward)
-$lines = $body -split "`n"
-$cleanLines = @()
-$inTasklist = $false
-
-foreach ($line in $lines) {
-    if ($line -match '^## .* Tracked') {
-        $inTasklist = $true
-        continue
-    }
-    if ($inTasklist -and $line -match '^- \[') { continue }
-    if ($inTasklist -and $line -match '^$') { continue }
-    if ($inTasklist -and $line -match '^##') { $inTasklist = $false }
-    if (-not $inTasklist) { $cleanLines += $line }
-}
-
-$cleanBody = ($cleanLines -join "`n").TrimEnd()
-
-# Add new tasklist
-$newBody = $cleanBody + "`n`n## 📋 Tracked Features`n`n- [ ] #106`n- [ ] #107"
-
-# Update issue
-$updateMutation = @"
-mutation {
-  updateIssue(input: {
-    id: `"$issueId`"
-    body: `"$($newBody.Replace('\', '\\').Replace('"', '\"').Replace("`n", '\n'))`"
-  }) {
-    issue { number }
-  }
-}
-"@
-
-gh api graphql -f query="$updateMutation" | Out-Null
-```
 
 ---
 
 ## Conventions
 
-| Parent Type | Section Header | Children |
-|-------------|---------------|----------|
-| Epic (with Features) | `## 📋 Tracked Features` | Feature issues |
-| Epic (direct Tasks) | `## 📋 Tracked Tasks` | Task issues |
-| Feature | `## 📋 Tracked Tasks` | Task issues |
-| Task | *(none — leaf node)* | — |
+| Parent Type | Children |
+|-------------|----------|
+| Epic (with Features) | Feature issues |
+| Epic (direct Tasks) | Task issues |
+| Feature | Task issues |
+| Task | *(none — leaf node)* |
 
-**Never mix Features and Tasks** in the same Epic's tasklist. Choose one pattern.
+**Never mix Features and Tasks** in the same Epic's sub-issues. Choose one pattern.
+
+---
+
+## Migration from Tasklists
+
+If you have existing tasklist-based relationships:
+
+1. Query old relationships using `trackedIssues` / `trackedInIssues`
+2. For each relationship, call `addSubIssue` mutation
+3. Remove tasklist markdown from issue body (optional)
+
+The old tasklist API (`trackedIssues` / `trackedInIssues`) was retired by GitHub on April 30, 2025.
 
 **[← Back to SKILL.md](../SKILL.md)**

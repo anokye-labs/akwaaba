@@ -22,7 +22,7 @@ gh issue create --label "task"
 gh issue create --label "parent:14"
 gh issue create --label "blocked-by:7"
 ```
-**Use instead:** Tasklists for parent-child, issue body text for blocking
+**Use instead:** Sub-issues API for parent-child, issue body text for blocking
 
 ### Status
 ```powershell
@@ -137,7 +137,7 @@ mutation {
 
 **Before creating a label, ask:**
 
-- Is this structural info (type, parent, blocking)? → **Don't use a label.** Use issue types, tasklists, or body text.
+- Is this structural info (type, parent, blocking)? → **Don't use a label.** Use issue types, sub-issues API, or body text.
 - Is this status? → **Don't use a label.** Use issue state or Projects.
 - Is this for filtering/searching? → ✅ **Label is appropriate.**
 - Am I working around a missing feature? → **Stop. Find the proper GitHub feature.**

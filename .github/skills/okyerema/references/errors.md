@@ -21,47 +21,58 @@ query {
 
 ---
 
-## Error: trackedIssues is empty after body update
+## Error: Sub-issue limit exceeded
 
-**Cause:** GitHub hasn't parsed the tasklist yet.
+**Cause:** Tried to add more than 100 sub-issues to a parent, or exceeded 8 levels of nesting.
 
-**Fix:** Wait 2-5 minutes, then re-query. Check web UI first (updates faster than GraphQL).
+**Fix:** Split into multiple parent issues or flatten the hierarchy.
 
 ---
 
-## Error: Epic tracks both Features AND Tasks
+## Error: Missing GraphQL-Features header
 
-**Cause:** Added new Feature tasklist without removing old Task tasklist.
+**Cause:** Sub-issues API requires special header.
 
-**Fix:** Parse body, remove ALL existing tasklist sections, add only the correct one:
-
-```powershell
-$lines = $body -split "`n"
-$cleanLines = @()
-$inTasklist = $false
-
-foreach ($line in $lines) {
-    if ($line -match '^## .* Tracked') {
-        $inTasklist = $true
-        continue
-    }
-    if ($inTasklist -and $line -match '^- \[') { continue }
-    if ($inTasklist -and $line -match '^$') { continue }
-    if ($inTasklist -and $line -match '^##') { $inTasklist = $false }
-    if (-not $inTasklist) { $cleanLines += $line }
-}
-
-$cleanBody = ($cleanLines -join "`n").TrimEnd()
-$newBody = $cleanBody + "`n`n## 📋 Tracked Features`n`n- [ ] #106`n- [ ] #107"
+**Fix:** Always include `-H "GraphQL-Features: sub_issues"` in your gh api call:
+```bash
+gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."
 ```
 
 ---
 
-## Error: GraphQL mutation `addTrackedByIssue` doesn't exist
+## Error: Epic has mixed Features AND Tasks as sub-issues
 
-**Cause:** There is no direct GraphQL mutation for parent-child relationships.
+**Cause:** Added both Features and Tasks as children of same Epic.
 
-**Fix:** The ONLY mechanism is **Tasklists in issue body**. Update the parent issue body with markdown checkboxes.
+**Fix:** Choose one pattern:
+- Epic → Features → Tasks (3-level)
+- Epic → Tasks (2-level)
+
+Never mix Features and Tasks under the same Epic.
+
+---
+
+## Error: addSubIssue mutation not found
+
+**Cause:** Missing the `GraphQL-Features: sub_issues` header.
+
+**Fix:** Use the sub-issues API with the required header:
+
+```graphql
+mutation {
+  addSubIssue(input: {
+    issueId: "I_parentNodeId"
+    subIssueId: "I_childNodeId"
+  }) {
+    subIssue {
+      number
+      parent { number }
+    }
+  }
+}
+```
+
+Run with: `gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."`
 
 ---
 
@@ -77,21 +88,7 @@ $newBody = $cleanBody + "`n`n## 📋 Tracked Features`n`n- [ ] #106`n- [ ] #107"
 
 **Cause:** Project custom fields are for tracking/visualization only.
 
-**Fix:** Use Tasklists in issue body for actual parent-child relationships. Projects fields are separate.
-
----
-
-## Error: Garbled emoji in issue body
-
-**Cause:** Encoding issues when passing emoji through PowerShell string escaping.
-
-**Fix:** Use simple ASCII headers or ensure UTF-8 encoding:
-```powershell
-# Use simple header if emoji causes issues
-$header = "## Tracked Features"
-# Instead of
-$header = "## 📋 Tracked Features"
-```
+**Fix:** Use sub-issues API for actual parent-child relationships. Project fields are separate.
 
 ---
 
@@ -121,9 +118,9 @@ Before starting any issue operations:
 
 - [ ] I have the repository ID (`R_xxx`)
 - [ ] I have organization issue type IDs (`IT_xxx`)
-- [ ] I'm using GraphQL API (not gh CLI for types/relationships)
+- [ ] I'm using GraphQL API with `GraphQL-Features: sub_issues` header
 - [ ] I'm NOT using labels for types
 - [ ] I've planned the hierarchy (3-level or 2-level?)
-- [ ] I'll wait 2-5 minutes before verifying tasklist relationships
+- [ ] I won't exceed 100 sub-issues per parent or 8 nesting levels
 
 **[← Back to SKILL.md](../SKILL.md)**
