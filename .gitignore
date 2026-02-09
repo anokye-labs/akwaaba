@@ -7,6 +7,9 @@ test*.ps1
 *.psd1.backup
 *.psm1.backup
 
+# PowerShell test results
+TestResults/
+
 # Build artifacts
 bin/
 obj/
