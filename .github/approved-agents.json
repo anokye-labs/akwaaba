@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "Allowlist of approved agents and GitHub Apps for commit authentication",
+  "lastUpdated": "2026-02-09",
+  "agents": [
+    {
+      "id": "github-copilot",
+      "type": "github-app",
+      "username": "copilot",
+      "botUsername": "copilot[bot]",
+      "githubAppId": 271694,
+      "description": "GitHub Copilot - AI pair programmer",
+      "approvedBy": "anokye-labs",
+      "approvedDate": "2026-02-09",
+      "permissions": ["read", "write"],
+      "enabled": true
+    },
+    {
+      "id": "github-actions",
+      "type": "github-app",
+      "username": "github-actions",
+      "botUsername": "github-actions[bot]",
+      "githubAppId": 15368,
+      "description": "GitHub Actions - CI/CD automation",
+      "approvedBy": "anokye-labs",
+      "approvedDate": "2026-02-09",
+      "permissions": ["read", "write"],
+      "enabled": true
+    },
+    {
+      "id": "dependabot",
+      "type": "github-app",
+      "username": "dependabot",
+      "botUsername": "dependabot[bot]",
+      "githubAppId": 49699333,
+      "description": "Dependabot - Automated dependency updates",
+      "approvedBy": "anokye-labs",
+      "approvedDate": "2026-02-09",
+      "permissions": ["read", "write"],
+      "enabled": true
+    }
+  ],
+  "validation": {
+    "requireBotSuffix": true,
+    "allowedBotPattern": "^[a-zA-Z0-9_-]+\\[bot\\]$",
+    "requireAppIdVerification": true
+  },
+  "audit": {
+    "logAllValidations": true,
+    "notifyOnNewAgent": true
+  }
+}
