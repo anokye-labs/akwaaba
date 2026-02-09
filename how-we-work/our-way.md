@@ -73,7 +73,7 @@ We follow a strict policy on labels:
 
 ### ❌ Never Use Labels For
 - **Issue types** — That's what types are for
-- **Relationships** — That's what tasklists are for
+- **Relationships** — That's what sub-issues are for
 - **Status** — That's what issue state and Projects are for
 - **Working around missing features** — Find the proper tool
 
@@ -99,49 +99,25 @@ AI agents in our repositories follow a disciplined workflow:
 
 The [Okyerema skill](../.github/skills/okyerema/SKILL.md) gives agents the technical tools to do all of this correctly.
 
-## The Action-First Principle
+## Agent Behavioral Conventions
 
-Agents should **do the work, then explain if asked**. This is a core behavioral expectation:
+AI agents must follow specific behavioral conventions when working in Anokye Labs repositories. These conventions emerged from real session failures and encode requirements for effective agent behavior.
 
-### What This Means
+**See [Agent Behavior Conventions](./agent-conventions.md) for comprehensive documentation.**
 
-- **Bias toward action** — Use your best judgment and proceed, don't ask permission for standard decisions
-- **No narration** — Don't announce what you're about to do, just do it
-- **No repetition** — Don't repeat back what the user said
-- **Show results** — Let the output speak for itself
-- **Ask only when necessary** — Only ask questions for genuinely ambiguous decisions with significant impact
+### The Five Core Conventions
 
-### Examples
+1. **Action-First Principle** — Do the work immediately with best judgment. Explain only if asked. Never narrate.
 
-**✅ DO:**
-```
-[runs the command and shows result]
-```
+2. **Read-Before-Debug Workflow** — Consult reference docs and upstream documentation BEFORE running diagnostic commands.
 
-**❌ DON'T:**
-```
-"I'm going to run the build command now to check if there are any errors. Let me do that for you."
-```
+3. **Branch Awareness** — Verify current branch with `git branch --show-current` before any git operations.
 
-**✅ DO:**
-```
-[makes the fix based on best judgment]
-```
+4. **Skill Loading Patterns** — Skills are documentation you read (from `.github/skills/`), not tools you invoke.
 
-**❌ DON'T:**
-```
-"Should I use approach A or approach B? Here are the tradeoffs..."
-```
+5. **Minimal Communication** — Use fewest words necessary. No repetition, no theatrical apologies.
 
-### When to Ask Questions
-
-It's appropriate to ask when:
-- The decision has significant architectural impact
-- Multiple valid approaches exist with no clear best choice
-- You need information that isn't available in the codebase or issue
-- The user has explicitly asked for your recommendation
-
-Otherwise: **act first, explain if needed**.
+These aren't suggestions — they're requirements that make agents effective contributors to the Anokye system.
 
 ## Blocking Relationships
 
@@ -150,6 +126,65 @@ GitHub doesn't have native "blocks/blocked by" relationships. We handle this by:
 1. **Issue body text** — "**Blocked by:** #7 (Phase 1 must complete first)"
 2. **Project fields** — Custom "Blocks" and "Blocked By" text fields
 3. **Phase ordering** — Issues within a phase generally depend on prior phases
+
+## Sub-Issues API for Hierarchy
+
+We use GitHub's **sub-issues API** to create parent-child relationships in our Epic → Feature → Task hierarchy.
+
+### Creating Relationships
+
+Use the `createIssueRelationship` mutation to establish parent-child relationships:
+
+```graphql
+mutation {
+  createIssueRelationship(input: {
+    repositoryId: "R_xxx"
+    parentId: "I_parent_xxx"
+    childId: "I_child_xxx"
+  }) {
+    issueRelationship {
+      parent { number }
+      child { number }
+    }
+  }
+}
+```
+
+**Important:** When using sub-issues API via GraphQL, you must include the header:
+```
+GraphQL-Features: sub_issues
+```
+
+### Querying Relationships
+
+Query relationships using the `parent` and `subIssues` fields:
+
+```graphql
+query {
+  repository(owner: "anokye-labs", name: "repo") {
+    issue(number: 14) {
+      title
+      issueType { name }
+      subIssues(first: 50) {
+        nodes {
+          number
+          title
+          issueType { name }
+        }
+      }
+    }
+  }
+}
+```
+
+### Why Sub-Issues?
+
+- **Immediate** — No parsing delays like the old tasklist approach
+- **Official API** — Supported by GitHub, future-proof
+- **Better UI** — Sub-issues appear in a dedicated section
+- **Reliable** — Direct relationships, no markdown parsing required
+
+See [ADR-0001: Use Sub-Issues API for Hierarchy](../docs/adr/ADR-0001-use-sub-issues-for-hierarchy.md) for the full rationale.
 
 ## Lessons Learned
 
@@ -161,7 +196,7 @@ These rules exist because we made every mistake in the book:
 | Used title prefixes | `[Epic]` in title doesn't set type | Set type via GraphQL mutation |
 | Created flat hierarchies | Epic → 95 Tasks was unmanageable | Use Features to group tasks |
 | Used gh CLI | Couldn't set types or relationships | Use GraphQL for all structured ops |
-| Expected instant updates | Relationships didn't appear immediately | Wait 2-5 minutes after tasklist changes |
+| Used tasklists | Relied on deprecated API, parsing delays | Use sub-issues API with createIssueRelationship |
 
 ---
 
