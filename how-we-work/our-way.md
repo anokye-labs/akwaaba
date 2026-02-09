@@ -86,6 +86,10 @@ GitHub Projects are for **visualization and tracking**, not for defining relatio
 - Use Projects to see the big picture across issues
 - Use custom fields for priority, status, and effort
 - Don't confuse Project fields with issue relationships — they're separate systems
+- Multiple views provide different perspectives (backlog, sprint, by phase, by type, blocked)
+- Automation reduces manual status updates
+
+**See [GitHub Projects Guide](../docs/github-projects.md) for complete setup and usage instructions.**
 
 ## The Agent Workflow
 

@@ -1,0 +1,89 @@
+name: Project Field Automation
+
+# Automatically update GitHub Project fields based on issue metadata
+# This workflow syncs issue data to project custom fields for better filtering and visualization
+
+on:
+  issues:
+    types: [opened, reopened, edited, labeled, unlabeled, assigned, closed]
+  pull_request:
+    types: [opened, closed, reopened]
+
+permissions:
+  issues: write
+  pull-requests: read
+  contents: read
+
+jobs:
+  sync-project-fields:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract issue metadata
+        id: metadata
+        run: |
+          # Extract priority from labels
+          PRIORITY="Medium"  # Default
+          if echo "${{ github.event.issue.labels.*.name }}" | grep -q "critical"; then
+            PRIORITY="Critical"
+          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "high-priority"; then
+            PRIORITY="High"
+          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "low-priority"; then
+            PRIORITY="Low"
+          fi
+          echo "priority=$PRIORITY" >> $GITHUB_OUTPUT
+          
+          # Extract phase from labels
+          PHASE=""
+          if echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-1"; then
+            PHASE="1-Foundation"
+          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-2"; then
+            PHASE="2-Governance"
+          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-3"; then
+            PHASE="3-Agents"
+          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-4"; then
+            PHASE="4-DotNet"
+          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-5"; then
+            PHASE="5-Documentation"
+          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-6"; then
+            PHASE="6-Validation"
+          fi
+          echo "phase=$PHASE" >> $GITHUB_OUTPUT
+          
+          # Determine status based on issue state and assignees
+          STATUS="Backlog"
+          if [ "${{ github.event.issue.state }}" = "closed" ]; then
+            STATUS="Done"
+          elif [ "${{ github.event.issue.assignees[0] }}" != "" ]; then
+            STATUS="In Progress"
+          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "blocked"; then
+            STATUS="Blocked"
+          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "ready"; then
+            STATUS="Ready"
+          fi
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          
+          echo "Extracted metadata:"
+          echo "  Priority: $PRIORITY"
+          echo "  Phase: $PHASE"
+          echo "  Status: $STATUS"
+
+      - name: Comment on processing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Project automation processed issue #${{ github.event.issue.number }}"
+          echo "Priority: ${{ steps.metadata.outputs.priority }}"
+          echo "Phase: ${{ steps.metadata.outputs.phase }}"
+          echo "Status: ${{ steps.metadata.outputs.status }}"
+          
+          # Future: Use GraphQL to update project fields
+          # For now, this workflow logs the intended updates
+          # To implement field updates, see .github/skills/okyerema/references/projects.md
+          
+          echo "Note: Actual project field updates require GraphQL mutations with project ID and field IDs"
+          echo "See docs/github-projects.md for implementation guidance"

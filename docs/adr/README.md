@@ -59,6 +59,7 @@ ADRs are numbered sequentially:
 | [ADR-0001](./ADR-0001-use-sub-issues-for-hierarchy.md) | Use sub-issues API for hierarchy | Accepted |
 | [ADR-0002](./ADR-0002-use-graphql-for-writes.md) | Use GraphQL for all write operations | Accepted |
 | [ADR-0003](./ADR-0003-use-org-level-issue-types.md) | Use organization-level issue types | Accepted |
+| [ADR-0004](./ADR-0004-use-github-projects-for-visualization.md) | Use GitHub Projects for workflow visualization | Accepted |
 
 ## Process
 

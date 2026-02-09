@@ -123,6 +123,7 @@ akwaaba/
 - **[How We Work](how-we-work.md)** — Overview of our philosophy and approach
 - **[Getting Started](how-we-work/getting-started.md)** — New to GitHub Issues? Start here
 - **[Our Way](how-we-work/our-way.md)** — How we structure and coordinate work
+- **[GitHub Projects Guide](docs/github-projects.md)** — Setup and usage of GitHub Projects for workflow visualization
 - **[Glossary](how-we-work/glossary.md)** — Akan terms and concepts
 - **[ADR Process](how-we-work/adr-process.md)** — How we document architectural decisions
 
