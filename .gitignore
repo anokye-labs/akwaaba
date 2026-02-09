@@ -1,33 +1,99 @@
-# Temporary PowerShell files
+# =============================================================================
+# Temporary and Scratch Files
+# =============================================================================
+# These patterns exclude temporary files created during development and testing.
+# 
+# IMPORTANT: test*.ps1 (lowercase) excludes ad-hoc test files like test_query.ps1
+# but does NOT match Test-*.ps1 files (capital T), which are permanent test
+# suites and ARE tracked in version control.
+
+# Temporary PowerShell files (e.g., temp_debug.ps1)
 temp*.ps1
+
+# Scratch files for experimentation (e.g., scratch_api_test.ps1)
 scratch*.ps1
+
+# Ad-hoc test files (e.g., test_query.ps1) - NOT Test-*.ps1 suites
 test*.ps1
 
-# PowerShell module artifacts
+# =============================================================================
+# PowerShell Module Artifacts
+# =============================================================================
+# Backup files created by module management tools
+
+# PowerShell module manifest backups
 *.psd1.backup
+
+# PowerShell script module backups
 *.psm1.backup
 
-# Build artifacts
+# =============================================================================
+# Build Artifacts and Compiled Output
+# =============================================================================
+# Generated files from build processes - never committed to version control
+
+# Binary output directory
 bin/
+
+# Object files directory
 obj/
+
+# Dynamic link libraries
 *.dll
+
+# Executables
 *.exe
+
+# Program database (debug symbols)
 *.pdb
 
-# IDE files
+# =============================================================================
+# IDE and Editor Configuration
+# =============================================================================
+# IDE-specific settings and temporary editor files are excluded to avoid
+# imposing personal development environment preferences on other contributors.
+# Use .editorconfig for shared editor settings instead.
+
+# Visual Studio Code settings
 .vscode/
+
+# JetBrains IDEs (IntelliJ, PyCharm, etc.)
 .idea/
+
+# Vim swap files
 *.swp
 *.swo
+
+# Backup files created by various editors
 *~
 
-# OS files
+# =============================================================================
+# Operating System Files
+# =============================================================================
+# OS-generated files that serve no purpose in version control
+
+# macOS folder metadata
 .DS_Store
+
+# Windows thumbnail cache
 Thumbs.db
 
-# Node modules (if any)
+# =============================================================================
+# Package Manager Dependencies
+# =============================================================================
+# Third-party dependencies managed by package managers - should be installed
+# locally via package manager commands, not committed to the repository
+
+# Node.js dependencies (npm/yarn)
 node_modules/
 
-# Logs
+# =============================================================================
+# Logs and Runtime Output
+# =============================================================================
+# Log files generated during development, testing, or runtime execution
+
+# All log files
 *.log
+
+# Log directory
 logs/
