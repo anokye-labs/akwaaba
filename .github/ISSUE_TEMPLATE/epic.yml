@@ -1,0 +1,51 @@
+name: Epic
+description: Create an Epic to organize a major project phase or initiative
+title: "[EPIC] "
+labels: ["epic"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Epic Overview
+        Epics represent major phases or initiatives that contain multiple features and tasks.
+        
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Project Phase
+      description: Which phase does this Epic belong to?
+      options:
+        - Phase 1 - Foundation
+        - Phase 2 - Governance
+        - Phase 3 - Agents
+        - Phase 4 - DotNet
+        - Phase 5 - Documentation
+        - Phase 6 - Validation
+        - Other
+    validations:
+      required: true
+      
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Detailed description of this Epic and its objectives
+      placeholder: |
+        What is this Epic about?
+        What problem does it solve?
+        What are the main goals?
+    validations:
+      required: true
+      
+  - type: textarea
+    id: success-criteria
+    attributes:
+      label: Success Criteria
+      description: How will we know this Epic is complete?
+      placeholder: |
+        - All features are implemented
+        - All tests pass
+        - Documentation is complete
+        - Code review approved
+    validations:
+      required: false
