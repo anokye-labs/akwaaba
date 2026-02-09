@@ -80,6 +80,8 @@ bld/
 # ===================================================================
 # Git Merge and Patch Files
 # ===================================================================
+# Temporary files created during git operations (merge conflicts, patches)
+# If you need to commit a patch file for documentation, use git add -f
 *.orig
 *.rej
 *.patch
@@ -122,7 +124,6 @@ $RECYCLE.BIN/
 
 # Linux
 .directory
-*~
 
 # ===================================================================
 # Copilot Session Artifacts
