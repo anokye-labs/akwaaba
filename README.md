@@ -186,7 +186,7 @@ License details coming soon — see [issue tracker](https://github.com/anokye-la
 
 - Inspired by [Gas Town](https://medium.com/@steve.yegge/why-gas-town-will-beat-agent-systems-6e0f0b1a76f0) by Steve Yegge
 - Built with patterns from [copilot-media-plugins](https://github.com/anokye-labs/copilot-media-plugins)
-- Architecture informed by experience with [amplifier-dotnet](https://github.com/anokye-labs/amplifier-dotnet)
+- Architecture informed by experience with amplifier-dotnet
 
 ---
 
