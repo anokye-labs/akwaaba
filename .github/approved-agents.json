@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "Allowlist of approved AI agents authorized to commit to this repository",
+  "lastUpdated": "2026-02-09",
+  "agents": [
+    {
+      "username": "copilot",
+      "githubAppId": "github-copilot",
+      "type": "github-app",
+      "description": "GitHub Copilot coding agent for automated code changes and PR creation",
+      "permissions": [
+        "read",
+        "write"
+      ],
+      "approvedBy": "repository-admin",
+      "dateAdded": "2026-02-09",
+      "status": "active"
+    },
+    {
+      "username": "github-actions[bot]",
+      "githubAppId": "github-actions",
+      "type": "github-app",
+      "description": "GitHub Actions bot for automated workflow operations",
+      "permissions": [
+        "read",
+        "write"
+      ],
+      "approvedBy": "repository-admin",
+      "dateAdded": "2026-02-09",
+      "status": "active"
+    },
+    {
+      "username": "dependabot[bot]",
+      "githubAppId": "dependabot",
+      "type": "github-app",
+      "description": "Dependabot for automated dependency updates and security patches",
+      "permissions": [
+        "read",
+        "write"
+      ],
+      "approvedBy": "repository-admin",
+      "dateAdded": "2026-02-09",
+      "status": "active"
+    }
+  ],
+  "registrationProcess": {
+    "description": "Process for adding new agents to the allowlist",
+    "steps": [
+      "1. Create a GitHub issue using the 'Agent Registration Request' template",
+      "2. Provide agent username, GitHub App ID, and justification",
+      "3. Repository administrators review and approve the request",
+      "4. Add agent entry to this file via PR",
+      "5. Ensure PR includes: username, githubAppId, type, description, permissions, approvedBy, dateAdded, status",
+      "6. Merge PR after approval and CI checks pass"
+    ],
+    "requiredFields": [
+      "username",
+      "githubAppId",
+      "type",
+      "description",
+      "permissions",
+      "approvedBy",
+      "dateAdded",
+      "status"
+    ],
+    "contactEmail": "See CONTRIBUTING.md for contact information"
+  },
+  "agentTypes": {
+    "github-app": "Official GitHub application with App ID",
+    "bot-user": "Bot user account (legacy, prefer GitHub Apps)",
+    "service-account": "Service account for automated operations"
+  },
+  "permissionLevels": {
+    "read": "Can read repository contents",
+    "write": "Can commit and create PRs",
+    "admin": "Administrative permissions (use with extreme caution)"
+  },
+  "statusValues": {
+    "active": "Agent is currently approved and operational",
+    "suspended": "Agent access is temporarily suspended",
+    "revoked": "Agent access has been permanently revoked"
+  }
+}
