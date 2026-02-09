@@ -1145,7 +1145,7 @@ Validates that all commits in a pull request reference GitHub issues, enforcing 
 The script accepts the following issue reference formats in commit messages:
 - `#123` - Basic issue reference
 - `Closes #123` - Closes/Close an issue
-- `Fixes #123` - Fixes/Fix an issue  
+- `Fixes #123` - Fixes/Fix an issue
 - `Resolves #123` - Resolves/Resolve an issue
 - `Issue #123` - Explicit issue reference
 - `GH-123` - GitHub issue shorthand

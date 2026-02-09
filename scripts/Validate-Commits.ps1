@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Validates commit messages in a pull request reference GitHub issues.
+    Validates commit messages in a pull request to reference GitHub issues.
 
 .DESCRIPTION
     Validate-Commits.ps1 fetches all commits in a GitHub Pull Request and validates
