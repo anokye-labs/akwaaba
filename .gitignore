@@ -164,6 +164,6 @@ yarn-error.log*
 # ===================================================================
 *.log
 logs/
-*.log.*
+*.log.*  # Rotated logs (e.g., app.log.1, app.log.2024-01-01)
 trace.log
 debug.log
