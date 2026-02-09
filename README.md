@@ -184,4 +184,4 @@ Inspired by concepts from:
 
 ---
 
-*Medaase* (Thank you) for your interest in Akwaaba! 🎊
+*Medase* (Thank you) for your interest in Akwaaba! 🎊
