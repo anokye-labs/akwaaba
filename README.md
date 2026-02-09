@@ -136,6 +136,7 @@ akwaaba/
 
 - **[Planning Roadmap](planning/README.md)** — Complete implementation plan across 6 phases
 - **[Architecture Decisions](docs/adr/)** — Technical decisions with rationale
+- **[GitHub App Detection](docs/github-app-detection.md)** — Commit author validation implementation
 
 ---
 
