@@ -13,10 +13,19 @@ obj/
 *.dll
 *.exe
 *.pdb
+*.user
+*.suo
 
 # IDE files
-.vscode/
+# Visual Studio
+.vs/
+*.vsidx
+# Rider
 .idea/
+# VS Code (keep shared settings)
+.vscode/*
+!.vscode/settings.json
+# General editors
 *.swp
 *.swo
 *~
