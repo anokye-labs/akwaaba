@@ -122,13 +122,25 @@ Test-Assert -TestName "Detects basic issue reference (#123)" -Condition ($result
 $result = Test-CommitMessageForIssueReference -CommitMessage "fix: Fix bug Closes #456" -CommitSha "def456"
 Test-Assert -TestName "Detects 'Closes #456' pattern" -Condition ($result.Valid -eq $true -and $result.IssueReferences -contains "456")
 
+# Test Close pattern (singular)
+$result = Test-CommitMessageForIssueReference -CommitMessage "fix: Fix bug Close #457" -CommitSha "def457"
+Test-Assert -TestName "Detects 'Close #457' pattern" -Condition ($result.Valid -eq $true -and $result.IssueReferences -contains "457")
+
 # Test Fixes pattern
 $result = Test-CommitMessageForIssueReference -CommitMessage "fix: Fixes #789 by updating logic" -CommitSha "ghi789"
 Test-Assert -TestName "Detects 'Fixes #789' pattern" -Condition ($result.Valid -eq $true -and $result.IssueReferences -contains "789")
 
+# Test Fix pattern (singular)
+$result = Test-CommitMessageForIssueReference -CommitMessage "fix: Fix #790 by updating logic" -CommitSha "ghi790"
+Test-Assert -TestName "Detects 'Fix #790' pattern" -Condition ($result.Valid -eq $true -and $result.IssueReferences -contains "790")
+
 # Test Resolves pattern
 $result = Test-CommitMessageForIssueReference -CommitMessage "chore: Resolves #321" -CommitSha "jkl321"
 Test-Assert -TestName "Detects 'Resolves #321' pattern" -Condition ($result.Valid -eq $true -and $result.IssueReferences -contains "321")
+
+# Test Resolve pattern (singular)
+$result = Test-CommitMessageForIssueReference -CommitMessage "chore: Resolve #322" -CommitSha "jkl322"
+Test-Assert -TestName "Detects 'Resolve #322' pattern" -Condition ($result.Valid -eq $true -and $result.IssueReferences -contains "322")
 
 # Test Issue pattern
 $result = Test-CommitMessageForIssueReference -CommitMessage "docs: Update docs for Issue #654" -CommitSha "mno654"

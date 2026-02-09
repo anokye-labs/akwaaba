@@ -9,9 +9,9 @@
     
     The script checks for issue references in the following formats:
     - #123
-    - Closes #123
-    - Fixes #123
-    - Resolves #123
+    - Closes #123 or Close #123
+    - Fixes #123 or Fix #123
+    - Resolves #123 or Resolve #123
     - Issue #123
     - GH-123
     
@@ -217,6 +217,9 @@ function Format-ValidationResults {
     <#
     .SYNOPSIS
         Formats validation results based on output format.
+    .DESCRIPTION
+        For Json format, returns the results object as JSON.
+        For Console format, writes formatted output to host and returns null.
     #>
     param(
         [Parameter(Mandatory = $true)]
@@ -230,7 +233,7 @@ function Format-ValidationResults {
         return $Results | ConvertTo-Json -Depth 10
     }
     
-    # Console format
+    # Console format - writes to host and returns null
     Write-Host ""
     Write-Host "═══════════════════════════════════════════════════════════════" -ForegroundColor Cyan
     Write-Host "  Commit Validation Results - PR #$($Results.PRNumber)" -ForegroundColor White
