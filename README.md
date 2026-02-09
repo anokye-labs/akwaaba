@@ -161,8 +161,8 @@ Want to contribute as an agent? Read **[Agent Conventions](how-we-work/agent-con
 ## The Anokye Labs Ecosystem
 
 - **Akwaaba** (this repo) — Welcome and governance reference
-- **[Ananse](https://github.com/anokye-labs/ananse)** — Agentic runtime engine (coming soon)
-- **[Okyeame](https://github.com/anokye-labs/okyeame)** — Voice-first client (coming soon)
+- **Ananse** — Agentic runtime engine (coming soon)
+- **Okyeame** — Voice-first client (coming soon)
 
 See [Glossary](how-we-work/glossary.md) for meanings.
 
