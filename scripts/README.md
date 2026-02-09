@@ -2350,3 +2350,78 @@ When adding new scripts to this directory:
 3. Add test scripts when applicable
 4. Update this README with documentation
 5. Use the `ConvertTo-Verb` naming convention for functions
+
+## Invoke-SystemHealthCheck.ps1
+
+Validate that the Okyerema system's docs, scripts, and assumptions match current GitHub API reality.
+
+**Features:**
+- Detects deprecated API references (trackedIssues vs subIssues)
+- Verifies all scripts referenced in SKILL.md actually exist
+- Checks for deprecated patterns in documentation (tasklists for relationships)
+- Validates hierarchy integrity (parent relationships)
+- Detects structural labels being used incorrectly
+- Returns structured check results (Pass/Warn/Fail)
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated (for hierarchy and label checks)
+- Invoke-GraphQL.ps1
+- Get-RepoContext.ps1
+- Write-OkyeremaLog.ps1
+
+**Background:**
+The entire Okyerema skill was built on the retired tasklist API for 10 months with no detection. This script catches this kind of drift by validating that documentation, scripts, and API usage align with current GitHub API reality. See ADR-0001 for context on the tasklist-to-subissues migration.
+
+**Checks Performed:**
+1. **API Compatibility**: Verify GraphQL queries in reference docs still work (trackedIssues vs subIssues)
+2. **Script Dependencies**: Verify all scripts referenced in SKILL.md actually exist
+3. **Doc Freshness**: Check if reference docs mention deprecated patterns
+4. **Hierarchy Integrity**: Verify all issues under an Epic have proper parent relationships
+5. **Label Consistency**: Verify no labels are being used for structure (epic, task, etc.)
+
+**Usage:**
+
+```powershell
+# Run all system health checks
+./scripts/Invoke-SystemHealthCheck.ps1 -Owner "anokye-labs" -Repo "akwaaba"
+
+# Run with verbose logging
+./scripts/Invoke-SystemHealthCheck.ps1 -Owner "anokye-labs" -Repo "akwaaba" -Verbose
+
+# Run with custom skill path
+./scripts/Invoke-SystemHealthCheck.ps1 -Owner "anokye-labs" -Repo "akwaaba" -SkillPath ".github/skills/okyerema"
+
+# Capture results for programmatic use
+$results = ./scripts/Invoke-SystemHealthCheck.ps1 -Owner "anokye-labs" -Repo "akwaaba"
+$failedChecks = $results | Where-Object { $_.Status -eq "Fail" }
+```
+
+**Output:**
+
+Returns an array of PSCustomObject with:
+- `CheckName`: Name of the check performed
+- `Status`: Pass, Warn, or Fail
+- `Details`: Description of findings
+
+**Example Output:**
+
+```
+╔════════════════════════════════════════════════════════════════════════════╗
+║                      SYSTEM HEALTH CHECK REPORT                           ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Repository: anokye-labs/akwaaba
+Skill Path: .github/skills/okyerema
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠ API Compatibility: Warn
+
+File 'relationships.md' references deprecated 'trackedIssues' API. ADR-0001 mandates using 'subIssues' and 'parent' fields instead.
+SKILL.md mentions tasklists for relationships. ADR-0001 mandates using createIssueRelationship mutation instead.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Script Dependencies: Pass
+
+All 4 scripts referenced in SKILL.md exist.
+```
