@@ -2,7 +2,7 @@
 
 **Welcome to Continuous AI**
 
-> _PRs Welcome — See CONTRIBUTING.md (coming soon)_
+_PRs welcome — read [How We Work](how-we-work.md) to get started_
 
 > _Akwaaba_ (ah-KWAH-bah) — "Welcome" in Akan/Twi
 
@@ -178,7 +178,7 @@ See [Glossary](how-we-work/glossary.md) for meanings.
 
 ## License
 
-This project is licensed under the MIT License — LICENSE file coming soon.
+License details coming soon — see [issue tracker](https://github.com/anokye-labs/akwaaba/issues) for updates.
 
 ---
 
