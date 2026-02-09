@@ -390,6 +390,58 @@ Returns an array of PSCustomObject with properties:
 - `Assignees`: Array of assignee logins
 - `Depth`: Depth in the hierarchy (0 = root)
 
+### Start-IssueWork.ps1
+
+Agent workflow to pick up an issue and begin work.
+
+**Features:**
+- Assigns the current user to the issue
+- Creates a feature branch from main (pattern: `issue-{number}-{slug}`)
+- Sets issue status to "In Progress" in the project board
+- Logs all actions with structured logging
+- Returns a context object for the work session
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Git configured and repository initialized
+- Requires: `Invoke-GraphQL.ps1`, `Write-OkyeremaLog.ps1`
+
+**Usage:**
+
+```powershell
+# Start work on issue #42 with default settings
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42
+
+# Start work and update status in a specific project
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42 -ProjectNumber 3
+
+# Start work without creating a new branch
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42 -SkipBranch
+
+# Start work without assigning the issue
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42 -SkipAssignment
+
+# Start work without updating project status
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42 -SkipStatusUpdate
+
+# Custom status field and value
+$workContext = ./scripts/Start-IssueWork.ps1 -IssueNumber 42 -StatusFieldName "Workflow" -InProgressValue "Active"
+```
+
+**Output:**
+
+Returns a PSCustomObject with properties:
+- `Success`: Boolean indicating if the operation succeeded
+- `IssueNumber`: The issue number
+- `IssueTitle`: The issue title
+- `IssueUrl`: The issue URL
+- `AssignedTo`: The user assigned to the issue
+- `Branch`: The created branch name (if created)
+- `Status`: The new status (if updated)
+- `CorrelationId`: The correlation ID for this session
+- `StartTime`: UTC timestamp when work started
+
 ### Invoke-GraphQL.ps1
 
 Centralized GraphQL executor with retry logic, rate-limit handling, and structured error output.
@@ -2350,3 +2402,78 @@ When adding new scripts to this directory:
 3. Add test scripts when applicable
 4. Update this README with documentation
 5. Use the `ConvertTo-Verb` naming convention for functions
+
+## Invoke-SystemHealthCheck.ps1
+
+Validate that the Okyerema system's docs, scripts, and assumptions match current GitHub API reality.
+
+**Features:**
+- Detects deprecated API references (trackedIssues vs subIssues)
+- Verifies all scripts referenced in SKILL.md actually exist
+- Checks for deprecated patterns in documentation (tasklists for relationships)
+- Validates hierarchy integrity (parent relationships)
+- Detects structural labels being used incorrectly
+- Returns structured check results (Pass/Warn/Fail)
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated (for hierarchy and label checks)
+- Invoke-GraphQL.ps1
+- Get-RepoContext.ps1
+- Write-OkyeremaLog.ps1
+
+**Background:**
+The entire Okyerema skill was built on the retired tasklist API for 10 months with no detection. This script catches this kind of drift by validating that documentation, scripts, and API usage align with current GitHub API reality. See ADR-0001 for context on the tasklist-to-subissues migration.
+
+**Checks Performed:**
+1. **API Compatibility**: Verify GraphQL queries in reference docs still work (trackedIssues vs subIssues)
+2. **Script Dependencies**: Verify all scripts referenced in SKILL.md actually exist
+3. **Doc Freshness**: Check if reference docs mention deprecated patterns
+4. **Hierarchy Integrity**: Verify all issues under an Epic have proper parent relationships
+5. **Label Consistency**: Verify no labels are being used for structure (epic, task, etc.)
+
+**Usage:**
+
+```powershell
+# Run all system health checks
+./scripts/Invoke-SystemHealthCheck.ps1 -Owner "anokye-labs" -Repo "akwaaba"
+
+# Run with verbose logging
+./scripts/Invoke-SystemHealthCheck.ps1 -Owner "anokye-labs" -Repo "akwaaba" -Verbose
+
+# Run with custom skill path
+./scripts/Invoke-SystemHealthCheck.ps1 -Owner "anokye-labs" -Repo "akwaaba" -SkillPath ".github/skills/okyerema"
+
+# Capture results for programmatic use
+$results = ./scripts/Invoke-SystemHealthCheck.ps1 -Owner "anokye-labs" -Repo "akwaaba"
+$failedChecks = $results | Where-Object { $_.Status -eq "Fail" }
+```
+
+**Output:**
+
+Returns an array of PSCustomObject with:
+- `CheckName`: Name of the check performed
+- `Status`: Pass, Warn, or Fail
+- `Details`: Description of findings
+
+**Example Output:**
+
+```
+╔════════════════════════════════════════════════════════════════════════════╗
+║                      SYSTEM HEALTH CHECK REPORT                           ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Repository: anokye-labs/akwaaba
+Skill Path: .github/skills/okyerema
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠ API Compatibility: Warn
+
+File 'relationships.md' references deprecated 'trackedIssues' API. ADR-0001 mandates using 'subIssues' and 'parent' fields instead.
+SKILL.md mentions tasklists for relationships. ADR-0001 mandates using createIssueRelationship mutation instead.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Script Dependencies: Pass
+
+All 4 scripts referenced in SKILL.md exist.
+```

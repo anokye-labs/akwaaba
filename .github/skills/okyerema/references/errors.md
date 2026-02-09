@@ -92,6 +92,26 @@ Run with: `gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."`
 
 ---
 
+## Error: GraphQL addAssigneesToAssignable fails for Copilot
+
+**Cause:** GitHub Copilot has a BOT-type node ID (`BOT_kgDOC9w8XQ`). The GraphQL `addAssigneesToAssignable` mutation does not support BOT IDs and returns `NOT_FOUND`.
+
+**Fix:** Use REST API instead of GraphQL for Copilot assignments:
+
+```bash
+# Via gh CLI (recommended)
+gh issue edit NUMBER --add-assignee "@copilot"
+
+# Via REST API directly
+gh api repos/OWNER/REPO/issues/NUMBER/assignees --method POST -f 'assignees[]=Copilot'
+```
+
+**Note:** This limitation applies to all BOT-type assignees, not just Copilot. Regular user assignments can use either GraphQL or REST, but BOT assignments **must** use REST.
+
+**Related:** See [SKILL.md Copilot Assignment section](../SKILL.md#copilot-assignment) for usage examples.
+
+---
+
 ## Pre-Flight Checklist
 
 Before starting any issue operations:

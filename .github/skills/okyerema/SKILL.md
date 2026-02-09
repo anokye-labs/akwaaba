@@ -166,6 +166,7 @@ Invoke these scripts for common operations:
 - **[scripts/New-IssueWithType.ps1](scripts/New-IssueWithType.ps1)** — Create issue with proper type
 - **[scripts/Update-IssueHierarchy.ps1](scripts/Update-IssueHierarchy.ps1)** — Build parent-child relationships via sub-issues API
 - **[scripts/Test-Hierarchy.ps1](scripts/Test-Hierarchy.ps1)** — Verify relationships via GraphQL
+- **[scripts/Update-AutoApproveConfig.ps1](scripts/Update-AutoApproveConfig.ps1)** — Manage auto-approve rules for PR automation
 
 ## Labels: Use Sparingly
 
