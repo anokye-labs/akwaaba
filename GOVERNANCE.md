@@ -479,7 +479,7 @@ A: No. GitHub's sub-issues API supports a single parent per issue. If work spans
 
 **Q: What's the difference between sub-issues and tasklists?**
 
-A: Sub-issues use GitHub's official sub-issues API to create proper parent-child relationships. Tasklists are markdown checkboxes in issue bodies. We use sub-issues because they're immediate, reliable, and officially supported. See [ADR-0001](docs/adr/ADR-0001-use-sub-issues-for-hierarchy.md) for details.
+A: Sub-issues use GitHub's sub-issues API (preview feature) to create proper parent-child relationships. Tasklists are markdown checkboxes in issue bodies. We use sub-issues because they're immediate, reliable, and have proper API support. See [ADR-0001](docs/adr/ADR-0001-use-sub-issues-for-hierarchy.md) for details.
 
 ---
 
