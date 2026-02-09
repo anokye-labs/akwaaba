@@ -31,3 +31,15 @@ node_modules/
 # Logs
 *.log
 logs/
+
+# Copilot session artifacts (except intentional planning)
+.copilot/
+!planning/.copilot/
+
+# Temporary test data
+temp/
+tmp/
+scratch/
+
+# Local configuration overrides
+*.local.*
