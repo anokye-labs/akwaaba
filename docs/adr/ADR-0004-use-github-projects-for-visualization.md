@@ -196,10 +196,10 @@ We will measure success by:
 ## References
 
 - [GitHub Projects Documentation](https://docs.github.com/en/issues/planning-and-tracking-with-projects)
-- [Okyerema Projects Reference](../.github/skills/okyerema/references/projects.md)
-- [GitHub Projects Guide](../docs/github-projects.md)
+- [Okyerema Projects Reference](../../.github/skills/okyerema/references/projects.md)
+- [GitHub Projects Guide](../github-projects.md)
 
 ---
 
-**Supersedes:** None  
+**Supersedes:** None
 **Superseded by:** None (current)

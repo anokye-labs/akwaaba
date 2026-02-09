@@ -26,30 +26,33 @@ jobs:
       - name: Extract issue metadata
         id: metadata
         run: |
+          # Get issue labels as JSON
+          LABELS='${{ toJSON(github.event.issue.labels) }}'
+          
           # Extract priority from labels
           PRIORITY="Medium"  # Default
-          if echo "${{ github.event.issue.labels.*.name }}" | grep -q "critical"; then
+          if echo "$LABELS" | jq -r '.[].name' | grep -q "critical"; then
             PRIORITY="Critical"
-          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "high-priority"; then
+          elif echo "$LABELS" | jq -r '.[].name' | grep -q "high-priority"; then
             PRIORITY="High"
-          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "low-priority"; then
+          elif echo "$LABELS" | jq -r '.[].name' | grep -q "low-priority"; then
             PRIORITY="Low"
           fi
           echo "priority=$PRIORITY" >> $GITHUB_OUTPUT
           
           # Extract phase from labels
           PHASE=""
-          if echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-1"; then
+          if echo "$LABELS" | jq -r '.[].name' | grep -q "phase-1"; then
             PHASE="1-Foundation"
-          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-2"; then
+          elif echo "$LABELS" | jq -r '.[].name' | grep -q "phase-2"; then
             PHASE="2-Governance"
-          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-3"; then
+          elif echo "$LABELS" | jq -r '.[].name' | grep -q "phase-3"; then
             PHASE="3-Agents"
-          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-4"; then
+          elif echo "$LABELS" | jq -r '.[].name' | grep -q "phase-4"; then
             PHASE="4-DotNet"
-          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-5"; then
+          elif echo "$LABELS" | jq -r '.[].name' | grep -q "phase-5"; then
             PHASE="5-Documentation"
-          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "phase-6"; then
+          elif echo "$LABELS" | jq -r '.[].name' | grep -q "phase-6"; then
             PHASE="6-Validation"
           fi
           echo "phase=$PHASE" >> $GITHUB_OUTPUT
@@ -58,11 +61,11 @@ jobs:
           STATUS="Backlog"
           if [ "${{ github.event.issue.state }}" = "closed" ]; then
             STATUS="Done"
-          elif [ "${{ github.event.issue.assignees[0] }}" != "" ]; then
+          elif [ -n "${{ github.event.issue.assignee }}" ]; then
             STATUS="In Progress"
-          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "blocked"; then
+          elif echo "$LABELS" | jq -r '.[].name' | grep -q "blocked"; then
             STATUS="Blocked"
-          elif echo "${{ github.event.issue.labels.*.name }}" | grep -q "ready"; then
+          elif echo "$LABELS" | jq -r '.[].name' | grep -q "ready"; then
             STATUS="Ready"
           fi
           echo "status=$STATUS" >> $GITHUB_OUTPUT

@@ -417,8 +417,8 @@ gh issue delete <issue-number>
 
 After completing this setup:
 
-1. Review the [GitHub Projects Guide](../docs/github-projects.md) for usage patterns
-2. Check [ADR-0004](../docs/adr/ADR-0004-use-github-projects-for-visualization.md) for architectural decisions
+1. Review the [GitHub Projects Guide](./github-projects.md) for usage patterns
+2. Check [ADR-0004](./adr/ADR-0004-use-github-projects-for-visualization.md) for architectural decisions
 3. Explore [Okyerema Projects Reference](../.github/skills/okyerema/references/projects.md) for GraphQL examples
 4. Consider enhancing automation with custom GitHub Actions
 
