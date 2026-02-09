@@ -189,8 +189,8 @@ Special thanks to:
 
 ### Anokye Labs
 
-- **Website:** [anokyeLabs.com](https://anokyeLabs.com) *(coming soon)*
-- **Email:** hello@anokyeLabs.com
+- **Website:** [anokyelabs.com](https://anokyelabs.com) *(coming soon)*
+- **Email:** hello@anokyelabs.com
 - **GitHub:** [@anokye-labs](https://github.com/anokye-labs)
 
 ### Maintainers
