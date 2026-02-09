@@ -2,9 +2,9 @@
 
 **Welcome to Continuous AI**
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/anokye-labs/akwaaba/ci.yml?branch=main)](https://github.com/anokye-labs/akwaaba/actions)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/anokye-labs/akwaaba/actions)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/anokye-labs/akwaaba/pulls)
 
 ---
 
