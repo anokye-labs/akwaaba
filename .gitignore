@@ -22,8 +22,16 @@ obj/
 *~
 
 # OS files
+# macOS
 .DS_Store
+.AppleDouble
+
+# Windows
 Thumbs.db
+Desktop.ini
+
+# Linux
+.directory
 
 # Node modules (if any)
 node_modules/
