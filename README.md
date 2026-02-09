@@ -2,7 +2,7 @@
 
 **Welcome to Continuous AI**
 
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+> _PRs Welcome — See CONTRIBUTING.md (coming soon)_
 
 > _Akwaaba_ (ah-KWAH-bah) — "Welcome" in Akan/Twi
 
@@ -178,7 +178,7 @@ See [Glossary](how-we-work/glossary.md) for meanings.
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details (coming soon).
+This project is licensed under the MIT License — LICENSE file coming soon.
 
 ---
 
