@@ -71,4 +71,4 @@ After setting up:
 
 ---
 
-**Full documentation coming in Phase 5!** Track progress in the [GitHub Project](https://github.com/orgs/anokye-labs/projects).
+**Full documentation coming in Phase 5!** Track progress in the [GitHub Issues](https://github.com/anokye-labs/akwaaba/issues).
