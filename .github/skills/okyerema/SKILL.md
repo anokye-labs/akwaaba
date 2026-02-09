@@ -174,7 +174,7 @@ Labels are for **filtering and categorization only**:
 ✅ **Good uses:** `documentation`, `security`, `typescript`, `good-first-issue`, `breaking-change`
 ❌ **Bad uses:** `epic`, `task`, `blocked-by-7`, `in-progress`, `parent:14`
 
-If you're tempted to create a label for structure, you're using the wrong tool. Use issue types, tasklists, or project fields instead.
+If you're tempted to create a label for structure, you're using the wrong tool. Use issue types, sub-issues API, or project fields instead.
 
 ## Glossary
 
