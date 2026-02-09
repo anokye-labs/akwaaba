@@ -154,7 +154,9 @@ if (Test-Path $referenceDocsPath) {
     foreach ($file in $referenceFiles) {
         $content = Get-Content -Path $file.FullName -Raw
         
-        # Check for deprecated trackedIssues API references (should use subIssues)
+        # Check for deprecated trackedIssues API references (should use subIssues per ADR-0001)
+        # Note: Negative lookahead (?!\s+is\s+empty) excludes the error message "trackedIssues is empty"
+        # which is a valid reference to the field name in troubleshooting docs
         if ($content -match 'trackedIssues(?!\s+is\s+empty)' -or $content -match 'trackedInIssues') {
             # According to ADR-0001, trackedIssues/trackedInIssues are deprecated in favor of subIssues/parent
             $apiCheckStatus = "Warn"
@@ -284,6 +286,11 @@ $hierarchyCheckStatus = "Pass"
 $hierarchyCheckDetails = @()
 
 # Query for all open Epics and verify their children have parent relationships
+# NOTE: This check uses the deprecated trackedIssues/trackedInIssues API because:
+# 1. The repository hasn't migrated to sub-issues API yet (per ADR-0001)
+# 2. We need to check the *current* state of the repository, not the ideal state
+# 3. This is a pragmatic health check that works with what's actually deployed
+# 4. The API Compatibility check above already warns about the deprecated API usage
 $epicQuery = @"
 query(`$owner: String!, `$repo: String!) {
   repository(owner: `$owner, name: `$repo) {
