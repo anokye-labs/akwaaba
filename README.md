@@ -1,46 +1,47 @@
 # Akwaaba
 
-**Akwaaba** (ah-KWAH-bah) means *"Welcome"* in Akan/Twi. This is the reference implementation for the **Anokye System** — a governance model for GitHub repositories where AI agents and humans collaborate through structured, issue-driven development.
+**Akwaaba** (ah-KWAH-bah) means *"Welcome"* in Akan/Twi — and that is exactly what this is. Welcome to the Anokye System.
+
+This repository is the reference implementation for a governance model where humans and AI agents collaborate through structured, issue-driven development. Everything you need to understand how Anokye Labs works lives here.
 
 > *When the Okyerema beats the drum, the asafo moves in formation.*
-
-## What Is This?
-
-Akwaaba is where you come to learn how Anokye Labs works. It contains:
-
-- **The Okyerema skill** — agent instructions for project orchestration via GitHub Issues, Projects, and sub-issues
-- **30+ PowerShell scripts** — a complete toolkit for DAG tracking, PR workflows, plan materialization, and agent lifecycle management
-- **Governance automation** — GitHub Actions that auto-assign unblocked work to agents
-- **Conventions and guides** — how we structure work, name things, and make decisions
-
-This isn't a library you install. It's a living reference that demonstrates a way of building software where issues are the single source of truth, agents are first-class contributors, and every change is traceable.
 
 ## The Anokye System
 
 The Anokye System is built on a simple premise: **humans decide what to build, agents build it, and GitHub is the coordination layer.**
 
+Today, two forces drive the system forward:
+
+- **The Okyeame** (Linguist) — the client interface. [WatchTower](https://github.com/anokye-labs/watchtower) is the current Okyeame: a cross-platform desktop application with an "Ancestral Futurism" design language, providing the voice between humans and the system.
+- **The Okyerema** (Talking Drummer) — the OODA orchestration skill. The Okyerema implements an **Observe → Orient → Decide → Act** loop for coordinating work. It is optimized for GitHub Issues — because issues are the most natural protocol for coordinating agents — but the pattern is not limited to GitHub.
+
+Together, the Okyeame and the Okyerema form the working heart of the system. The Okyeame speaks; the Okyerema orchestrates.
+
+### Why GitHub Issues?
+
+Issues are not just task tracking. In the Anokye System, they are **external memory** — the single source of truth that both humans and AI agents can read, write, and act on. An issue is a contract. A sub-issue is a decomposition. A dependency is a sequencing constraint. This makes the issue DAG (directed acyclic graph) the coordination protocol for the entire asafo.
+
+The strategic advantage: any agent that can read and write GitHub Issues can participate in the system without custom integration.
+
+### Roles and Concepts
+
 Every concept in the system draws from Akan culture:
 
-| Role | Akan | What It Does |
-|------|------|-------------|
-| **Akwaaba** | Welcome | This repo — the reference implementation and onboarding ground |
-| **Okyerema** | Talking Drummer | The orchestration skill — keeps agents in rhythm |
-| **Asafo** | Warriors | The team — humans and AI agents working together |
-| **Adwoma** | Work | GitHub Issues — the external memory and single source of truth |
-| **Ananse** | Spider | The agentic runtime — GitHub Copilot, Actions, the web that connects everything |
-| **Okyeame** | Linguist | Client applications — the voice between humans and machines |
-| **Omanfo** | The People | The shared plugin — bundles skills for distribution |
-| **Sankofa** | Return and get it | Automated health patrols — looking back to move forward |
+| Role | Akan | What It Does | Status |
+|------|------|-------------|--------|
+| **Akwaaba** | Welcome | This repo — the reference implementation and onboarding ground | ✅ Active |
+| **Okyeame** | Linguist | Client applications — [WatchTower](https://github.com/anokye-labs/watchtower) is the current Okyeame | ✅ Active |
+| **Okyerema** | Talking Drummer | OODA orchestration of work — keeps agents in rhythm | ✅ Active |
+| **Asafo** | Warriors | The team — humans and AI agents working together | ✅ Active |
+| **Adwoma** | Work | GitHub Issues — external memory and single source of truth | ✅ Active |
+| **Omanfo** | The People | Shared plugin — bundles skills for distribution | 🔧 In Progress |
+| **Sankofa** | Return and get it | Automated health patrols — looking back to move forward | 🔧 In Progress |
+| **Ananse** | Spider | The agentic runtime — not yet part of the system | 🔮 Future |
 
 ```
                         ┌──────────────┐
                         │   Okyeame    │
-                        │  (Client UI) │
-                        └──────┬───────┘
-                               │
-                        ┌──────┴───────┐
-                        │    Ananse    │
-                        │  (Runtime)   │
+                        │ (WatchTower) │
                         └──────┬───────┘
                                │
                  ┌─────────────┼─────────────┐
@@ -54,7 +55,7 @@ Every concept in the system draws from Akan culture:
                                │
                         ┌──────┴───────┐
                         │  Okyerema   │
-                        │  (Drummer)   │
+                        │ (OODA Loop)  │
                         │ Orchestrates │
                         │   adwoma     │
                         └──────┬───────┘
@@ -65,6 +66,17 @@ Every concept in the system draws from Akan culture:
                         │  Issues)     │
                         └──────────────┘
 ```
+
+## The Okyerema: OODA Orchestration
+
+The Okyerema is more than a project management tool. It implements the OODA loop:
+
+- **Observe** — Read the issue DAG. What's done? What's blocked? What's ready?
+- **Orient** — Understand dependencies, priorities, and the current state of the asafo.
+- **Decide** — Select the next piece of work. Assign it.
+- **Act** — Create branches, open PRs, resolve issues, advance the plan.
+
+This loop runs continuously. When an agent completes a task, the Okyerema observes the change, re-orients, and decides what comes next. The drummer never stops.
 
 ## What's Inside
 
@@ -182,12 +194,14 @@ Read **[agents.md](agents.md)** — it points you to the Okyerema skill and expl
 
 The Okyerema skill and shared capabilities are being packaged as the **[Omanfo Plugin](https://github.com/anokye-labs/plugins)** for installation into any repository. Until the plugin is ready, copy the `.github/skills/okyerema/` directory.
 
-## Related Repositories
+## The Anokye Labs Ecosystem
 
-| Repository | Purpose |
-|-----------|---------|
-| [anokye-labs/plugins](https://github.com/anokye-labs/plugins) | The Omanfo plugin — packages Okyerema + shared skills for distribution |
-| [anokye-labs/okyeame](https://github.com/anokye-labs/okyeame) | The Okyeame client — voice-first interface to the Ananse runtime |
+| Repository | Role | Description |
+|-----------|------|-------------|
+| **[akwaaba](https://github.com/anokye-labs/akwaaba)** | Akwaaba | This repo — reference implementation and welcome mat |
+| **[watchtower](https://github.com/anokye-labs/watchtower)** | Okyeame | Cross-platform desktop client with Ancestral Futurism design language |
+| **[plugins](https://github.com/anokye-labs/plugins)** | Omanfo | Packages Okyerema + shared skills for distribution |
+| **[copilot-media-plugins](https://github.com/anokye-labs/copilot-media-plugins)** | — | Agentic media plugins for GitHub Copilot |
 
 ## Why "Akwaaba"?
 
