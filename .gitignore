@@ -3,10 +3,13 @@
 # =============================================================================
 # These patterns exclude temporary files created during development and testing.
 # 
-# IMPORTANT: test*.ps1 (lowercase 't') excludes ad-hoc test files like test_query.ps1
-# but does NOT match Test-*.ps1 files (capital 'T'), which are permanent test
-# suites and ARE tracked in version control. Git patterns are case-sensitive
-# regardless of the underlying filesystem.
+# IMPORTANT: The pattern test*.ps1 excludes ad-hoc test files like test_query.ps1.
+# However, the permanent test suites in this repository use the naming convention
+# Test-*.ps1 (capital 'T' with hyphen), so they do NOT match this pattern and ARE
+# tracked in version control.
+# 
+# Examples of excluded files: test.ps1, testing.ps1, test_something.ps1
+# Examples of tracked files: Test-Invoke-SystemHealthCheck.ps1, Test-Get-DagStatus.ps1
 
 # Temporary PowerShell files (e.g., temp_debug.ps1)
 temp*.ps1
