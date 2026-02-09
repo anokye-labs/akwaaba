@@ -4,7 +4,7 @@ An **Architectural Decision Record (ADR)** is a lightweight document that captur
 
 ## Why We Use ADRs
 
-The decision to use tasklist blocks for issue hierarchy was never formally documented. When GitHub retired tasklist blocks in late 2024, we had no ADR to flag for review. An ADR like "ADR-001: Use tasklist blocks for issue hierarchy" would have been immediately caught during the retirement announcement, allowing us to plan migration proactively instead of reactively.
+The decision to use tasklist blocks for issue hierarchy was never formally documented. When GitHub retired tasklist blocks in November 2024, we had no ADR to flag for review. An ADR like "ADR-001: Use tasklist blocks for issue hierarchy" would have been immediately caught during the retirement announcement, allowing us to plan migration proactively instead of reactively. We have since created [ADR-0001](../docs/adr/ADR-0001-use-sub-issues-for-hierarchy.md) which documents our migration to the sub-issues API.
 
 **ADRs serve as trip wires** - they ensure that when underlying assumptions change (APIs deprecate, platforms evolve, requirements shift), we catch the impact early and can respond deliberately.
 

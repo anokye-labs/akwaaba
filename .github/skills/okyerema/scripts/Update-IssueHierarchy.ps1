@@ -1,25 +1,23 @@
 # Update-IssueHierarchy.ps1
-# Build parent-child relationships by adding tasklists to issue bodies
+# Build parent-child relationships using sub-issues API
 
 param(
     [Parameter(Mandatory)][string]$Owner,
     [Parameter(Mandatory)][string]$Repo,
     [Parameter(Mandatory)][int]$ParentNumber,
-    [Parameter(Mandatory)][int[]]$ChildNumbers,
-    [ValidateSet("Features", "Tasks")]
-    [string]$ChildType = "Tasks"
+    [Parameter(Mandatory)][int[]]$ChildNumbers
 )
 
 $ErrorActionPreference = "Stop"
 
-# Get parent issue
+# Get parent issue node ID
 $parentQuery = @"
 query {
   repository(owner: `"$Owner`", name: `"$Repo`") {
     issue(number: $ParentNumber) {
       id
       title
-      body
+      issueType { name }
     }
   }
 }
@@ -28,52 +26,59 @@ query {
 $result = gh api graphql -f query="$parentQuery" | ConvertFrom-Json
 $parentId = $result.data.repository.issue.id
 $parentTitle = $result.data.repository.issue.title
-$parentBody = $result.data.repository.issue.body
+$parentType = $result.data.repository.issue.issueType.name
 
-Write-Host "Parent: #$ParentNumber - $parentTitle" -ForegroundColor Cyan
+Write-Host "Parent: #$ParentNumber [$parentType] $parentTitle" -ForegroundColor Cyan
 
-# Remove existing tasklist section
-$lines = $parentBody -split "`n"
-$cleanLines = @()
-$inTasklist = $false
-
-foreach ($line in $lines) {
-    if ($line -match '^## [\p{So}\s]*Tracked (Tasks|Features|Items)') {
-        $inTasklist = $true
-        continue
+# Get child issue node IDs
+$childIssues = @()
+foreach ($childNum in $ChildNumbers) {
+    $childQuery = @"
+query {
+  repository(owner: `"$Owner`", name: `"$Repo`") {
+    issue(number: $childNum) {
+      id
+      number
+      title
+      issueType { name }
     }
-    if ($inTasklist -and $line -match '^- \[') { continue }
-    if ($inTasklist -and $line -match '^\s*$') { continue }
-    if ($inTasklist -and $line -match '^##') { $inTasklist = $false }
-    if (-not $inTasklist) { $cleanLines += $line }
-}
-
-$cleanBody = ($cleanLines -join "`n").TrimEnd()
-
-# Build new tasklist
-$tasklist = "`n`n## Tracked $ChildType`n`n"
-foreach ($num in $ChildNumbers | Sort-Object) {
-    $tasklist += "- [ ] #$num`n"
-}
-
-$newBody = $cleanBody + $tasklist
-
-# Update parent
-$escapedBody = $newBody.Replace('\', '\\').Replace('"', '\"').Replace("`n", '\n')
-
-$updateMutation = @"
-mutation {
-  updateIssue(input: {
-    id: `"$parentId`"
-    body: `"$escapedBody`"
-  }) {
-    issue { number }
   }
 }
 "@
+    
+    $childResult = gh api graphql -f query="$childQuery" | ConvertFrom-Json
+    $child = $childResult.data.repository.issue
+    $childIssues += $child
+    Write-Host "  Child: #$($child.number) [$($child.issueType.name)] $($child.title)" -ForegroundColor Gray
+}
 
-gh api graphql -f query="$updateMutation" | Out-Null
+# Add sub-issue relationships
+$successCount = 0
+foreach ($child in $childIssues) {
+    $addSubIssueMutation = @"
+mutation {
+  addSubIssue(input: {
+    issueId: `"$parentId`"
+    subIssueId: `"$($child.id)`"
+  }) {
+    subIssue {
+      number
+      parent {
+        number
+      }
+    }
+  }
+}
+"@
+    
+    try {
+        gh api graphql -H "GraphQL-Features: sub_issues" -f query="$addSubIssueMutation" | Out-Null
+        $successCount++
+    }
+    catch {
+        Write-Host "  ⚠ Failed to add #$($child.number): $_" -ForegroundColor Yellow
+    }
+}
 
-Write-Host "✓ Updated #$ParentNumber with $($ChildNumbers.Count) tracked $ChildType" -ForegroundColor Green
-Write-Host "  Children: #$($ChildNumbers -join ', #')" -ForegroundColor Gray
-Write-Host "  ⏰ Wait 2-5 minutes for GitHub to parse relationships" -ForegroundColor Yellow
+Write-Host "`n✓ Added $successCount of $($childIssues.Count) sub-issues to #$ParentNumber" -ForegroundColor Green
+Write-Host "  Relationships are immediate (no wait time)" -ForegroundColor Gray
