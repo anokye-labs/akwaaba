@@ -15,8 +15,19 @@ obj/
 *.pdb
 
 # IDE files
-.vscode/
+# Rider
 .idea/
+
+# Visual Studio
+.vs/
+*.vsidx
+*.sln.docstates
+
+# VS Code (keep settings.json template)
+.vscode/*
+!.vscode/settings.json
+
+# General editors
 *.swp
 *.swo
 *~
