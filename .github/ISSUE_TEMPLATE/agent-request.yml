@@ -1,0 +1,199 @@
+name: Agent Request
+description: Request approval for a new agent to commit to the repository
+title: "[AGENT] "
+labels: ["agent-request", "enhancement", "governance"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Agent Registration Request
+        
+        Use this template to request approval for a new agent (bot, GitHub App, or automation) to commit to this repository. All agents must be reviewed and approved before they can make commits.
+        
+        **Please provide complete and accurate information to expedite the review process.**
+
+  - type: input
+    id: agent-name
+    attributes:
+      label: Agent Name
+      description: Human-readable name for this agent
+      placeholder: "e.g., Documentation Sync Bot, PR Labeler, Code Formatter"
+    validations:
+      required: true
+
+  - type: input
+    id: github-username
+    attributes:
+      label: GitHub Username
+      description: The GitHub username or bot account name (must end with [bot] for GitHub Apps)
+      placeholder: "e.g., myapp[bot], my-custom-bot"
+    validations:
+      required: true
+
+  - type: input
+    id: github-app-id
+    attributes:
+      label: GitHub App ID
+      description: The unique GitHub App ID (found in App settings). Leave blank if not a GitHub App.
+      placeholder: "e.g., 12345"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: agent-type
+    attributes:
+      label: Agent Type
+      description: What type of agent is this?
+      options:
+        - GitHub App
+        - GitHub Actions Bot
+        - Custom Bot
+        - Third-party Integration
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose
+      description: What problem does this agent solve? Why is it needed?
+      placeholder: |
+        Describe the business need or problem this agent addresses.
+        Example: "Automatically syncs documentation from source code comments to keep docs up-to-date."
+    validations:
+      required: true
+
+  - type: textarea
+    id: operations
+    attributes:
+      label: Planned Operations
+      description: What specific actions will this agent perform?
+      placeholder: |
+        List the operations this agent will perform:
+        - Read source files
+        - Generate documentation
+        - Create pull requests
+        - Update issue labels
+    validations:
+      required: true
+
+  - type: textarea
+    id: permissions
+    attributes:
+      label: Permissions Required
+      description: What GitHub permissions does this agent need? (Use minimum necessary)
+      placeholder: |
+        List required permissions:
+        - Repository: Read
+        - Pull Requests: Write
+        - Issues: Write
+        - Contents: Write
+    validations:
+      required: true
+
+  - type: textarea
+    id: security
+    attributes:
+      label: Security Considerations
+      description: How is this agent secured? What security measures are in place?
+      placeholder: |
+        Address security concerns:
+        - How are credentials stored and managed?
+        - What access controls are in place?
+        - How is the agent authenticated?
+        - What monitoring/logging exists?
+    validations:
+      required: true
+
+  - type: input
+    id: maintainer
+    attributes:
+      label: Maintainer
+      description: Who is responsible for maintaining this agent?
+      placeholder: "@username or team name"
+    validations:
+      required: true
+
+  - type: textarea
+    id: maintenance-plan
+    attributes:
+      label: Maintenance Plan
+      description: How will this agent be maintained and updated?
+      placeholder: |
+        Describe the maintenance approach:
+        - Who responds to issues?
+        - How are updates deployed?
+        - What monitoring is in place?
+        - How are incidents handled?
+    validations:
+      required: true
+
+  - type: input
+    id: documentation
+    attributes:
+      label: Documentation
+      description: Link to agent documentation (if available)
+      placeholder: "https://github.com/org/repo/docs/agent-name.md"
+    validations:
+      required: false
+
+  - type: textarea
+    id: testing
+    attributes:
+      label: Testing Plan
+      description: How will you verify the agent works correctly before full deployment?
+      placeholder: |
+        Outline your testing approach:
+        - Test in a fork or test repository
+        - Create sample PRs
+        - Verify authentication works
+        - Test error handling
+    validations:
+      required: false
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      description: How urgent is this agent approval?
+      options:
+        - Low - Can wait for normal review cycle
+        - Medium - Needed within 1 week
+        - High - Needed within 2-3 days
+        - Critical - Needed immediately (explain why)
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information that would help with the review?
+      placeholder: |
+        - Links to similar agents in other repositories
+        - References to discussions or RFCs
+        - Integration with existing workflows
+        - Dependencies or requirements
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm you have completed these steps
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: I have reviewed the GOVERNANCE.md agent registration requirements
+          required: true
+        - label: I have minimized the requested permissions to only what is necessary
+          required: true
+        - label: I have a plan for securing and maintaining this agent
+          required: true
+        - label: I have tested the agent in a non-production environment (if applicable)
+          required: false

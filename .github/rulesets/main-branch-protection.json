@@ -1,0 +1,65 @@
+{
+  "_comment": "Main Branch Protection Ruleset - Exported configuration for repository governance",
+  "_usage_note": "To apply this ruleset, use: gh api -X PUT /repos/anokye-labs/akwaaba/rulesets -F @.github/rulesets/main-branch-protection.json",
+  "_export_command": "To export current rulesets: pwsh -File scripts/Export-Ruleset.ps1 -Owner \"anokye-labs\" -Repo \"akwaaba\"",
+  
+  "name": "Main Branch Protection",
+  "target": "branch",
+  "enforcement": "active",
+  "_enforcement_comment": "Set to 'active' for full enforcement. Use 'evaluate' to test without blocking.",
+  
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/heads/main"],
+      "exclude": []
+    }
+  },
+  
+  "rules": [
+    {
+      "_rule_comment": "Require pull requests for all changes to main branch",
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews_on_push": true,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": true
+      }
+    },
+    {
+      "_rule_comment": "Require status checks to pass before merging",
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "required_status_checks": [
+          {
+            "context": "Commit Validator",
+            "integration_id": null
+          },
+          {
+            "context": "Agent Authentication",
+            "integration_id": null
+          }
+        ]
+      }
+    },
+    {
+      "_rule_comment": "Block force pushes to maintain commit history integrity",
+      "type": "non_fast_forward"
+    },
+    {
+      "_rule_comment": "Prevent accidental or malicious branch deletion",
+      "type": "deletion"
+    }
+  ],
+  
+  "bypass_actors": [
+    {
+      "_bypass_comment": "Organization administrators can bypass in emergencies",
+      "actor_id": 5,
+      "actor_type": "RepositoryRole",
+      "bypass_mode": "always"
+    }
+  ]
+}
