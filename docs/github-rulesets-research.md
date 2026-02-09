@@ -24,7 +24,7 @@ GitHub rulesets allow repository and organization administrators to define, bund
 - **Multi-level enforcement**: Repository, organization, and enterprise levels
 - **Scalability**: Up to 75 rulesets per repository and 75 organization-wide rulesets
 - **Pattern matching**: Use fnmatch syntax to target branches/tags (e.g., `main`, `release/*`, `v*`)
-- **Organization-wide availability**: Now available on GitHub Team plans (as of mid-2025), not just Enterprise
+- **Organization-wide availability**: Now available on GitHub Team plans (as of June 2025), not just Enterprise
 
 ### 2. Rule Types and Enforcement
 
