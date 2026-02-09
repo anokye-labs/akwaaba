@@ -1,0 +1,99 @@
+{
+  "_comment": "GitHub Repository Ruleset Configuration",
+  "_description": "This file defines comprehensive branch protection rules for the main branch",
+  "_export_command": "pwsh -File scripts/Export-Ruleset.ps1 -Owner anokye-labs -Repo akwaaba",
+  "_api_reference": "https://docs.github.com/en/rest/repos/rules",
+  "_last_updated": "2026-02-09",
+  
+  "name": "Main Branch Protection",
+  "target": "branch",
+  "enforcement": "active",
+  
+  "_conditions_comment": "Defines which branches this ruleset applies to",
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/heads/main"],
+      "exclude": []
+    }
+  },
+  
+  "_bypass_actors_comment": "Users, teams, or apps that can bypass these protection rules. Repository administrators typically have bypass access for emergency situations.",
+  "bypass_actors": [
+    {
+      "_comment": "Organization administrators can bypass in emergencies",
+      "actor_id": 5,
+      "actor_type": "RepositoryRole",
+      "bypass_mode": "always"
+    }
+  ],
+  
+  "_rules_comment": "Array of protection rules enforced on the main branch",
+  "rules": [
+    {
+      "_comment": "PULL REQUEST REQUIREMENT: All changes to main must go through a pull request. This prevents direct pushes and ensures code review process.",
+      "type": "pull_request",
+      "parameters": {
+        "_required_approving_review_count_comment": "Minimum number of approving reviews before merge",
+        "required_approving_review_count": 1,
+        
+        "_dismiss_stale_reviews_on_push_comment": "Automatically dismiss existing approvals when new commits are pushed to ensure reviewers see the latest changes",
+        "dismiss_stale_reviews_on_push": true,
+        
+        "_require_code_owner_review_comment": "Require at least one approval from code owners if CODEOWNERS file exists",
+        "require_code_owner_review": false,
+        
+        "_require_last_push_approval_comment": "Require approval from someone other than the last person to push (prevents self-approval)",
+        "require_last_push_approval": true,
+        
+        "_required_review_thread_resolution_comment": "All conversations in the pull request must be resolved before merging",
+        "required_review_thread_resolution": true
+      }
+    },
+    {
+      "_comment": "REQUIRED STATUS CHECKS: Automated checks that must pass before merging. These ensure code quality and security standards.",
+      "type": "required_status_checks",
+      "parameters": {
+        "_status_checks_comment": "List of required status check contexts",
+        "required_status_checks": [
+          {
+            "context": "Commit Validator",
+            "_context_comment": "Validates commit message format, sign-off requirements, and commit metadata"
+          },
+          {
+            "context": "Agent Authentication",
+            "_context_comment": "Verifies that automated agents are properly authenticated and authorized"
+          }
+        ],
+        
+        "_strict_required_status_checks_policy_comment": "When true, requires branches to be up-to-date with base branch before merging. Prevents merge conflicts and ensures tests run against latest code.",
+        "strict_required_status_checks_policy": true
+      }
+    },
+    {
+      "_comment": "DELETION PROTECTION: Prevents accidental or malicious deletion of the main branch",
+      "type": "deletion"
+    },
+    {
+      "_comment": "NON-FAST-FORWARD PROTECTION: Prevents force pushes and history rewrites. Maintains commit history integrity and prevents data loss.",
+      "type": "non_fast_forward"
+    }
+  ],
+  
+  "_notes": [
+    "This ruleset provides comprehensive protection for the main branch",
+    "Direct pushes are blocked - all changes must go through pull requests",
+    "At least one approval is required, and it must be from someone other than the author",
+    "Automated status checks must pass before merging",
+    "The branch cannot be deleted or force-pushed",
+    "In emergencies, repository administrators can bypass these rules",
+    "To export the current ruleset from GitHub: pwsh -File scripts/Export-Ruleset.ps1 -Owner anokye-labs -Repo akwaaba",
+    "To apply this ruleset: Configure via GitHub UI at Settings -> Rules -> Rulesets"
+  ],
+  
+  "_optional_rules_reference": {
+    "_comment": "Additional rules that can be enabled if needed",
+    "required_signatures": "Requires all commits to be signed with GPG/SSH keys",
+    "required_linear_history": "Prevents merge commits, requires linear history (rebase or squash)",
+    "required_deployments": "Requires successful deployment to specified environments before merge"
+  }
+}
