@@ -19,7 +19,7 @@ The Anokye-Krom System is inspired by Steve Yegge's Gas Town but designed specif
 ### Planning & Architecture
 - **[Implementation Plan](planning/README.md)** - Complete breakdown of all phases and features
 - **[Agents Guide](agents.md)** - How AI agents work in this repository (includes Okyerema skill documentation)
-- **[GOVERNANCE.md](GOVERNANCE.md)** _(coming soon)_ - Governance rules and enforcement
+- **GOVERNANCE.md** _(coming soon)_ - Governance rules and enforcement
 - **[Architecture Documentation](docs/)** - Technical specifications and ADRs
 
 ### How We Work
