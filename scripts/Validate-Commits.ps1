@@ -285,9 +285,9 @@ function Format-ValidationResults {
         Write-Host ""
         Write-Host "Commits must reference a GitHub issue using one of these formats:" -ForegroundColor Yellow
         Write-Host "  - #123" -ForegroundColor White
-        Write-Host "  - Closes #123" -ForegroundColor White
-        Write-Host "  - Fixes #123" -ForegroundColor White
-        Write-Host "  - Resolves #123" -ForegroundColor White
+        Write-Host "  - Close #123 or Closes #123" -ForegroundColor White
+        Write-Host "  - Fix #123 or Fixes #123" -ForegroundColor White
+        Write-Host "  - Resolve #123 or Resolves #123" -ForegroundColor White
         Write-Host "  - Issue #123" -ForegroundColor White
         Write-Host "  - GH-123" -ForegroundColor White
     }
@@ -370,7 +370,12 @@ $result = [PSCustomObject]@{
 }
 
 # Format and output results
-Format-ValidationResults -Results $result -OutputFormat $OutputFormat
+$formattedOutput = Format-ValidationResults -Results $result -OutputFormat $OutputFormat
+
+# For JSON output, write to stdout
+if ($OutputFormat -eq "Json" -and $formattedOutput) {
+    Write-Output $formattedOutput
+}
 
 # Set exit code based on validation success
 if (-not $success) {
