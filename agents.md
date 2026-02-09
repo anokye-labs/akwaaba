@@ -42,7 +42,7 @@ When a script exists for an operation, **use it** instead of reimplementing the 
 
 The Okyerema (talking drummer) skill teaches agents how to:
 - Create issues with proper organization types (Epic, Feature, Task, Bug)
-- Build parent-child hierarchies using GitHub Tasklists
+- Build parent-child hierarchies using GitHub's sub-issues API
 - Manipulate GitHub Projects via GraphQL
 - Use labels appropriately (sparingly, for categorization only)
 - Verify relationships and troubleshoot issues
@@ -51,8 +51,8 @@ The Okyerema (talking drummer) skill teaches agents how to:
 
 1. **Use GraphQL for all structured operations** — gh CLI is insufficient
 2. **Use organization issue types** — never labels or title prefixes
-3. **Use Tasklists for relationships** — markdown checkboxes in issue body
-4. **Wait 2-5 minutes** after tasklist updates for GitHub to parse
+3. **Use sub-issues API for relationships** — createIssueRelationship mutation
+4. **Include GraphQL-Features: sub_issues header** — required for sub-issues operations
 5. **Use labels sparingly** — categorization only, never structure
 
 ## Session Context
