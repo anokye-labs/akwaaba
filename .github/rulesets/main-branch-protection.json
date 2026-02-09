@@ -32,8 +32,7 @@
       }
     },
     {
-      "type": "non_fast_forward",
-      "parameters": {}
+      "type": "non_fast_forward"
     },
     {
       "type": "deletion"
