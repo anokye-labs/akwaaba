@@ -1102,6 +1102,57 @@ Comprehensive PR status check with merge, review, issues, threads, and time metr
 - **Comment Threads**: Total, resolved, unresolved, and outdated counts
 - **Time Metrics**: Age, time since update, time in draft vs ready
 
+### Validate-Commits.ps1
+
+Validates that all commits in a pull request reference GitHub issues, enforcing issue-driven development.
+
+**Features:**
+- Fetches all commits from a pull request
+- Validates commit messages contain issue references
+- Supports multiple issue reference formats (#123, Closes #123, Fixes #123, Resolves #123, Issue #123, GH-123)
+- Allows revert commits without issue references
+- Multiple output formats (Console, Json)
+- Detailed validation results with pass/fail per commit
+- Helpful error messages with format examples
+- DryRun mode for testing
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+
+**Usage:**
+
+```powershell
+# Validate commits in PR #42
+./scripts/Validate-Commits.ps1 -PRNumber 42
+
+# Get JSON output for scripting
+./scripts/Validate-Commits.ps1 -PRNumber 42 -OutputFormat Json
+
+# Specify repository explicitly
+./scripts/Validate-Commits.ps1 -PRNumber 42 -Owner anokye-labs -Repo akwaaba
+
+# Test without making API calls
+./scripts/Validate-Commits.ps1 -PRNumber 42 -DryRun
+```
+
+**Exit Codes:**
+- `0`: All commits passed validation
+- `1`: One or more commits failed validation
+
+**Issue Reference Formats:**
+
+The script accepts the following issue reference formats in commit messages:
+- `#123` - Basic issue reference
+- `Closes #123` - Closes/Close an issue
+- `Fixes #123` - Fixes/Fix an issue  
+- `Resolves #123` - Resolves/Resolve an issue
+- `Issue #123` - Explicit issue reference
+- `GH-123` - GitHub issue shorthand
+
+Multiple issue references in a single commit are supported.
+
+
 ### Get-RepoContext.ps1
 
 Fetches repository context (repo ID, issue types, project IDs, and label IDs) in one query.
