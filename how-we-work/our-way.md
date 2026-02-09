@@ -73,7 +73,7 @@ We follow a strict policy on labels:
 
 ### ❌ Never Use Labels For
 - **Issue types** — That's what types are for
-- **Relationships** — That's what tasklists are for
+- **Relationships** — That's what sub-issues are for
 - **Status** — That's what issue state and Projects are for
 - **Working around missing features** — Find the proper tool
 
@@ -151,6 +151,65 @@ GitHub doesn't have native "blocks/blocked by" relationships. We handle this by:
 2. **Project fields** — Custom "Blocks" and "Blocked By" text fields
 3. **Phase ordering** — Issues within a phase generally depend on prior phases
 
+## Sub-Issues API for Hierarchy
+
+We use GitHub's **sub-issues API** to create parent-child relationships in our Epic → Feature → Task hierarchy.
+
+### Creating Relationships
+
+Use the `createIssueRelationship` mutation to establish parent-child relationships:
+
+```graphql
+mutation {
+  createIssueRelationship(input: {
+    repositoryId: "R_xxx"
+    parentId: "I_parent_xxx"
+    childId: "I_child_xxx"
+  }) {
+    issueRelationship {
+      parent { number }
+      child { number }
+    }
+  }
+}
+```
+
+**Important:** When using sub-issues API via GraphQL, you must include the header:
+```
+GraphQL-Features: sub_issues
+```
+
+### Querying Relationships
+
+Query relationships using the `parent` and `subIssues` fields:
+
+```graphql
+query {
+  repository(owner: "anokye-labs", name: "repo") {
+    issue(number: 14) {
+      title
+      issueType { name }
+      subIssues(first: 50) {
+        nodes {
+          number
+          title
+          issueType { name }
+        }
+      }
+    }
+  }
+}
+```
+
+### Why Sub-Issues?
+
+- **Immediate** — No parsing delays like the old tasklist approach
+- **Official API** — Supported by GitHub, future-proof
+- **Better UI** — Sub-issues appear in a dedicated section
+- **Reliable** — Direct relationships, no markdown parsing required
+
+See [ADR-0001: Use Sub-Issues API for Hierarchy](../docs/adr/ADR-0001-use-sub-issues-for-hierarchy.md) for the full rationale.
+
 ## Lessons Learned
 
 These rules exist because we made every mistake in the book:
@@ -161,7 +220,7 @@ These rules exist because we made every mistake in the book:
 | Used title prefixes | `[Epic]` in title doesn't set type | Set type via GraphQL mutation |
 | Created flat hierarchies | Epic → 95 Tasks was unmanageable | Use Features to group tasks |
 | Used gh CLI | Couldn't set types or relationships | Use GraphQL for all structured ops |
-| Expected instant updates | Relationships didn't appear immediately | Wait 2-5 minutes after tasklist changes |
+| Used tasklists | Relied on deprecated API, parsing delays | Use sub-issues API with createIssueRelationship |
 
 ---
 
