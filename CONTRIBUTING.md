@@ -22,7 +22,7 @@ This workflow ensures:
 **Important:** Direct commits to protected branches (like `main`) are not permitted. All changes must go through the issue → agent → pull request workflow.
 
 This restriction is enforced via:
-- GitHub branch protection rules
+- GitHub branch protection rules (see [GOVERNANCE.md](GOVERNANCE.md))
 - Commit validation workflows
 - Authentication and authorization controls
 

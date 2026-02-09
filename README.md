@@ -125,6 +125,7 @@ akwaaba/
 - **[Our Way](how-we-work/our-way.md)** — How we structure and coordinate work
 - **[Glossary](how-we-work/glossary.md)** — Akan terms and concepts
 - **[ADR Process](how-we-work/adr-process.md)** — How we document architectural decisions
+- **[Governance](GOVERNANCE.md)** — Branch protection and governance policies
 
 ### For AI Agents
 
