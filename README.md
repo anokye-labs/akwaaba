@@ -41,7 +41,7 @@ The system uses GitHub's native features (Projects, Issues, Actions) combined wi
 
 Before working with Akwaaba, ensure you have:
 
-- **[GitHub CLI](https://cli.github.com/)** (`gh`) — For interacting with GitHub from the command line
+- **[GitHub CLI](https://cli.github.com/)** (`gh`) version 2.0 or later — For interacting with GitHub from the command line
 - **[.NET SDK](https://dotnet.microsoft.com/download)** (8.0 or later) — For building and running .NET projects
 - **[PowerShell](https://github.com/PowerShell/PowerShell)** (7.0 or later) — For automation scripts
 
