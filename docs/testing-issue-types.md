@@ -259,7 +259,7 @@ gh api graphql -H "GraphQL-Features: sub_issues" -f query="..."
 
 2. **No Issue Templates**: The repository uses organization-level issue types, not issue templates in `.github/ISSUE_TEMPLATE/`. The planning document mentioning issue templates was superseded by ADR-0003.
 
-3. **Agent Request**: There is no "Agent Request" issue type. If you need to propose an agent, create a Feature or Task issue with appropriate labels (e.g., `agent-related`, `enhancement`).
+3. **Agent Request**: There is no "Agent Request" issue type. The original planning document (`planning/phase-2-governance/04-issue-templates.md`) proposed an "Agent Request" template, but this was not implemented when we switched to organization-level issue types. If you need to propose an agent, create a Feature or Task issue with appropriate labels (e.g., `agent-related`, `enhancement`).
 
 4. **GraphQL Required**: Issue types can only be set via GraphQL API, not via `gh issue create` CLI commands.
 

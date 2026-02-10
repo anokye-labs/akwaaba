@@ -19,7 +19,7 @@ This guide helps you quickly test the organization-level issue type system.
 
 ## Prerequisites
 
-1. **PowerShell 7+** installed
+1. **PowerShell 7.x or higher** installed
 2. **GitHub CLI** (`gh`) installed and authenticated
 3. **Permissions** to create issues in the target repository
 4. **Organization** has issue types configured (Epic, Feature, Task, Bug)

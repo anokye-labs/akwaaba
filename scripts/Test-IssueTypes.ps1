@@ -82,7 +82,8 @@ $ErrorActionPreference = "Stop"
 
 # Find repository root and load dependencies
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$repoRoot = $scriptDir  # Already in scripts directory
+# Note: This assumes the script is located in scripts/ directory at repository root
+$repoRoot = $scriptDir
 
 # Import required scripts
 . (Join-Path $scriptDir "Invoke-GraphQL.ps1")
@@ -321,6 +322,7 @@ query {
 }
 "@
             
+            # Note: GraphQL-Features: sub_issues header is required when querying subIssues fields
             $result = gh api graphql -H "GraphQL-Features: sub_issues" -f query="$query" | ConvertFrom-Json
             $epicIssue = $result.data.repository.issue
             
@@ -388,6 +390,7 @@ query {
 }
 "@
             
+            # Note: sub_issues header not needed here since we're not querying subIssues field
             $result = gh api graphql -f query="$query" | ConvertFrom-Json
             $bugIssue = $result.data.repository.issue
             
