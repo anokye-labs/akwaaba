@@ -84,6 +84,65 @@ Write-Host "Repository ID: $($context.RepoId)"
 $context = ./scripts/Get-RepoContext.ps1 -Refresh
 ```
 
+
+### Test-IssueExists.ps1
+
+Validates that a GitHub issue exists, is in the same repository, and is open.
+
+**Features:**
+- Checks if an issue exists via GitHub CLI
+- Verifies issue is in the expected repository
+- Confirms issue is open (not closed)
+- Session-scoped caching to avoid rate limiting
+- Supports explicit repository specification
+- Returns structured validation results
+- Force refresh option to bypass cache
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Get-RepoContext.ps1 (for repository context)
+
+**Usage:**
+
+```powershell
+# Check issue in current repository
+$result = ./scripts/Test-IssueExists.ps1 -IssueNumber 68
+
+# Check with explicit repository
+$result = ./scripts/Test-IssueExists.ps1 -IssueNumber 68 -Owner "anokye-labs" -Repo "akwaaba"
+
+# Force refresh (bypass cache)
+$result = ./scripts/Test-IssueExists.ps1 -IssueNumber 68 -Refresh
+
+# Conditional logic example
+$check = ./scripts/Test-IssueExists.ps1 -IssueNumber 68
+if ($check.Exists -and $check.IsOpen -and $check.IsSameRepository) {
+    Write-Host "Issue is valid - proceeding"
+} else {
+    Write-Error "Issue validation failed"
+}
+```
+
+**Output Properties:**
+- `Exists`: Boolean - Whether the issue exists
+- `IsOpen`: Boolean - Whether the issue is open
+- `IsSameRepository`: Boolean - Whether issue is in expected repository
+- `IssueNumber`: Int - The issue number checked
+- `State`: String - Issue state (OPEN, CLOSED, or null)
+- `Title`: String - Issue title (or null if not found)
+- `Url`: String - Issue URL (or null if not found)
+- `RepositoryNameWithOwner`: String - Full repo name (or null if not found)
+- `ErrorMessage`: String - Error message if validation failed (or null)
+
+**Common Use Cases:**
+- Commit message validation (verify issue references)
+- Pre-work validation (ensure issue is open before starting)
+- Bulk issue validation (check multiple issues)
+- Cross-repository issue validation
+
+**Examples:**
+See `scripts/examples/Test-IssueExists-Examples.ps1` for detailed usage examples.
 ### Import-DagFromJson.ps1
 
 Create issue graph from a JSON DAG (Directed Acyclic Graph) definition.
