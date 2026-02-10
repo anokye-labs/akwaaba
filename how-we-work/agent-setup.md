@@ -134,7 +134,7 @@ Building a custom agent? Here's what you need:
 **Resources:**
 - [GitHub Apps Documentation](https://docs.github.com/en/apps)
 - [GitHub GraphQL API](https://docs.github.com/en/graphql)
-- [Okyerema Skill](./.github/skills/okyerema/SKILL.md) — Project orchestration patterns
+- [Okyerema Skill](.github/skills/okyerema/SKILL.md) — Project orchestration patterns
 
 ## Requesting Agent Approval
 
@@ -313,7 +313,7 @@ In rare cases (production outages, security vulnerabilities), humans may need to
 - [Agent Conventions](./agent-conventions.md) — Behavioral requirements
 - [Our Way](./our-way.md) — How we structure work
 - [Getting Started](./getting-started.md) — First-time contributor guide
-- [Okyerema Skill](./.github/skills/okyerema/SKILL.md) — Project orchestration
+- [Okyerema Skill](.github/skills/okyerema/SKILL.md) — Project orchestration
 
 ---
 
