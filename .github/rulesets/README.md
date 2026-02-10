@@ -70,7 +70,7 @@ Once the `commit-validator` workflow is implemented:
 
 ## Next Steps
 
-1. Create an issue to track implementation of the `commit-validator` workflow (see `/tmp/required-workflows-issue.md`)
+1. Create an issue to track implementation of the `commit-validator` workflow (see `planning/phase-2-governance/02-workflow-commit-validator.md` for details)
 2. Implement the workflow as described in `planning/phase-2-governance/02-workflow-commit-validator.md`
 3. Test the workflow
 4. Update this ruleset to set `enforcement: "active"`
