@@ -48,7 +48,7 @@
     Supported issue reference formats:
     - Simple reference: #123
     - Action keywords: Closes #123, Fixes #456, Resolves #789
-    - Full URL: anokye-labs/akwaaba#123
+    - Repository reference: anokye-labs/akwaaba#123
     - Full GitHub URL: https://github.com/anokye-labs/akwaaba/issues/123
     
     Multiple references can be combined in one commit message.
@@ -70,6 +70,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# Define action keywords as a constant for consistency
+$script:ActionKeywords = 'Closes|Fixes|Resolves|Close|Fix|Resolve'
 
 function Get-IssueReferences {
     <#
@@ -109,8 +112,8 @@ function Get-IssueReferences {
 
     # Helper function to check if a range overlaps with already processed ranges
     function Test-RangeProcessed {
-        param([int]$Start, [int]$End)
-        foreach ($range in $processedRanges) {
+        param([int]$Start, [int]$End, [array]$Ranges)
+        foreach ($range in $Ranges) {
             if (($Start -ge $range.Start -and $Start -le $range.End) -or 
                 ($End -ge $range.Start -and $End -le $range.End) -or
                 ($Start -le $range.Start -and $End -ge $range.End)) {
@@ -120,32 +123,51 @@ function Get-IssueReferences {
         return $false
     }
 
+    # Helper function to mark a range as processed and add issue number
+    function Add-IssueNumber {
+        param(
+            [int]$IssueNumber,
+            [int]$MatchStart,
+            [int]$MatchLength,
+            [ref]$IssueNumbers,
+            [ref]$ProcessedRanges
+        )
+        
+        # Mark this range as processed
+        $ProcessedRanges.Value += @{ Start = $MatchStart; End = $MatchStart + $MatchLength - 1 }
+        
+        # Add issue number if not already present
+        if ($IssueNumber -notin $IssueNumbers.Value) {
+            $IssueNumbers.Value += $IssueNumber
+        }
+    }
+
+    # Helper function to check if repository matches the context
+    function Test-RepositoryMatch {
+        param([string]$RefOwner, [string]$RefRepo, [string]$Owner, [string]$Repo)
+        
+        if ($Owner -and $Repo) {
+            return ($RefOwner -eq $Owner -and $RefRepo -eq $Repo)
+        }
+        return $true  # No context provided, accept all
+    }
+
     # Pattern 1: Action keywords with full repository reference
     # Matches: Closes anokye-labs/akwaaba#123, Fixes owner/repo#456
     # Process these first to handle repo-scoped references with keywords
-    $actionFullRefPattern = '(?:Closes|Fixes|Resolves|Close|Fix|Resolve)\s+([\w-]+)/([\w-]+)#(\d+)'
+    $actionFullRefPattern = "(?:$script:ActionKeywords)\s+([\w-]+)/([\w-]+)#(\d+)"
     $actionFullRefMatches = [regex]::Matches($Message, $actionFullRefPattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
     foreach ($match in $actionFullRefMatches) {
         $refOwner = $match.Groups[1].Value
         $refRepo = $match.Groups[2].Value
         $issueNumber = [int]$match.Groups[3].Value
         
-        # Mark this range as processed
-        $processedRanges += @{ Start = $match.Index; End = $match.Index + $match.Length - 1 }
-        
-        # If Owner and Repo are provided, only include references to the same repository
-        if ($Owner -and $Repo) {
-            if ($refOwner -eq $Owner -and $refRepo -eq $Repo) {
-                if ($issueNumber -notin $issueNumbers) {
-                    $issueNumbers += $issueNumber
-                }
-            }
+        if (Test-RepositoryMatch -RefOwner $refOwner -RefRepo $refRepo -Owner $Owner -Repo $Repo) {
+            Add-IssueNumber -IssueNumber $issueNumber -MatchStart $match.Index -MatchLength $match.Length -IssueNumbers ([ref]$issueNumbers) -ProcessedRanges ([ref]$processedRanges)
         }
         else {
-            # If no repository context provided, include all references
-            if ($issueNumber -notin $issueNumbers) {
-                $issueNumbers += $issueNumber
-            }
+            # Still mark as processed even if filtered out
+            $processedRanges += @{ Start = $match.Index; End = $match.Index + $match.Length - 1 }
         }
     }
 
@@ -156,7 +178,7 @@ function Get-IssueReferences {
     $fullRefMatches = [regex]::Matches($Message, $fullRefPattern)
     foreach ($match in $fullRefMatches) {
         # Skip if already processed
-        if (Test-RangeProcessed -Start $match.Index -End ($match.Index + $match.Length - 1)) {
+        if (Test-RangeProcessed -Start $match.Index -End ($match.Index + $match.Length - 1) -Ranges $processedRanges) {
             continue
         }
         
@@ -164,44 +186,28 @@ function Get-IssueReferences {
         $refRepo = $match.Groups[2].Value
         $issueNumber = [int]$match.Groups[3].Value
         
-        # Mark this range as processed
-        $processedRanges += @{ Start = $match.Index; End = $match.Index + $match.Length - 1 }
-        
-        # If Owner and Repo are provided, only include references to the same repository
-        if ($Owner -and $Repo) {
-            if ($refOwner -eq $Owner -and $refRepo -eq $Repo) {
-                if ($issueNumber -notin $issueNumbers) {
-                    $issueNumbers += $issueNumber
-                }
-            }
+        if (Test-RepositoryMatch -RefOwner $refOwner -RefRepo $refRepo -Owner $Owner -Repo $Repo) {
+            Add-IssueNumber -IssueNumber $issueNumber -MatchStart $match.Index -MatchLength $match.Length -IssueNumbers ([ref]$issueNumbers) -ProcessedRanges ([ref]$processedRanges)
         }
         else {
-            # If no repository context provided, include all references
-            if ($issueNumber -notin $issueNumbers) {
-                $issueNumbers += $issueNumber
-            }
+            # Still mark as processed even if filtered out
+            $processedRanges += @{ Start = $match.Index; End = $match.Index + $match.Length - 1 }
         }
     }
 
     # Pattern 3: Action keywords with simple issue reference
     # Matches: Closes #123, Fixes #456, Resolves #789, etc.
     # Process before simple patterns to avoid double-counting
-    $actionPattern = '(?:Closes|Fixes|Resolves|Close|Fix|Resolve)\s+#(\d+)'
+    $actionPattern = "(?:$script:ActionKeywords)\s+#(\d+)"
     $actionMatches = [regex]::Matches($Message, $actionPattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
     foreach ($match in $actionMatches) {
         # Skip if already processed
-        if (Test-RangeProcessed -Start $match.Index -End ($match.Index + $match.Length - 1)) {
+        if (Test-RangeProcessed -Start $match.Index -End ($match.Index + $match.Length - 1) -Ranges $processedRanges) {
             continue
         }
         
         $issueNumber = [int]$match.Groups[1].Value
-        
-        # Mark this range as processed
-        $processedRanges += @{ Start = $match.Index; End = $match.Index + $match.Length - 1 }
-        
-        if ($issueNumber -notin $issueNumbers) {
-            $issueNumbers += $issueNumber
-        }
+        Add-IssueNumber -IssueNumber $issueNumber -MatchStart $match.Index -MatchLength $match.Length -IssueNumbers ([ref]$issueNumbers) -ProcessedRanges ([ref]$processedRanges)
     }
 
     # Pattern 4: Full GitHub URL
@@ -210,7 +216,7 @@ function Get-IssueReferences {
     $urlMatches = [regex]::Matches($Message, $urlPattern)
     foreach ($match in $urlMatches) {
         # Skip if already processed
-        if (Test-RangeProcessed -Start $match.Index -End ($match.Index + $match.Length - 1)) {
+        if (Test-RangeProcessed -Start $match.Index -End ($match.Index + $match.Length - 1) -Ranges $processedRanges) {
             continue
         }
         
@@ -218,22 +224,12 @@ function Get-IssueReferences {
         $refRepo = $match.Groups[2].Value
         $issueNumber = [int]$match.Groups[3].Value
         
-        # Mark this range as processed
-        $processedRanges += @{ Start = $match.Index; End = $match.Index + $match.Length - 1 }
-        
-        # If Owner and Repo are provided, only include references to the same repository
-        if ($Owner -and $Repo) {
-            if ($refOwner -eq $Owner -and $refRepo -eq $Repo) {
-                if ($issueNumber -notin $issueNumbers) {
-                    $issueNumbers += $issueNumber
-                }
-            }
+        if (Test-RepositoryMatch -RefOwner $refOwner -RefRepo $refRepo -Owner $Owner -Repo $Repo) {
+            Add-IssueNumber -IssueNumber $issueNumber -MatchStart $match.Index -MatchLength $match.Length -IssueNumbers ([ref]$issueNumbers) -ProcessedRanges ([ref]$processedRanges)
         }
         else {
-            # If no repository context provided, include all references
-            if ($issueNumber -notin $issueNumbers) {
-                $issueNumbers += $issueNumber
-            }
+            # Still mark as processed even if filtered out
+            $processedRanges += @{ Start = $match.Index; End = $match.Index + $match.Length - 1 }
         }
     }
 
@@ -244,14 +240,12 @@ function Get-IssueReferences {
     $simpleMatches = [regex]::Matches($Message, $simplePattern)
     foreach ($match in $simpleMatches) {
         # Skip if already processed (e.g., as part of owner/repo#123)
-        if (Test-RangeProcessed -Start $match.Index -End ($match.Index + $match.Length - 1)) {
+        if (Test-RangeProcessed -Start $match.Index -End ($match.Index + $match.Length - 1) -Ranges $processedRanges) {
             continue
         }
         
         $issueNumber = [int]$match.Groups[1].Value
-        if ($issueNumber -notin $issueNumbers) {
-            $issueNumbers += $issueNumber
-        }
+        Add-IssueNumber -IssueNumber $issueNumber -MatchStart $match.Index -MatchLength $match.Length -IssueNumbers ([ref]$issueNumbers) -ProcessedRanges ([ref]$processedRanges)
     }
 
     return $issueNumbers
