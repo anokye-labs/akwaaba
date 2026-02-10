@@ -98,7 +98,7 @@ function Get-IssueReferences {
     $issueRefs = @()
     
     # Pattern 1: Simple #123 format
-    $simplePattern = '#(\d+)'
+    $simplePattern = '#(\d+)\b'
     $simpleMatches = [regex]::Matches($Message, $simplePattern)
     foreach ($match in $simpleMatches) {
         $issueRefs += @{
