@@ -1,0 +1,75 @@
+name: Commit Validator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate-commits:
+    name: Validate Commit Messages
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup PowerShell
+        shell: pwsh
+        run: |
+          Write-Host "PowerShell version: $($PSVersionTable.PSVersion)"
+          Write-Host "Operating System: $($PSVersionTable.OS)"
+      
+      - name: Validate commits
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Check if validation script exists
+          $scriptPath = "./scripts/Validate-Commits.ps1"
+          if (-not (Test-Path $scriptPath)) {
+            Write-Host "⚠️  Warning: Validation script not found at $scriptPath" -ForegroundColor Yellow
+            Write-Host "Skipping validation (graceful degradation during development)" -ForegroundColor Yellow
+            exit 0
+          }
+          
+          # Run validation
+          Write-Host "Running commit validation for PR #${{ github.event.pull_request.number }}..."
+          & $scriptPath -PRNumber ${{ github.event.pull_request.number }}
+          
+          # Exit with the script's exit code
+          exit $LASTEXITCODE
+      
+      - name: Comment on PR (if validation fails)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const message = `## ❌ Commit Validation Failed
+            
+            One or more commits in this PR do not reference an open GitHub issue.
+            
+            Please review the workflow logs for details and update your commit messages.
+            
+            ### Supported Formats
+            - \`#123\`
+            - \`Closes #123\`
+            - \`Fixes #456\`
+            - \`Resolves #789\`
+            - \`owner/repo#123\`
+            - \`https://github.com/owner/repo/issues/123\`
+            
+            See [CONTRIBUTING.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md) for more information.`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: message
+            });
