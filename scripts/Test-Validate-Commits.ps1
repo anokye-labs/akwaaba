@@ -77,10 +77,10 @@ function Test-CommitMessage {
     # - Full GitHub URLs
     
     $patterns = @(
-        '#\d+',                                          # #123
-        '(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#\d+',  # Closes #123
-        '[\w-]+/[\w-]+#\d+',                            # owner/repo#123
-        'github\.com/[\w-]+/[\w-]+/issues/\d+'          # Full URL
+        '#\d+',                                              # #123
+        '(?i)(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#\d+',  # Closes #123 (case-insensitive)
+        '[\w-]+/[\w-]+#\d+',                                 # owner/repo#123
+        'github\.com/[\w-]+/[\w-]+/issues/\d+'               # Full URL
     )
     
     foreach ($pattern in $patterns) {
@@ -102,9 +102,10 @@ function Get-IssueReferences {
     
     $issueNumbers = @()
     
-    # Match simple #123 format
-    if ($Message -match '#(\d+)') {
-        $issueNumbers += $Matches[1]
+    # Match simple #123 format (all occurrences)
+    $simpleMatches = [regex]::Matches($Message, '#(\d+)')
+    foreach ($match in $simpleMatches) {
+        $issueNumbers += $match.Groups[1].Value
     }
     
     # Match keyword formats (Closes #123, Fixes #456, etc.)
@@ -227,6 +228,16 @@ Test-CommitValidation -TestName "Extract multiple unique issues" -TestBlock {
     $issues = @(Get-IssueReferences -Message "fix: update readme #123 and Closes #456")
     if ($issues.Count -ne 2) {
         throw "Failed to extract multiple issues. Got: $($issues -join ', '), Count: $($issues.Count)"
+    }
+    if ($issues -notcontains "123" -or $issues -notcontains "456") {
+        throw "Missing expected issue numbers. Got: $($issues -join ', ')"
+    }
+}
+
+Test-CommitValidation -TestName "Extract multiple simple issue references" -TestBlock {
+    $issues = @(Get-IssueReferences -Message "fix: addresses #123 and #456")
+    if ($issues.Count -ne 2) {
+        throw "Failed to extract multiple simple references. Got: $($issues -join ', '), Count: $($issues.Count)"
     }
     if ($issues -notcontains "123" -or $issues -notcontains "456") {
         throw "Missing expected issue numbers. Got: $($issues -join ', ')"

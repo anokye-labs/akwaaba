@@ -96,10 +96,10 @@ function Test-CommitMessage {
     # - Full GitHub URLs
     
     $patterns = @(
-        '#\d+',                                          # #123
-        '(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#\d+',  # Closes #123
-        '[\w-]+/[\w-]+#\d+',                            # owner/repo#123
-        'github\.com/[\w-]+/[\w-]+/issues/\d+'          # Full URL
+        '#\d+',                                              # #123
+        '(?i)(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#\d+',  # Closes #123 (case-insensitive)
+        '[\w-]+/[\w-]+#\d+',                                 # owner/repo#123
+        'github\.com/[\w-]+/[\w-]+/issues/\d+'               # Full URL
     )
     
     foreach ($pattern in $patterns) {
@@ -119,9 +119,10 @@ function Get-IssueReferences {
     
     $issueNumbers = @()
     
-    # Match simple #123 format
-    if ($Message -match '#(\d+)') {
-        $issueNumbers += $Matches[1]
+    # Match simple #123 format (all occurrences)
+    $simpleMatches = [regex]::Matches($Message, '#(\d+)')
+    foreach ($match in $simpleMatches) {
+        $issueNumbers += $match.Groups[1].Value
     }
     
     # Match keyword formats (Closes #123, Fixes #456, etc.)

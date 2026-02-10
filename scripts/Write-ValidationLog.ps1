@@ -117,4 +117,4 @@ $logFile = Join-Path $logPath "$logDate-validation.log"
 Add-Content -Path $logFile -Value $json -Encoding UTF8
 
 # Also write to stderr for immediate visibility
-Write-Host "::notice::Validation logged: $ValidationResult for commit $CommitSha" -ForegroundColor Gray
+Write-Host "::notice::Validation logged: $ValidationResult for commit $CommitSha"
