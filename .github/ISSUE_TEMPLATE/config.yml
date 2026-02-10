@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/anokye-labs/akwaaba/blob/main/how-we-work.md
+    about: Learn how we work, our conventions, and guidelines for contributing
+  - name: 💬 GitHub Discussions
+    url: https://github.com/anokye-labs/akwaaba/discussions
+    about: Ask questions, share ideas, and discuss with the community
+  - name: 🏛️ Getting Started
+    url: https://github.com/anokye-labs/akwaaba/blob/main/how-we-work/getting-started.md
+    about: New to GitHub Issues? Start here to understand our workflow
+  - name: 🥁 Okyerema Skill (For Agents)
+    url: https://github.com/anokye-labs/akwaaba/blob/main/.github/skills/okyerema/SKILL.md
+    about: AI agents - read this for project orchestration and GraphQL examples
