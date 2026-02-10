@@ -1,30 +1,47 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "Allowlist of approved agents that can commit to this repository",
+  "_comment": "Approved agents for the Anokye-Krom System",
+  "_usage": "This file defines which agents are authorized to commit to this repository",
+  "_schema": "Each agent must have: id, type, username, botUsername (for GitHub Apps), githubAppId (for GitHub Apps), description, approvedBy, approvedDate, permissions, enabled",
   "agents": [
     {
-      "username": "copilot-swe-agent[bot]",
+      "id": "github-copilot",
       "type": "github-app",
-      "appId": "198982749",
-      "description": "GitHub Copilot Workspace agent for automated code changes",
+      "username": "copilot",
+      "botUsername": "copilot[bot]",
+      "githubAppId": "github-copilot",
+      "description": "GitHub Copilot - AI-powered code generation and automation agent",
       "approvedBy": "repository-admin",
-      "approvedDate": "2026-02-09"
+      "approvedDate": "2026-02-10",
+      "permissions": [
+        "read:repository",
+        "write:code",
+        "write:pull-requests",
+        "write:issues"
+      ],
+      "enabled": true
     },
     {
-      "username": "github-actions[bot]",
+      "id": "github-actions-bot",
       "type": "github-app",
-      "appId": "41898282",
-      "description": "GitHub Actions automation bot",
+      "username": "github-actions",
+      "botUsername": "github-actions[bot]",
+      "githubAppId": "github-actions",
+      "description": "GitHub Actions - Workflow automation for CI/CD and repository management",
       "approvedBy": "repository-admin",
-      "approvedDate": "2026-02-09"
-    },
-    {
-      "username": "dependabot[bot]",
-      "type": "github-app",
-      "appId": "49699333",
-      "description": "Dependabot for automated dependency updates",
-      "approvedBy": "repository-admin",
-      "approvedDate": "2026-02-09"
+      "approvedDate": "2026-02-10",
+      "permissions": [
+        "read:repository",
+        "write:code",
+        "write:pull-requests",
+        "write:workflow-runs"
+      ],
+      "enabled": true
     }
-  ]
+  ],
+  "_bypass_comment": "Emergency bypass: Apply 'emergency-merge' label to PR to bypass agent authentication",
+  "emergencyBypass": {
+    "label": "emergency-merge",
+    "requiresRole": "admin",
+    "auditRequired": true
+  }
 }

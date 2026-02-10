@@ -1,0 +1,111 @@
+name: Feature
+description: Cohesive functionality grouping related tasks within an epic
+title: "[Feature]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Template
+        A Feature represents a cohesive piece of functionality that can be broken down into multiple tasks. Features belong to Epics.
+        
+        **Before creating a Feature:**
+        - Identify the parent Epic this feature belongs to
+        - Ensure it represents a meaningful deliverable
+        - Verify it can be implemented within 1-2 weeks
+
+  - type: input
+    id: title
+    attributes:
+      label: Feature Title
+      description: A clear, concise name for this feature (will be prefixed with [Feature]:)
+      placeholder: "Example: Create Issue Templates"
+    validations:
+      required: true
+
+  - type: input
+    id: parent-epic
+    attributes:
+      label: Parent Epic
+      description: The Epic issue number this feature belongs to
+      placeholder: "Example: #12 or just 12"
+    validations:
+      required: true
+      pattern: '^#?\d+$'
+      patternError: "Please enter a valid issue number (e.g., #12 or 12)"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: Detailed description of what this feature will accomplish
+      placeholder: |
+        Describe the feature including:
+        - What functionality will be added?
+        - How does it contribute to the parent Epic?
+        - What user problems does it solve?
+        - What are the key requirements?
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      description: Break down the feature into specific tasks (these will become separate Task issues)
+      placeholder: |
+        Example tasks:
+        - [ ] Task 1: Create epic.yml template
+        - [ ] Task 2: Create feature.yml template
+        - [ ] Task 3: Create task.yml template
+        - [ ] Task 4: Add validation rules
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What conditions must be met for this feature to be considered complete?
+      placeholder: |
+        Example criteria:
+        - [ ] All templates are created and functional
+        - [ ] Validation works as expected
+        - [ ] Documentation is updated
+        - [ ] Tests pass
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Are there other features or tasks that must be completed first?
+      placeholder: |
+        List any dependencies:
+        - Feature #X must be completed first
+        - Requires access to Y
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this feature?
+      options:
+        - "Critical - Blocking other work"
+        - "High - Important for phase completion"
+        - "Medium - Should be done soon"
+        - "Low - Nice to have"
+    validations:
+      required: false
+
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Notes
+      description: Any technical considerations, constraints, or implementation details
+      placeholder: Include architecture decisions, technology choices, or technical risks
+    validations:
+      required: false

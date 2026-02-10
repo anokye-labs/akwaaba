@@ -1,0 +1,102 @@
+name: Epic
+description: Large initiative spanning multiple features across a project phase
+title: "[Epic]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Epic Template
+        An Epic represents a large initiative that spans multiple features. It typically aligns with a project phase and contains several related features.
+        
+        **Before creating an Epic:**
+        - Ensure it represents significant work spanning weeks or months
+        - Verify it can be broken down into multiple features
+        - Check that no similar Epic already exists
+
+  - type: input
+    id: title
+    attributes:
+      label: Epic Title
+      description: A clear, concise name for this epic (will be prefixed with [Epic]:)
+      placeholder: "Example: Implement Project Governance Framework"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Project Phase
+      description: Which project phase does this epic belong to?
+      options:
+        - "Phase 1: Foundation"
+        - "Phase 2: Governance"
+        - "Phase 3: Agent Framework"
+        - "Phase 4: .NET Integration"
+        - "Phase 5: Documentation"
+        - "Phase 6: Validation & Polish"
+        - "Phase 7: Advanced Features"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Epic Description
+      description: Detailed description of what this epic aims to achieve and why it's important
+      placeholder: |
+        Provide a comprehensive overview including:
+        - What problem does this epic solve?
+        - What are the main goals and objectives?
+        - What value does it deliver to the project?
+        - What is the scope (what's included/excluded)?
+    validations:
+      required: true
+
+  - type: textarea
+    id: success-criteria
+    attributes:
+      label: Success Criteria
+      description: How will we know when this epic is complete? What does "done" look like?
+      placeholder: |
+        List measurable success criteria:
+        - [ ] All features are implemented and tested
+        - [ ] Documentation is complete
+        - [ ] Acceptance criteria are met
+        - [ ] Stakeholders approve the implementation
+    validations:
+      required: true
+
+  - type: textarea
+    id: features
+    attributes:
+      label: Expected Features
+      description: List the major features that will be part of this epic (these will become separate Feature issues)
+      placeholder: |
+        Example features:
+        - Feature 1: Create issue templates
+        - Feature 2: Set up project automation
+        - Feature 3: Configure branch protection
+    validations:
+      required: false
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Are there other epics or work that must be completed first?
+      placeholder: |
+        List any dependencies:
+        - Epic #X must be completed first
+        - Requires Y to be set up
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      description: Any other context, constraints, or important information
+      placeholder: Include timeline expectations, technical constraints, or key stakeholders
+    validations:
+      required: false

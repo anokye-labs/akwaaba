@@ -84,6 +84,65 @@ Write-Host "Repository ID: $($context.RepoId)"
 $context = ./scripts/Get-RepoContext.ps1 -Refresh
 ```
 
+
+### Test-IssueExists.ps1
+
+Validates that a GitHub issue exists, is in the same repository, and is open.
+
+**Features:**
+- Checks if an issue exists via GitHub CLI
+- Verifies issue is in the expected repository
+- Confirms issue is open (not closed)
+- Session-scoped caching to avoid rate limiting
+- Supports explicit repository specification
+- Returns structured validation results
+- Force refresh option to bypass cache
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Get-RepoContext.ps1 (for repository context)
+
+**Usage:**
+
+```powershell
+# Check issue in current repository
+$result = ./scripts/Test-IssueExists.ps1 -IssueNumber 68
+
+# Check with explicit repository
+$result = ./scripts/Test-IssueExists.ps1 -IssueNumber 68 -Owner "anokye-labs" -Repo "akwaaba"
+
+# Force refresh (bypass cache)
+$result = ./scripts/Test-IssueExists.ps1 -IssueNumber 68 -Refresh
+
+# Conditional logic example
+$check = ./scripts/Test-IssueExists.ps1 -IssueNumber 68
+if ($check.Exists -and $check.IsOpen -and $check.IsSameRepository) {
+    Write-Host "Issue is valid - proceeding"
+} else {
+    Write-Error "Issue validation failed"
+}
+```
+
+**Output Properties:**
+- `Exists`: Boolean - Whether the issue exists
+- `IsOpen`: Boolean - Whether the issue is open
+- `IsSameRepository`: Boolean - Whether issue is in expected repository
+- `IssueNumber`: Int - The issue number checked
+- `State`: String - Issue state (OPEN, CLOSED, or null)
+- `Title`: String - Issue title (or null if not found)
+- `Url`: String - Issue URL (or null if not found)
+- `RepositoryNameWithOwner`: String - Full repo name (or null if not found)
+- `ErrorMessage`: String - Error message if validation failed (or null)
+
+**Common Use Cases:**
+- Commit message validation (verify issue references)
+- Pre-work validation (ensure issue is open before starting)
+- Bulk issue validation (check multiple issues)
+- Cross-repository issue validation
+
+**Examples:**
+See `scripts/examples/Test-IssueExists-Examples.ps1` for detailed usage examples.
 ### Import-DagFromJson.ps1
 
 Create issue graph from a JSON DAG (Directed Acyclic Graph) definition.
@@ -441,6 +500,63 @@ Returns a PSCustomObject with properties:
 - `Status`: The new status (if updated)
 - `CorrelationId`: The correlation ID for this session
 - `StartTime`: UTC timestamp when work started
+
+### Test-IssueTypes.ps1
+
+Comprehensive test script for GitHub organization-level issue types and hierarchies.
+
+**Features:**
+- Creates test issues with all four issue types (Epic, Feature, Task, Bug)
+- Establishes hierarchical relationships using sub-issues API
+- Verifies issue types are correctly set via GraphQL queries
+- Validates parent-child relationships (Epic → Feature → Task)
+- Provides cleanup functionality to close test issues
+- Detailed test output with success/failure indicators
+- Supports partial testing (verification only, cleanup only)
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Organization-level issue types configured (Epic, Feature, Task, Bug)
+- Requires: `Invoke-GraphQL.ps1`, `New-IssueWithType.ps1`, `Update-IssueHierarchy.ps1`, `Get-DagStatus.ps1`
+
+**Usage:**
+
+```powershell
+# Full test with creation, verification, and cleanup prompt
+./scripts/Test-IssueTypes.ps1 -Owner "anokye-labs" -Repo "akwaaba"
+
+# Create and verify but skip cleanup (leave issues open for inspection)
+./scripts/Test-IssueTypes.ps1 -Owner "anokye-labs" -Repo "akwaaba" -SkipCleanup
+
+# Only verify existing test issues (no creation)
+$issues = @{ Epic = 123; Feature = 124; Task = 125; Bug = 126 }
+./scripts/Test-IssueTypes.ps1 -Owner "anokye-labs" -Repo "akwaaba" `
+    -SkipCreation -TestIssueNumbers $issues
+
+# Cleanup only (close specified test issues)
+$issues = @{ Epic = 123; Feature = 124; Task = 125; Bug = 126 }
+./scripts/Test-IssueTypes.ps1 -Owner "anokye-labs" -Repo "akwaaba" `
+    -CleanupOnly -TestIssueNumbers $issues
+```
+
+**What It Tests:**
+
+1. **Issue Type Creation** — Verifies each issue type can be created with correct metadata
+2. **Hierarchy Linking** — Tests sub-issues API for parent-child relationships
+3. **Type Integrity** — Ensures issue types remain correct after relationship creation
+4. **GraphQL Queries** — Validates queries for types, hierarchies, and sub-issues work correctly
+
+**Output:**
+
+Returns a hashtable with test results:
+- `Success`: Boolean indicating if all tests passed
+- `Created`: Hashtable of created issue numbers by type
+- `Verified`: Hashtable of verification results by type
+- `Cleaned`: Hashtable of cleanup status by type
+- `Errors`: Array of error messages (if any)
+
+See [docs/testing-issue-types.md](../docs/testing-issue-types.md) for detailed documentation.
 
 ### Invoke-GraphQL.ps1
 

@@ -12,10 +12,10 @@ Build a required GitHub Actions workflow that validates commits are from approve
 ## Tasks
 
 ### Task 1: Define agent authentication strategy
-- [ ] Research GitHub App authentication patterns
-- [ ] Decide: GitHub App vs Bot user vs Service account
-- [ ] Document authentication flow
-- [ ] Plan for future agent registration system
+- [x] Research GitHub App authentication patterns
+- [x] Decide: GitHub App vs Bot user vs Service account
+- [x] Document authentication flow
+- [x] Plan for future agent registration system
 
 ### Task 2: Create allowlist of approved agents
 - [ ] Define allowlist format (JSON or YAML)
