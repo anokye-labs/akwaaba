@@ -1,0 +1,62 @@
+name: Commit Validator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate-commits:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Validate commit messages
+        id: validate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Validating commits for PR #${{ github.event.pull_request.number }}"
+          
+          pwsh -File scripts/Validate-Commits.ps1 -PRNumber ${{ github.event.pull_request.number }}
+        continue-on-error: true
+      
+      - name: Upload validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: commit-validation-logs
+          path: logs/commit-validation/
+          retention-days: 90
+      
+      - name: Post PR comment on failure
+        if: steps.validate.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "## ❌ Commit Validation Failed
+          
+          Some commits in this PR do not reference GitHub issues. All commits must reference at least one issue.
+          
+          **Required format examples:**
+          - \`#123\`
+          - \`Closes #123\`
+          - \`Fixes #456\`
+          - \`Resolves #789\`
+          - \`owner/repo#123\`
+          - \`https://github.com/owner/repo/issues/123\`
+          
+          Please amend your commits to include issue references. See the workflow logs for details on which commits failed validation.
+          
+          **Note:** Merge commits, revert commits, and bot commits are automatically skipped."
+      
+      - name: Fail workflow if validation failed
+        if: steps.validate.outcome == 'failure'
+        run: exit 1
