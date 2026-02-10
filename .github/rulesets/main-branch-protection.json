@@ -73,6 +73,7 @@
   "bypass_actors": [
     {
       "actor_id": 1,
+      "_actor_id_comment": "When creating via UI, GitHub automatically sets the correct actor_id. For OrganizationAdmin type, this is typically 1.",
       "actor_type": "OrganizationAdmin",
       "bypass_mode": "always"
     }
