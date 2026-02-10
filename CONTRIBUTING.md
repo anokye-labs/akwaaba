@@ -24,9 +24,11 @@ This workflow ensures:
 This restriction is enforced via:
 - GitHub branch protection rules
 - Commit validation workflows
-- Authentication and authorization controls
+- Agent authentication checks (only approved agents can commit)
 
 Even repository maintainers follow this rule. It ensures consistency, auditability, and maintains the integrity of the Anokye-Krom System.
+
+**Learn more:** [Agent Setup Guide](./how-we-work/agent-setup.md)
 
 ## How to Contribute
 

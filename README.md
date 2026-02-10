@@ -129,6 +129,7 @@ akwaaba/
 ### For AI Agents
 
 - **[Agents](agents.md)** — Quick reference for agent behavior
+- **[Agent Setup](how-we-work/agent-setup.md)** — How to configure and use agents
 - **[Okyerema Skill](.github/skills/okyerema/SKILL.md)** — Project orchestration skill
 - **[Agent Conventions](how-we-work/agent-conventions.md)** — Behavioral requirements
 

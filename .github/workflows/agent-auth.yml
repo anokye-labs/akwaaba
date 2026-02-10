@@ -31,7 +31,7 @@ jobs:
         continue-on-error: true
       
       - name: Post error comment
-        if: failure()
+        if: steps.validate.outcome == 'failure'
         uses: actions/github-script@v7
         with:
           script: |
@@ -57,7 +57,7 @@ jobs:
             core.setFailed('Human commits detected. All commits must be from approved agents.');
       
       - name: Mark as successful
-        if: success()
+        if: steps.validate.outcome == 'success'
         run: |
           echo "✅ All commits are from approved agents"
           echo "Agent authentication check: PASSED"
