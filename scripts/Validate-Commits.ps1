@@ -244,7 +244,8 @@ catch {
 $invalidCommits = @()
 $validCommits = @()
 $skippedCommits = @()
-$shortShaLength = 7  # Standard abbreviated commit SHA length
+# Git standard abbreviated commit SHA length (short enough to be readable, long enough to avoid collisions in most repos)
+$shortShaLength = 7
 
 foreach ($commit in $commits) {
     # Safely abbreviate commit SHA (standard is 7 characters, but handle shorter SHAs)
