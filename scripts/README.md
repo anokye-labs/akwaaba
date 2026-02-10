@@ -2477,3 +2477,92 @@ SKILL.md mentions tasklists for relationships. ADR-0001 mandates using createIss
 
 All 4 scripts referenced in SKILL.md exist.
 ```
+
+## Validate-Commits.ps1
+
+Validates that every commit in a pull request references a GitHub issue, with comprehensive audit logging.
+
+**Features:**
+- Validates commit messages contain issue references (#123, Closes #456, etc.)
+- Supports multiple reference formats (simple, keywords, cross-repo, URLs)
+- Skips special commit types (merge, revert, bot commits)
+- Logs every validation attempt with structured JSON
+- Returns exit code 0 for success, 1 for failure
+- Provides detailed error messages and examples
+
+**Audit Logging:**
+- Every validation attempt is logged to `logs/commit-validation/YYYY-MM-DD-validation.log`
+- Logs include: timestamp, commit SHA, author, PR number, result, correlation ID
+- JSON format enables easy parsing and analysis
+- See `logs/commit-validation/example-log.md` for usage examples
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- Write-ValidationLog.ps1
+
+**Usage:**
+
+```powershell
+# Validate commits in PR #42
+./scripts/Validate-Commits.ps1 -PRNumber 42
+
+# Specify repository explicitly
+./scripts/Validate-Commits.ps1 -PRNumber 42 -Owner anokye-labs -Repo akwaaba
+
+# With custom log directory
+./scripts/Validate-Commits.ps1 -PRNumber 42 -LogDirectory "custom/logs"
+```
+
+**Supported Issue Reference Formats:**
+- Simple: `#123`
+- Keywords: `Closes #456`, `Fixes #789`, `Resolves #101`
+- Cross-repo: `owner/repo#123`
+- Full URL: `https://github.com/owner/repo/issues/123`
+
+**Test Suite:**
+Run `./scripts/Test-Validate-Commits.ps1` to execute 19 comprehensive tests.
+
+## Write-ValidationLog.ps1
+
+Structured JSON audit logging utility for commit validation operations.
+
+**Features:**
+- Writes structured JSON logs to dated log files
+- One JSON object per line for easy parsing
+- Automatic log directory creation
+- ISO 8601 UTC timestamps
+- Auto-generates correlation IDs
+- Supports both relative and absolute log paths
+
+**Usage:**
+
+```powershell
+# Log a successful validation
+./scripts/Write-ValidationLog.ps1 `
+    -CommitSha "abc123" `
+    -CommitAuthor "dev@example.com" `
+    -CommitMessage "fix: update readme #123" `
+    -PRNumber 42 `
+    -ValidationResult "Pass" `
+    -ValidationMessage "Issue reference found: 123"
+
+# Log a failure with custom correlation ID
+./scripts/Write-ValidationLog.ps1 `
+    -CommitSha "def456" `
+    -CommitAuthor "dev@example.com" `
+    -CommitMessage "update code" `
+    -PRNumber 42 `
+    -ValidationResult "Fail" `
+    -ValidationMessage "No issue reference found" `
+    -CorrelationId "my-custom-id"
+```
+
+**ValidationResult Values:**
+- `Pass`: Commit passed validation
+- `Fail`: Commit failed validation
+- `Skip`: Commit skipped (merge, revert, bot commits)
+
+**Test Suite:**
+Run `./scripts/Test-Write-ValidationLog.ps1` to execute 8 comprehensive tests.
+
