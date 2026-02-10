@@ -1,33 +1,169 @@
-# Temporary PowerShell files
+# ===================================================================
+# PowerShell Temporary Files
+# ===================================================================
+# Ad-hoc test scripts and temporary scratch files.
+# NOTE: Test-*.ps1 permanent test suites are NOT excluded.
 temp*.ps1
 scratch*.ps1
 test*.ps1
+!Test-*.ps1
 
-# PowerShell module artifacts
+# ===================================================================
+# PowerShell Module Artifacts
+# ===================================================================
 *.psd1.backup
 *.psm1.backup
 
-# Build artifacts
+# ===================================================================
+# .NET Build Artifacts
+# ===================================================================
+# Standard .NET build output directories
 bin/
 obj/
+out/
+
+# Compiled assemblies and executables
 *.dll
 *.exe
 *.pdb
 
-# IDE files
-.vscode/
+# NuGet packages (except those committed for tooling)
+*.nupkg
+*.snupkg
+packages/
+!packages/build/
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+
+# Visual Studio cache/options
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vsidx
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# ===================================================================
+# IDE and Editor Files
+# ===================================================================
+# JetBrains Rider
 .idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Vim/Emacs temporary files
 *.swp
 *.swo
 *~
+\#*\#
+.#*
 
-# OS files
+# ===================================================================
+# Git Merge and Patch Files
+# ===================================================================
+# Temporary files created during git operations (merge conflicts, patches)
+# If you need to commit a patch file for documentation, use git add -f
+*.orig
+*.rej
+*.patch
+*.diff
+
+# ===================================================================
+# .NET Development Tools
+# ===================================================================
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# NCrunch
+*.ncrunch*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+# dotCover
+*.dotCover
+
+# ===================================================================
+# OS-Specific Files
+# ===================================================================
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
 
-# Node modules (if any)
+# Linux
+.directory
+
+# ===================================================================
+# Copilot Session Artifacts
+# ===================================================================
+# Exclude Copilot session data except in planning directory
+.copilot/
+!planning/.copilot/
+
+# ===================================================================
+# Temporary Directories and Files
+# ===================================================================
+# Local development temporary data
+temp/
+tmp/
+scratch/
+*.tmp
+*.temp
+
+# Local configuration overrides
+*.local.*
+local.settings.json
+
+# ===================================================================
+# Node.js (if used)
+# ===================================================================
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
 
-# Logs
+# ===================================================================
+# Logs and Diagnostics
+# ===================================================================
 *.log
 logs/
+*.log.*  # Rotated logs (e.g., app.log.1, app.log.2024-01-01)
+trace.log
+debug.log

@@ -1,0 +1,108 @@
+name: Task
+description: Specific work item to be completed as part of a feature
+title: "[Task]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Task Template
+        A Task represents a specific, actionable work item that contributes to a Feature. Tasks should be completable by one person in a few hours to a few days.
+        
+        **Before creating a Task:**
+        - Identify the parent Feature this task belongs to
+        - Ensure it's specific and actionable
+        - Verify it has clear acceptance criteria
+
+  - type: input
+    id: title
+    attributes:
+      label: Task Title
+      description: A clear, action-oriented name for this task (will be prefixed with [Task]:)
+      placeholder: "Example: Add regex validation to epic template"
+    validations:
+      required: true
+
+  - type: input
+    id: parent-feature
+    attributes:
+      label: Parent Feature
+      description: The Feature issue number this task belongs to
+      placeholder: "Example: #25 or just 25"
+    validations:
+      required: true
+      pattern: '^#?\d+$'
+      patternError: "Please enter a valid issue number (e.g., #25 or 25)"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: Detailed description of what needs to be done
+      placeholder: |
+        Describe the task including:
+        - What specific work needs to be completed?
+        - What files or systems will be modified?
+        - Are there any specific approaches or requirements?
+        - What context is needed to complete this task?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How will we verify this task is complete?
+      placeholder: |
+        Example criteria:
+        - [ ] Regex patterns are added to all input fields
+        - [ ] Validation messages are clear and helpful
+        - [ ] Template can be submitted successfully
+        - [ ] Invalid inputs are caught and reported
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated Effort
+      description: Rough estimate of how much work this will take
+      options:
+        - "Small - Few hours"
+        - "Medium - 1-2 days"
+        - "Large - 3-5 days"
+    validations:
+      required: false
+
+  - type: textarea
+    id: technical-approach
+    attributes:
+      label: Technical Approach
+      description: How should this task be implemented? (Optional but helpful)
+      placeholder: |
+        Example approach:
+        - Use GitHub's YAML form schema syntax
+        - Add 'validations' block with 'pattern' key
+        - Reference GitHub docs for regex syntax
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      description: Any other context, gotchas, or important information
+      placeholder: Include links to documentation, related issues, or helpful resources
+    validations:
+      required: false
+
+  - type: input
+    id: assignee
+    attributes:
+      label: Assignee (optional)
+      description: GitHub username of person to assign (without @)
+      placeholder: "Example: username or copilot"
+    validations:
+      required: false
+      pattern: '^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$'
+      patternError: "Please enter a valid GitHub username (1-39 characters, alphanumeric and hyphens)"

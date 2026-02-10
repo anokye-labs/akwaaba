@@ -79,6 +79,7 @@ function Invoke-GraphQLHelper {
     param(
         [string]$Query,
         [hashtable]$Variables = @{},
+        [hashtable]$Headers = @{},
         [string]$CorrelationId
     )
     
@@ -88,6 +89,10 @@ function Invoke-GraphQLHelper {
         Query = $Query
         Variables = $Variables
         CorrelationId = $CorrelationId
+    }
+    
+    if ($Headers.Count -gt 0) {
+        $params.Headers = $Headers
     }
     
     return & $invokeGraphQLPath @params
@@ -286,11 +291,7 @@ $hierarchyCheckStatus = "Pass"
 $hierarchyCheckDetails = @()
 
 # Query for all open Epics and verify their children have parent relationships
-# NOTE: This check uses the deprecated trackedIssues/trackedInIssues API because:
-# 1. The repository hasn't migrated to sub-issues API yet (per ADR-0001)
-# 2. We need to check the *current* state of the repository, not the ideal state
-# 3. This is a pragmatic health check that works with what's actually deployed
-# 4. The API Compatibility check above already warns about the deprecated API usage
+# Updated to use subIssues API instead of deprecated trackedIssues
 $epicQuery = @"
 query(`$owner: String!, `$repo: String!) {
   repository(owner: `$owner, name: `$repo) {
@@ -302,14 +303,14 @@ query(`$owner: String!, `$repo: String!) {
         issueType {
           name
         }
-        trackedIssues(first: 100) {
+        subIssues(first: 100) {
           nodes {
             number
             title
             issueType {
               name
             }
-            trackedInIssues(first: 1) {
+            parents(first: 1) {
               totalCount
             }
           }
@@ -325,21 +326,25 @@ $variables = @{
     repo = $Repo
 }
 
+$headers = @{
+    "GraphQL-Features" = "sub_issues"
+}
+
 try {
-    $epicResult = Invoke-GraphQLHelper -Query $epicQuery -Variables $variables -CorrelationId $correlationId
+    $epicResult = Invoke-GraphQLHelper -Query $epicQuery -Variables $variables -Headers $headers -CorrelationId $correlationId
     
     if ($epicResult.Success) {
         $issues = $epicResult.Data.repository.issues.nodes
         $epics = $issues | Where-Object { $_.issueType.name -eq "Epic" }
         
         foreach ($epic in $epics) {
-            $children = $epic.trackedIssues.nodes
+            $children = $epic.subIssues.nodes
             
             foreach ($child in $children) {
                 # Check if child has parent relationship
-                if ($child.trackedInIssues.totalCount -eq 0) {
+                if ($child.parents.totalCount -eq 0) {
                     $hierarchyCheckStatus = "Warn"
-                    $hierarchyCheckDetails += "Issue #$($child.number) is tracked by Epic #$($epic.number) but shows no parent relationship (trackedInIssues.totalCount = 0). This indicates a relationship sync issue."
+                    $hierarchyCheckDetails += "Issue #$($child.number) is a sub-issue of Epic #$($epic.number) but shows no parent relationship (parents.totalCount = 0). This indicates a relationship sync issue."
                 }
             }
         }

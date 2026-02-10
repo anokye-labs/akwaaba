@@ -287,7 +287,7 @@ try {
     
     # Check for essential GraphQL fields
     $requiredFields = @(
-        "trackedIssues",
+        "subIssues",
         "issueType",
         "labels",
         "assignees",
