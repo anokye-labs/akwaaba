@@ -217,26 +217,43 @@ The `.github/approved-agents.json` file follows this structure:
 {
   "agents": [
     {
-      "username": "copilot-swe-agent[bot]",
+      "id": "github-copilot",
       "type": "github-app",
-      "appId": 1143301,
-      "description": "GitHub Copilot automated code changes",
-      "addedDate": "2026-01-15",
-      "addedBy": "hoopsomuah"
+      "username": "copilot",
+      "botUsername": "copilot[bot]",
+      "githubAppId": "github-copilot",
+      "description": "GitHub Copilot - AI-powered code generation and automation agent",
+      "approvedBy": "repository-admin",
+      "approvedDate": "2026-02-10",
+      "permissions": [
+        "read:repository",
+        "write:code",
+        "write:pull-requests",
+        "write:issues"
+      ],
+      "enabled": true
     },
     {
-      "username": "dependabot[bot]",
+      "id": "github-actions-bot",
       "type": "github-app",
-      "appId": 29110,
-      "description": "Automated dependency updates",
-      "addedDate": "2026-01-15",
-      "addedBy": "hoopsomuah"
+      "username": "github-actions",
+      "botUsername": "github-actions[bot]",
+      "githubAppId": "github-actions",
+      "description": "GitHub Actions - Workflow automation for CI/CD",
+      "approvedBy": "repository-admin",
+      "approvedDate": "2026-02-10",
+      "permissions": [
+        "read:repository",
+        "write:code",
+        "write:pull-requests"
+      ],
+      "enabled": true
     }
   ],
   "emergencyBypass": {
     "label": "emergency-merge",
-    "requiredRole": "admin",
-    "auditLog": "logs/agent-auth/bypasses.log"
+    "requiresRole": "admin",
+    "auditRequired": true
   }
 }
 ```
@@ -324,7 +341,9 @@ If your agent works across multiple Anokye Labs repositories:
 If you're stuck or have questions:
 
 1. **Check the documentation**:
+   - [Repository Governance](../GOVERNANCE.md)
    - [Agent Behavior Conventions](./agent-conventions.md)
+   - [Agent Authentication](../docs/agent-authentication.md)
    - [Agents Overview](../agents.md)
    - [Contributing Guide](../CONTRIBUTING.md)
 
@@ -344,11 +363,20 @@ If you're stuck or have questions:
 
 ## Related Documentation
 
-- **[Agent Behavior Conventions](./agent-conventions.md)** — How agents should behave
+### Core Documentation
+- **[Repository Governance](../GOVERNANCE.md)** — Governance policies and enforcement mechanisms
+- **[Agent Behavior Conventions](./agent-conventions.md)** — Required behavioral conventions for agents
 - **[Agents Overview](../agents.md)** — Understanding the agent system
-- **[Okyerema Skill](../.github/skills/okyerema/SKILL.md)** — Project management for agents
 - **[Contributing Guide](../CONTRIBUTING.md)** — The issue-first workflow
 - **[How We Work](../how-we-work.md)** — Overall coordination system
+
+### Detailed Technical Documentation
+- **[Agent Authentication](../docs/agent-authentication.md)** — Technical details of the authentication system
+- **[Agent Registration Workflow](../docs/agent-registration-workflow.md)** — Detailed registration process
+- **[Approved Agents List](../.github/APPROVED-AGENTS.md)** — Current approved agents
+
+### Skills and Tools
+- **[Okyerema Skill](../.github/skills/okyerema/SKILL.md)** — Project management for agents
 
 ---
 
