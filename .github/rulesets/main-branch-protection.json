@@ -1,4 +1,6 @@
 {
+  "_comment": "Main Branch Protection Ruleset - Enforces Anokye-Krom System governance model",
+  "_note": "The commit-validator status check is required but not yet implemented. Apply this ruleset in 'disabled' mode initially, or implement the workflow first.",
   "name": "Main Branch Protection",
   "target": "branch",
   "enforcement": "active",
