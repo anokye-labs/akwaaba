@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "List of approved agents authorized to commit to this repository",
+  "agents": [
+    {
+      "username": "copilot",
+      "type": "github-app",
+      "description": "GitHub Copilot",
+      "approved_by": "anokye-labs",
+      "approved_date": "2024-01-01"
+    }
+  ],
+  "policy": {
+    "enforcement": "strict",
+    "allow_human_commits": false,
+    "documentation_url": "https://github.com/anokye-labs/akwaaba/blob/main/how-we-work/agent-setup.md",
+    "request_approval_url": "https://github.com/anokye-labs/akwaaba/issues/new?template=agent-request.yml"
+  }
+}
