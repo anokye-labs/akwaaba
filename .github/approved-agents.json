@@ -1,0 +1,50 @@
+{
+  "_comment": "Approved agents allowlist for commit author validation",
+  "_usage": "This file contains the list of approved GitHub Apps and bot accounts that are authorized to commit to this repository",
+  "_fields": {
+    "id": "Unique identifier for this agent entry",
+    "username": "GitHub username of the agent (human-readable name)",
+    "botUsername": "Bot username (typically ends with [bot])",
+    "githubAppId": "GitHub App ID (numeric) - null for non-App bots",
+    "type": "Agent type: GitHubApp, ServiceAccount, or Bot",
+    "description": "Human-readable description of the agent's purpose",
+    "approvedBy": "GitHub username of person who approved this agent",
+    "approvedDate": "ISO 8601 date when agent was approved",
+    "permissions": "Array of operations this agent is allowed to perform",
+    "enabled": "Boolean indicating if agent is currently active"
+  },
+  "agents": [
+    {
+      "id": "github-copilot",
+      "username": "copilot",
+      "botUsername": "github-actions[bot]",
+      "githubAppId": 15368,
+      "type": "GitHubApp",
+      "description": "GitHub Copilot coding agent for automated code changes",
+      "approvedBy": "system",
+      "approvedDate": "2026-02-09",
+      "permissions": [
+        "code_changes",
+        "documentation",
+        "tests",
+        "configuration"
+      ],
+      "enabled": true
+    },
+    {
+      "id": "github-web-ui",
+      "username": "web-flow",
+      "botUsername": "web-flow",
+      "githubAppId": null,
+      "type": "GitHubWebUI",
+      "description": "GitHub web UI for merge commits and web-based edits",
+      "approvedBy": "system",
+      "approvedDate": "2026-02-09",
+      "permissions": [
+        "merge_commits",
+        "web_edits"
+      ],
+      "enabled": true
+    }
+  ]
+}
