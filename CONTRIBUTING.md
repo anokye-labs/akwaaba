@@ -22,9 +22,9 @@ This workflow ensures:
 **Important:** Direct commits to protected branches (like `main`) are not permitted. All changes must go through the issue → agent → pull request workflow.
 
 This restriction is enforced via:
-- GitHub branch protection rules
-- Commit validation workflows
-- Authentication and authorization controls
+- **GitHub branch protection rules** — Direct commits to main are blocked
+- **Agent authentication workflow** — Only approved agents can commit (see [Approved Agents](./.github/APPROVED-AGENTS.md))
+- **Commit validation workflows** — All commits must reference issues
 
 Even repository maintainers follow this rule. It ensures consistency, auditability, and maintains the integrity of the Anokye-Krom System.
 
