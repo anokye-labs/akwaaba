@@ -1,0 +1,91 @@
+name: Task
+description: Create a specific Task that contributes to a Feature
+title: "[TASK] "
+labels: ["task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Create a Task
+        
+        A **Task** represents a specific, actionable piece of work that contributes to a Feature.
+        Tasks should be focused and completable within a reasonable timeframe.
+
+  - type: input
+    id: parent_feature
+    attributes:
+      label: Parent Feature
+      description: Reference the Feature this Task belongs to (e.g., #456)
+      placeholder: "#456"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: Describe the specific work to be done
+      placeholder: |
+        Provide a clear description of what needs to be accomplished:
+        - Specific actions to take
+        - Files or components to modify
+        - Expected outcome
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Define what "done" means for this Task
+      placeholder: |
+        - [ ] Criterion 1: Specific, verifiable condition
+        - [ ] Criterion 2: Specific, verifiable condition
+        - [ ] Criterion 3: Specific, verifiable condition
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated Effort
+      description: Rough estimate of effort required
+      options:
+        - "Small (< 4 hours)"
+        - "Medium (4-8 hours)"
+        - "Large (> 8 hours)"
+    validations:
+      required: false
+
+  - type: input
+    id: assignee
+    attributes:
+      label: Assignee
+      description: GitHub username of the person/agent assigned (e.g., @copilot)
+      placeholder: "@username"
+    validations:
+      required: false
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: List any dependencies on other Tasks or requirements
+      placeholder: |
+        - Depends on Task #789
+        - Requires PR #123 to be merged
+        - Blocked by external factor X
+    validations:
+      required: false
+
+  - type: textarea
+    id: technical_notes
+    attributes:
+      label: Technical Notes
+      description: Implementation details, code references, or other technical context
+      placeholder: |
+        - Files to modify: src/foo.js, src/bar.js
+        - API endpoints to update: /api/v1/resource
+        - Tests to add/update: tests/foo.test.js
+    validations:
+      required: false

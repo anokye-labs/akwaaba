@@ -1,0 +1,90 @@
+name: Epic
+description: Create a new Epic to represent a large initiative spanning multiple features
+title: "[EPIC] "
+labels: ["epic"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Create an Epic
+        
+        An **Epic** represents a large initiative or body of work that will be broken down into multiple Features.
+        Epics help organize and track progress on major project milestones.
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Project Phase
+      description: Which phase does this Epic belong to?
+      options:
+        - "Phase 1 - Foundation"
+        - "Phase 2 - Governance"
+        - "Phase 3 - Automation"
+        - "Phase 4 - Integration"
+        - "Phase 5 - Intelligence"
+        - "Phase 6 - Validation & Polish"
+        - "Phase 7 - Launch"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Epic Description
+      description: Describe the overall goal and scope of this Epic
+      placeholder: |
+        Provide a comprehensive description of what this Epic aims to achieve.
+        Include:
+        - The problem or opportunity being addressed
+        - High-level approach
+        - Expected impact
+        - Any constraints or considerations
+    validations:
+      required: true
+
+  - type: textarea
+    id: success_criteria
+    attributes:
+      label: Success Criteria
+      description: What does success look like for this Epic?
+      placeholder: |
+        Define measurable criteria that indicate this Epic is complete:
+        - Specific deliverables
+        - Quality metrics
+        - Performance targets
+        - User/stakeholder satisfaction indicators
+    validations:
+      required: true
+
+  - type: textarea
+    id: features
+    attributes:
+      label: Related Features
+      description: List the major Features that will comprise this Epic (can be added later)
+      placeholder: |
+        - Feature 1: [Brief description]
+        - Feature 2: [Brief description]
+        - Feature 3: [Brief description]
+    validations:
+      required: false
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: List any dependencies on other Epics, Features, or external factors
+      placeholder: |
+        - Depends on Epic #123
+        - Requires external API access
+        - Needs stakeholder approval for X
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      description: Any other relevant information
+      placeholder: Add context, links to documentation, or other notes that would help the team
+    validations:
+      required: false

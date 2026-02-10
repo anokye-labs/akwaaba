@@ -1,0 +1,97 @@
+name: Feature
+description: Create a new Feature that delivers cohesive functionality within an Epic
+title: "[FEATURE] "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Create a Feature
+        
+        A **Feature** represents a cohesive piece of functionality that contributes to an Epic.
+        Features are broken down into multiple Tasks for implementation.
+
+  - type: input
+    id: parent_epic
+    attributes:
+      label: Parent Epic
+      description: Reference the Epic this Feature belongs to (e.g., #123)
+      placeholder: "#123"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Project Phase
+      description: Which phase does this Feature belong to?
+      options:
+        - "Phase 1 - Foundation"
+        - "Phase 2 - Governance"
+        - "Phase 3 - Automation"
+        - "Phase 4 - Integration"
+        - "Phase 5 - Intelligence"
+        - "Phase 6 - Validation & Polish"
+        - "Phase 7 - Launch"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: Describe what this Feature will accomplish
+      placeholder: |
+        Provide a clear description of the Feature:
+        - What functionality will be delivered
+        - How it contributes to the parent Epic
+        - Key user benefits
+        - Technical approach (high-level)
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Implementation Tasks
+      description: Break down the Feature into specific Tasks (can be refined later)
+      placeholder: |
+        - [ ] Task 1: [Description]
+        - [ ] Task 2: [Description]
+        - [ ] Task 3: [Description]
+        - [ ] Task 4: [Description]
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Define what "done" means for this Feature
+      placeholder: |
+        - Criterion 1: Specific, testable condition
+        - Criterion 2: Specific, testable condition
+        - Criterion 3: Specific, testable condition
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: List dependencies on other Features, Tasks, or external factors
+      placeholder: |
+        - Depends on Feature #456
+        - Requires Task #789 to be completed first
+        - Needs library X to be installed
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      description: Any other relevant information
+      placeholder: Technical considerations, design decisions, links to documentation, etc.
+    validations:
+      required: false

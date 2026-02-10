@@ -1,0 +1,163 @@
+name: Agent Request
+description: Request a new AI agent or propose agent behavior changes
+title: "[AGENT] "
+labels: ["agent-request", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Request a New Agent
+        
+        Use this template to propose a new AI agent or modifications to existing agent behavior.
+        Provide enough detail to help evaluate the request and guide implementation.
+
+  - type: input
+    id: agent_name
+    attributes:
+      label: Agent Name
+      description: Proposed name for the agent (or name of existing agent to modify)
+      placeholder: "my-agent-name"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: request_type
+    attributes:
+      label: Request Type
+      description: Is this a new agent or a modification?
+      options:
+        - "New Agent"
+        - "Modify Existing Agent"
+        - "Deprecate Agent"
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose / Problem Statement
+      description: What problem does this agent solve? Why is it needed?
+      placeholder: |
+        Describe the problem or gap this agent addresses:
+        - Current pain points
+        - Manual processes to automate
+        - Decisions to automate
+        - Expected benefits
+    validations:
+      required: true
+
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Proposed Behavior
+      description: Describe what the agent should do
+      placeholder: |
+        Explain the agent's behavior:
+        - What actions will it perform?
+        - What decisions will it make?
+        - How will it interact with the repository?
+        - What outputs will it produce?
+    validations:
+      required: true
+
+  - type: textarea
+    id: triggers
+    attributes:
+      label: Trigger Conditions
+      description: When should this agent activate?
+      placeholder: |
+        Define the conditions that trigger this agent:
+        - GitHub events (PR opened, issue created, etc.)
+        - Schedule (cron)
+        - Manual invocation
+        - Other triggers
+    validations:
+      required: true
+
+  - type: textarea
+    id: permissions
+    attributes:
+      label: Required Permissions
+      description: What repository permissions does this agent need?
+      placeholder: |
+        List required permissions:
+        - Read access to: issues, PRs, code, etc.
+        - Write access to: issues, PRs, comments, etc.
+        - Actions: create issues, merge PRs, etc.
+    validations:
+      required: true
+
+  - type: input
+    id: agent_username
+    attributes:
+      label: GitHub Username/Bot Name
+      description: Proposed GitHub username for the agent (if applicable)
+      placeholder: "agent-name[bot]"
+    validations:
+      required: false
+
+  - type: input
+    id: github_app_id
+    attributes:
+      label: GitHub App ID
+      description: If using a GitHub App, provide the App ID (numbers only)
+      placeholder: "123456"
+    validations:
+      required: false
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples
+      description: Provide concrete examples of agent behavior
+      placeholder: |
+        Example scenarios:
+        
+        **Scenario 1:**
+        - Input: [describe input]
+        - Agent Action: [describe what agent does]
+        - Expected Output: [describe output]
+        
+        **Scenario 2:**
+        - Input: [describe input]
+        - Agent Action: [describe what agent does]
+        - Expected Output: [describe output]
+    validations:
+      required: false
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and Considerations
+      description: What could go wrong? What should we be careful about?
+      placeholder: |
+        Identify potential risks:
+        - Security concerns
+        - Performance impact
+        - Potential for errors
+        - Mitigation strategies
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other approaches were considered?
+      placeholder: |
+        Describe alternatives:
+        - Manual process
+        - Different automation approach
+        - Existing tools
+        - Why this agent is preferred
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: Links to documentation, related issues, examples from other projects, etc.
+    validations:
+      required: false

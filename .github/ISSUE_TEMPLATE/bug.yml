@@ -1,0 +1,107 @@
+name: Bug Report
+description: Report a defect or unexpected behavior
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Report a Bug
+        
+        Thank you for helping improve the project! Please provide detailed information to help us understand and fix the issue.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this bug?
+      options:
+        - "Critical - System is unusable"
+        - "High - Major functionality broken"
+        - "Medium - Feature partially broken"
+        - "Low - Minor issue or cosmetic"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: Provide a clear and concise description of the bug
+      placeholder: What is wrong? What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Execute command '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should happen?
+      placeholder: Describe the expected behavior in detail
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happens?
+      placeholder: Describe what actually occurs, including error messages, stack traces, or screenshots
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Provide relevant environment details
+      placeholder: |
+        - OS: [e.g., Windows 11, Ubuntu 22.04, macOS 13]
+        - Runtime: [e.g., .NET 8.0, Node.js 20.x, Python 3.11]
+        - Browser: [if applicable, e.g., Chrome 120, Firefox 121]
+        - Version: [project version or commit SHA]
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and Error Messages
+      description: Include relevant log output or error messages
+      placeholder: |
+        Paste logs, error messages, or stack traces here.
+        Use code blocks for better formatting.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: Have you found any workaround for this issue?
+      placeholder: Describe any temporary solution or workaround you've discovered
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information that might be helpful
+      placeholder: Links to related issues, screenshots, or other context
+    validations:
+      required: false
