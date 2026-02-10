@@ -168,8 +168,8 @@ The issue-first workflow ensures:
 - [Contribution Guidelines](../CONTRIBUTING.md) - Detailed contribution process
 - [How We Work](../how-we-work.md) - Overview of the issue-first workflow
 - [Commit Validator Workflow](../.github/workflows/commit-validator.yml) - GitHub Actions workflow
-- [Validation Script](Validate-Commits.ps1) - PowerShell validation script
-- [Test Suite](Test-Validate-Commits.ps1) - Comprehensive test coverage
+- [Validation Script](../scripts/Validate-Commits.ps1) - PowerShell validation script
+- [Test Suite](../scripts/Test-Validate-Commits.ps1) - Comprehensive test coverage
 
 ## Troubleshooting
 
