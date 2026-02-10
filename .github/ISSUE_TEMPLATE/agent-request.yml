@@ -96,7 +96,6 @@ body:
         - phase-4-dotnet
         - phase-5-documentation
         - phase-6-validation
-      default: 2
     validations:
       required: true
 
@@ -124,7 +123,7 @@ body:
     id: authentication
     attributes:
       label: Authentication Method
-      description: How should this agent authenticate with GitHub?
+      description: How should this agent authenticate with GitHub? (GitHub App is recommended per ADR-0004)
       options:
         - GitHub App (recommended for production agents)
         - GitHub Actions token (GITHUB_TOKEN)
@@ -178,7 +177,6 @@ body:
         - High - Important for current phase
         - Medium - Nice to have in current phase
         - Low - Future enhancement
-      default: 2
     validations:
       required: true
 
