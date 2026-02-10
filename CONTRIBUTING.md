@@ -97,6 +97,7 @@ To understand how we structure and coordinate work:
 - **[Glossary](./how-we-work/glossary.md)** — Akan terms and concepts we use
 
 For AI agents working in this repository:
+- **[Agent Setup Guide](./how-we-work/agent-setup.md)** — How to register and configure agents
 - **[Agents Documentation](./agents.md)** — How agents should behave
 - **[Okyerema Skill](/.github/skills/okyerema/SKILL.md)** — Project orchestration skill
 

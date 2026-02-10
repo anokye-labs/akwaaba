@@ -65,6 +65,15 @@ Every agent session should operate in the context of a specific GitHub issue. Be
 4. Do the work
 5. Update and close the issue when done
 
+## Agent Setup and Authentication
+
+New agents must be registered before they can work in Anokye Labs repositories. See the **[Agent Setup Guide](how-we-work/agent-setup.md)** for:
+
+- How to register a new agent
+- Authentication requirements
+- Approved agents list management
+- Troubleshooting authentication issues
+
 ## Behavioral Conventions
 
 AI agents working in Anokye Labs repositories must follow specific behavioral conventions. These conventions emerged from real session failures and are **requirements, not suggestions**.
