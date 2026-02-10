@@ -2,6 +2,82 @@
 
 This directory contains GitHub Actions workflows for automating repository operations.
 
+## Agent Authentication
+
+**File:** `agent-auth.yml`
+
+### Purpose
+
+Validates that all commits in pull requests are authored by approved agents, enforcing the repository's agent-only commit policy.
+
+### Trigger
+
+- **Event:** `pull_request` (types: opened, synchronize, reopened, labeled, unlabeled)
+- **When:** A PR is created, updated, or labels change
+
+### Behavior
+
+When a pull request is created or updated, the workflow:
+
+1. **Fetches all commits** in the pull request
+2. **Validates each commit author** against `.github/approved-agents.json`
+3. **Checks for emergency bypass** label (`emergency-merge`)
+4. **Posts validation results** as a PR comment
+5. **Passes or fails** the required check based on validation results
+
+### Approved Agents
+
+The list of approved agents is maintained in `.github/approved-agents.json`:
+
+- `copilot-swe-agent[bot]` - GitHub Copilot Workspace
+- `github-actions[bot]` - GitHub Actions automation
+- `dependabot[bot]` - Automated dependency updates
+
+### Emergency Bypass
+
+In exceptional circumstances, validation can be bypassed by applying the `emergency-merge` label:
+
+- Requires write permissions on the repository
+- All bypasses are logged for audit purposes
+- Should only be used for critical emergencies
+
+### Validation Script
+
+The workflow uses `scripts/Validate-CommitAuthors.ps1` which:
+
+- Loads the approved agents allowlist
+- Fetches commit data via GitHub GraphQL API
+- Validates each commit author
+- Provides detailed error messages for unauthorized commits
+- Logs all validation attempts for audit
+
+### Permissions
+
+The workflow requires:
+- `contents: read` - To checkout the repository
+- `pull-requests: write` - To post validation comments
+
+### Error Messages
+
+When unauthorized commits are detected, the workflow provides:
+
+- List of unauthorized commits and authors
+- Explanation of the agent-only policy
+- Instructions for fixing the issue
+- Links to documentation
+- Contact information for requesting agent approval
+
+### Related Documentation
+
+- [Agent Setup Guide](../../how-we-work/agent-setup.md)
+- [Agent Approval Request Template](../ISSUE_TEMPLATE/agent-approval-request.yml)
+- [Approved Agents List](../approved-agents.json)
+
+### Related Scripts
+
+- `scripts/Validate-CommitAuthors.ps1` - Validation logic
+- `scripts/Test-Validate-CommitAuthors.ps1` - Test suite
+
 ## Auto-assign Unblocked Tasks
 
 **File:** `auto-assign-unblocked.yml`
