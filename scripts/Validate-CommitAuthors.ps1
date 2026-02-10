@@ -352,7 +352,7 @@ try {
     }
     
     # Determine overall result
-    $allApproved = ($results | Where-Object { -not $_.Approved }).Count -eq 0
+    $allApproved = @($results | Where-Object { -not $_.Approved }).Count -eq 0
     
     # Display results
     Format-ValidationResults -Results $results -AllApproved $allApproved -EmergencyBypass $emergencyBypass
