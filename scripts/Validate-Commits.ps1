@@ -72,7 +72,8 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Define action keywords as a constant for consistency
-$script:ActionKeywords = 'Closes|Fixes|Resolves|Close|Fix|Resolve'
+# Note: Wrapped in non-capturing group for direct use in regex patterns
+$script:ActionKeywords = '(?:Closes|Fixes|Resolves|Close|Fix|Resolve)'
 
 function Get-IssueReferences {
     <#
@@ -111,6 +112,8 @@ function Get-IssueReferences {
     $processedRanges = @()  # Track character ranges we've already processed
 
     # Helper function to check if a range overlaps with already processed ranges
+    # This prevents duplicate issue extraction from overlapping patterns
+    # (e.g., #123 in both owner/repo#123 and as a standalone reference)
     function Test-RangeProcessed {
         param([int]$Start, [int]$End, [array]$Ranges)
         foreach ($range in $Ranges) {
@@ -124,6 +127,8 @@ function Get-IssueReferences {
     }
 
     # Helper function to mark a range as processed and add issue number
+    # This ensures each matched pattern is only processed once and issue numbers
+    # are not duplicated in the results
     function Add-IssueNumber {
         param(
             [int]$IssueNumber,
@@ -143,6 +148,8 @@ function Get-IssueReferences {
     }
 
     # Helper function to check if repository matches the context
+    # When Owner and Repo are provided, only references to that repository are included
+    # When no context is provided, all references are accepted
     function Test-RepositoryMatch {
         param([string]$RefOwner, [string]$RefRepo, [string]$Owner, [string]$Repo)
         
@@ -155,7 +162,7 @@ function Get-IssueReferences {
     # Pattern 1: Action keywords with full repository reference
     # Matches: Closes anokye-labs/akwaaba#123, Fixes owner/repo#456
     # Process these first to handle repo-scoped references with keywords
-    $actionFullRefPattern = "(?:$script:ActionKeywords)\s+([\w-]+)/([\w-]+)#(\d+)"
+    $actionFullRefPattern = "$script:ActionKeywords\s+([\w-]+)/([\w-]+)#(\d+)"
     $actionFullRefMatches = [regex]::Matches($Message, $actionFullRefPattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
     foreach ($match in $actionFullRefMatches) {
         $refOwner = $match.Groups[1].Value
@@ -198,7 +205,7 @@ function Get-IssueReferences {
     # Pattern 3: Action keywords with simple issue reference
     # Matches: Closes #123, Fixes #456, Resolves #789, etc.
     # Process before simple patterns to avoid double-counting
-    $actionPattern = "(?:$script:ActionKeywords)\s+#(\d+)"
+    $actionPattern = "$script:ActionKeywords\s+#(\d+)"
     $actionMatches = [regex]::Matches($Message, $actionPattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
     foreach ($match in $actionMatches) {
         # Skip if already processed
