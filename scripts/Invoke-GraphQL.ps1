@@ -61,6 +61,9 @@ param(
     [hashtable]$Variables = @{},
 
     [Parameter(Mandatory = $false)]
+    [hashtable]$Headers = @{},
+
+    [Parameter(Mandatory = $false)]
     [switch]$DryRun,
 
     [Parameter(Mandatory = $false)]
@@ -97,6 +100,13 @@ if ($DryRun) {
     if ($Variables.Count -gt 0) {
         Write-Host "Variables:" -ForegroundColor Cyan
         $Variables.GetEnumerator() | ForEach-Object {
+            Write-Host "  $($_.Key): $($_.Value)" -ForegroundColor Yellow
+        }
+    }
+    
+    if ($Headers.Count -gt 0) {
+        Write-Host "Headers:" -ForegroundColor Cyan
+        $Headers.GetEnumerator() | ForEach-Object {
             Write-Host "  $($_.Key): $($_.Value)" -ForegroundColor Yellow
         }
     }
@@ -224,6 +234,11 @@ while ($attempt -lt ($MaxRetries + 1)) {
     try {
         # Build the gh command
         $ghArgs = @('api', 'graphql')
+        
+        # Add custom headers
+        foreach ($header in $Headers.GetEnumerator()) {
+            $ghArgs += @('-H', "$($header.Key): $($header.Value)")
+        }
         
         # Add query
         $ghArgs += @('-f', "query=$Query")

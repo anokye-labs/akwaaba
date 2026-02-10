@@ -119,7 +119,10 @@ function Invoke-GraphQLHelper {
     )
     
     $graphqlScript = Join-Path $PSScriptRoot "Invoke-GraphQL.ps1"
-    return & $graphqlScript -Query $Query -Variables $Variables -CorrelationId $correlationId
+    $headers = @{
+        "GraphQL-Features" = "sub_issues"
+    }
+    return & $graphqlScript -Query $Query -Variables $Variables -Headers $headers -CorrelationId $correlationId
 }
 
 # Helper function to call Get-RepoContext.ps1
@@ -177,7 +180,7 @@ query(`$owner: String!, `$repo: String!, `$rootNumber: Int!) {
           login
         }
       }
-      trackedIssues(first: 100) {
+      subIssues(first: 100) {
         nodes {
           id
           number
@@ -199,7 +202,7 @@ query(`$owner: String!, `$repo: String!, `$rootNumber: Int!) {
               login
             }
           }
-          trackedIssues(first: 100) {
+          subIssues(first: 100) {
             nodes {
               id
               number
@@ -221,7 +224,7 @@ query(`$owner: String!, `$repo: String!, `$rootNumber: Int!) {
                   login
                 }
               }
-              trackedIssues(first: 100) {
+              subIssues(first: 100) {
                 nodes {
                   id
                   number
@@ -404,8 +407,8 @@ function Add-IssueToMap {
     $issueMap[$Issue.number] = $normalizedIssue
     
     # Recursively process children
-    if ($Issue.trackedIssues -and $Issue.trackedIssues.nodes) {
-        foreach ($child in $Issue.trackedIssues.nodes) {
+    if ($Issue.subIssues -and $Issue.subIssues.nodes) {
+        foreach ($child in $Issue.subIssues.nodes) {
             $normalizedIssue.Children += $child.number
             Add-IssueToMap -Issue $child -Depth ($Depth + 1) -Parent $normalizedIssue
         }

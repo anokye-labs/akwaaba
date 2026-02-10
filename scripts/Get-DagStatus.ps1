@@ -135,7 +135,7 @@ query(`$owner: String!, `$repo: String!, `$number: Int!) {
         id
         name
       }
-      trackedIssues(first: 100) {
+      subIssues(first: 100) {
         totalCount
         nodes {
           id
@@ -149,7 +149,7 @@ query(`$owner: String!, `$repo: String!, `$number: Int!) {
           }
         }
       }
-      trackedInIssues(first: 100) {
+      parents(first: 100) {
         totalCount
         nodes {
           id
@@ -169,7 +169,11 @@ query(`$owner: String!, `$repo: String!, `$number: Int!) {
         number = $Number
     }
 
-    $result = Invoke-GraphQL -Query $query -Variables $variables -CorrelationId $CorrelationId
+    $headers = @{
+        "GraphQL-Features" = "sub_issues"
+    }
+
+    $result = Invoke-GraphQL -Query $query -Variables $variables -Headers $headers -CorrelationId $CorrelationId
 
     if (-not $result.Success) {
         $errorMsg = $result.Errors[0].Message
@@ -218,7 +222,7 @@ function Build-HierarchyTree {
         Closed = $issue.closed
         IssueType = if ($issue.issueType) { $issue.issueType.name } else { "Unknown" }
         Children = @()
-        ParentCount = $issue.trackedInIssues.totalCount
+        ParentCount = $issue.parents.totalCount
         TotalChildren = 0
         ClosedChildren = 0
         PercentComplete = 0
@@ -228,8 +232,8 @@ function Build-HierarchyTree {
     }
 
     # Recursively fetch children
-    if ($issue.trackedIssues.totalCount -gt 0) {
-        foreach ($child in $issue.trackedIssues.nodes) {
+    if ($issue.subIssues.totalCount -gt 0) {
+        foreach ($child in $issue.subIssues.nodes) {
             $childNode = Build-HierarchyTree `
                 -Number $child.number `
                 -Owner $Owner `
