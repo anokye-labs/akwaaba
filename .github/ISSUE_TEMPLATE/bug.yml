@@ -1,0 +1,76 @@
+name: Bug Report
+description: Report a bug or defect in the project
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug! Please fill out the sections below to help us reproduce and fix the issue.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this bug? This helps us prioritize the fix.
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Please provide detailed steps to reproduce the bug.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: Describe what you expected to happen...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Describe what actually happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Information
+      description: Please provide relevant environment details.
+      placeholder: |
+        - OS: [e.g., Windows 11, macOS 14, Ubuntu 22.04]
+        - .NET Version: [e.g., .NET 8.0]
+        - PowerShell Version: [e.g., 7.4.0]
+        - Browser (if applicable): [e.g., Chrome 120, Firefox 121]
+        - Other relevant details: [e.g., Node.js version, Python version]
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here (screenshots, logs, error messages, etc.)
+      placeholder: Add any additional information that might help us understand the issue...
+    validations:
+      required: false
