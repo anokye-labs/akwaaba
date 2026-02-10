@@ -1,6 +1,4 @@
 {
-  "_comment": "Main Branch Protection Ruleset - Enforces Anokye-Krom System governance model",
-  "_note": "The commit-validator status check is required but not yet implemented. Set enforcement to 'active' after implementing the workflow.",
   "name": "Main Branch Protection",
   "target": "branch",
   "enforcement": "disabled",
@@ -31,7 +29,6 @@
         "required_status_checks": [
           {
             "context": "commit-validator",
-            "_comment": "integration_id is null for repository workflows. Set to app ID if using GitHub App",
             "integration_id": null
           }
         ]
