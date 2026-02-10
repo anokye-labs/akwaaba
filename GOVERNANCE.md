@@ -402,7 +402,7 @@ After creating both issues:
 2. Or use the Okyerema skill which provides helper scripts
 3. The relationship will show in GitHub's UI automatically
 
-See the [Okyerema skill documentation](/.github/skills/okyerema/SKILL.md) for details.
+See the [Okyerema skill documentation](.github/skills/okyerema/SKILL.md) for details.
 
 ### What about labels?
 
@@ -470,7 +470,7 @@ Yes, but:
 - **[How We Work](./how-we-work.md)** — Overview of coordination system
 - **[Our Way](./how-we-work/our-way.md)** — Philosophy and practices
 - **[Agent Conventions](./how-we-work/agent-conventions.md)** — Agent behavior requirements
-- **[Okyerema Skill](/.github/skills/okyerema/SKILL.md)** — Technical tools for agents
+- **[Okyerema Skill](.github/skills/okyerema/SKILL.md)** — Technical tools for agents
 - **[CONTRIBUTING.md](./CONTRIBUTING.md)** — Contribution guidelines
 
 ---

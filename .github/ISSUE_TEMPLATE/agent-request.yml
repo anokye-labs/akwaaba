@@ -14,7 +14,7 @@ body:
         - Agents respond to human-created issues
         - All commits must reference an issue
         - Agents must be approved and added to `.github/approved-agents.json`
-        - See [Agent Conventions](../how-we-work/agent-conventions.md) for behavioral requirements
+        - See [Agent Conventions](https://github.com/anokye-labs/akwaaba/blob/main/how-we-work/agent-conventions.md) for behavioral requirements
 
         **Security Note:** Agent requests require review and approval from repository maintainers.
 
@@ -268,7 +268,7 @@ body:
       label: Pre-submission Checklist
       description: Please verify these items before submitting
       options:
-        - label: I have read the [Agent Conventions](../how-we-work/agent-conventions.md)
+        - label: I have read the [Agent Conventions](https://github.com/anokye-labs/akwaaba/blob/main/how-we-work/agent-conventions.md)
           required: true
         - label: I have considered security implications
           required: true
