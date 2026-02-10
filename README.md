@@ -123,6 +123,7 @@ akwaaba/
 - **[How We Work](how-we-work.md)** — Overview of our philosophy and approach
 - **[Getting Started](how-we-work/getting-started.md)** — New to GitHub Issues? Start here
 - **[Our Way](how-we-work/our-way.md)** — How we structure and coordinate work
+- **[Governance](GOVERNANCE.md)** — Branch protection, rulesets, and bypass procedures
 - **[Glossary](how-we-work/glossary.md)** — Akan terms and concepts
 - **[ADR Process](how-we-work/adr-process.md)** — How we document architectural decisions
 
@@ -152,7 +153,7 @@ Akwaaba follows an **issue-first workflow**:
 
 Looking for something to work on? Check out issues labeled [`good-first-issue`](https://github.com/anokye-labs/akwaaba/labels/good-first-issue).
 
-Want to understand how to contribute as a human? Read **[How We Work](how-we-work.md)**.
+Want to understand how to contribute? Read **[Contributing Guide](CONTRIBUTING.md)** and **[Governance](GOVERNANCE.md)**.
 
 Want to contribute as an agent? Read **[Agent Conventions](how-we-work/agent-conventions.md)**.
 
