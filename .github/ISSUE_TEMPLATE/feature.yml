@@ -1,0 +1,101 @@
+name: Feature
+description: Propose a cohesive piece of functionality that delivers user value. Features are children of Epics and parents of Tasks.
+title: "[FEATURE] "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Proposal
+        
+        A Feature represents a cohesive piece of functionality that delivers value. Features belong to an Epic and are broken down into Tasks.
+        
+        **Hierarchy:** Epic → **Feature** → Task
+
+  - type: input
+    id: parent-epic
+    attributes:
+      label: Parent Epic
+      description: Link to the Epic this Feature belongs to (e.g., #123 or full URL)
+      placeholder: "#123 or https://github.com/anokye-labs/akwaaba/issues/123"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: Describe what this feature does and what value it provides
+      placeholder: |
+        Clear description of the feature functionality and its purpose.
+        
+        Example:
+        - What does this feature enable users to do?
+        - Why is this feature valuable?
+        - How does it fit into the larger Epic?
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks Checklist
+      description: List the specific tasks needed to implement this feature. Each task can become a separate issue.
+      placeholder: |
+        - [ ] Task 1: Setup infrastructure
+        - [ ] Task 2: Implement core logic
+        - [ ] Task 3: Add tests
+        - [ ] Task 4: Update documentation
+      value: |
+        - [ ] 
+    validations:
+      required: false
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: List any dependencies on other Features, Tasks, or external factors
+      placeholder: |
+        - Depends on #456 (Feature: Authentication)
+        - Requires external API access
+        - Blocked by infrastructure setup
+    validations:
+      required: false
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Project Phase
+      description: Which phase of the project does this feature belong to?
+      options:
+        - phase-1-foundation
+        - phase-2-governance
+        - phase-3-agents
+        - phase-4-dotnet
+        - phase-5-documentation
+        - phase-6-validation
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What conditions must be met for this feature to be considered complete?
+      placeholder: |
+        - [ ] All tasks are completed
+        - [ ] Feature works as described
+        - [ ] Tests pass
+        - [ ] Documentation updated
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      description: Any other information, context, or considerations
+      placeholder: Technical considerations, design decisions, or future enhancements
+    validations:
+      required: false
