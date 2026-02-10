@@ -215,7 +215,7 @@ function Test-IssueValid {
     catch {
         return @{
             Valid = $false
-            Reason = "Failed to verify issue #$issueNumber: $_"
+            Reason = "Failed to verify issue #${issueNumber}: $_"
         }
     }
 }
