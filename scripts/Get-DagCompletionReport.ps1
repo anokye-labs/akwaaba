@@ -89,6 +89,9 @@ function Invoke-GraphQLHelper {
     $params = @{
         Query = $Query
         Variables = $Variables
+        Headers = @{
+            "GraphQL-Features" = "sub_issues"
+        }
         CorrelationId = $correlationId
     }
     
@@ -144,7 +147,7 @@ query {
       createdAt
       closedAt
       issueType { name }
-      trackedIssues(first: 100) {
+      subIssues(first: 100) {
         totalCount
         nodes {
           id
@@ -180,14 +183,14 @@ query {
         ClosedAt = $issue.closedAt
         Level = $Level
         Children = [System.Collections.Generic.List[object]]::new()
-        TotalCount = $issue.trackedIssues.totalCount
+        TotalCount = $issue.subIssues.totalCount
         ClosedCount = 0
         OpenCount = 0
     }
     
     # Recursively fetch children
-    if ($issue.trackedIssues.nodes) {
-        foreach ($child in $issue.trackedIssues.nodes) {
+    if ($issue.subIssues.nodes) {
+        foreach ($child in $issue.subIssues.nodes) {
             $childObj = Get-IssueHierarchy -Owner $Owner -Repo $Repo -Number $child.number -Level ($Level + 1) -Visited $Visited
             if ($childObj) {
                 $issueObj.Children.Add($childObj) | Out-Null

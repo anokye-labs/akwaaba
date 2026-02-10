@@ -32,7 +32,7 @@ The Anokye-Krom System is our governance model for agent-first development. Name
 
 **Humans Plan, Agents Code** — Humans create issues and review PRs; agents write all code
 **Issue-First Workflow** — No commit without an issue; no PR without acceptance criteria  
-**Strict Enforcement** — Branch protection blocks direct commits; all changes via agents  
+**Strict Enforcement** — Branch protection blocks direct commits; all changes via agents (see [ruleset](.github/rulesets/main-branch-protection.json))  
 **Structural Integrity** — Use GitHub's native features correctly (issue types, sub-issues, projects)  
 **Continuous Verification** — Health checks validate that the system reflects reality
 

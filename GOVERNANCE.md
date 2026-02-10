@@ -1,278 +1,228 @@
-# Governance
+# Repository Governance
 
-**Akwaaba** operates under the **Anokye-Krom System** — a governance model where AI agents handle all commits in response to human-created issues.
+This document outlines the governance policies and enforcement mechanisms for the Akwaaba repository, a reference implementation of the **Anokye-Krom System**.
 
-## Philosophy
+## Table of Contents
 
-The Anokye-Krom System is built on three core principles:
+- [Overview](#overview)
+- [Branch Protection](#branch-protection)
+- [Commit Validator Workflow](#commit-validator-workflow)
+- [Agent Authentication](#agent-authentication)
+- [Bypass Procedures](#bypass-procedures)
 
-1. **Issue-Driven Development** — All work begins with a GitHub issue created by a human
-2. **Agent-Only Commits** — All code changes are implemented by approved AI agents
-3. **Human Oversight** — Humans review, approve, and merge all changes
+## Overview
 
-This model ensures:
-- Every change is tracked and documented
-- The "why" behind every commit is clear and searchable
-- Work is coordinated through a single source of truth
-- Consistent quality and adherence to conventions
+The Akwaaba repository implements strict governance controls to ensure:
+- **Issue-driven development**: All changes must be linked to GitHub issues
+- **Agent-only commits**: Only approved AI agents can commit code
+- **Quality assurance**: All changes go through pull request review
+- **Auditability**: Every commit is traceable to an issue and its rationale
+
+These controls are enforced through a combination of:
+- GitHub branch protection rulesets
+- GitHub Actions workflows
+- Commit validation checks
+- Agent authentication mechanisms
 
 ## Branch Protection
 
-The `main` branch is protected by a comprehensive GitHub ruleset that enforces our governance model.
+The `main` branch is protected by GitHub rulesets that enforce:
 
-### Active Rules
+### Required Pull Requests
+- Direct commits to `main` are blocked
+- All changes must go through pull requests
+- Pull requests require review before merging
 
-#### Pull Request Requirements
-- **Require pull request before merging** — Direct pushes to `main` are blocked
-- **Require at least 1 approval** — All PRs must be reviewed and approved
-- **Dismiss stale reviews** — Reviews are invalidated when new commits are pushed
-- **Require conversation resolution** — All review comments must be resolved before merging
+### Required Status Checks
+Two status checks must pass before merging:
+1. **Commit Validator** - Validates commit messages reference open issues
+2. **Agent Authentication** - Verifies commits are from approved agents
 
-#### Status Check Requirements
-- **Require status checks to pass** — All required checks must succeed before merging
-- **Required checks:**
-  - `commit-validator` — Validates commit messages reference GitHub issues
-  - `agent-auth` (planned) — Validates commits are from approved agents
-- **Require branches to be up to date** — Branches must be current with `main` before merging
+### Non-Fast-Forward Protection
+- Force pushes to `main` are blocked
+- History rewriting is prevented
+- Branch cannot be deleted
 
-#### Commit Restrictions
-- **Block force pushes** — History on `main` is immutable
-- **Block branch deletion** — The `main` branch cannot be deleted
-- **Restrict push access** — Only through approved pull requests
+### Strict Status Checks
+- Status checks must pass on the latest commit
+- Cannot merge stale pull requests
 
-### Ruleset Configuration
+For detailed ruleset configuration, see [`.github/rulesets/`](.github/rulesets/).
 
-The complete ruleset configuration is stored in `.github/rulesets/` (to be exported when implemented via GitHub UI).
+## Commit Validator Workflow
 
-## Commit Validation
+The **Commit Validator** workflow enforces issue-driven development by validating that every commit in a pull request references an open GitHub issue.
 
-All commits must reference a GitHub issue. This requirement is enforced by the `commit-validator` workflow.
+### Purpose
 
-### Valid Commit Formats
-
-Commits must include an issue reference in one of these formats:
-
-1. **Simple reference:** `#123`
-2. **Keyword reference:** `Closes #123`, `Fixes #456`, `Resolves #789`
-3. **Cross-repository:** `owner/repo#123`
-4. **Full URL:** `https://github.com/owner/repo/issues/123`
-
-### Examples
-
-✅ **Valid commits:**
-```
-feat: Add governance documentation (#42)
-fix: Correct validation logic, Closes #101
-docs: Update README (anokye-labs/akwaaba#50)
-```
-
-❌ **Invalid commits:**
-```
-feat: Add new feature
-fix: Bug fix
-Update documentation
-```
-
-### Exempt Commits
-
-The following commit types are automatically exempt from issue reference requirements:
-- **Merge commits** — Automatically created by GitHub
-- **Revert commits** — Starting with "Revert"
-- **Bot commits** — From `github-actions[bot]`, `dependabot[bot]`, `renovate[bot]`
-
-### Validation Logs
-
-All commit validation attempts are logged to `logs/commit-validation/` with structured JSON for audit purposes:
-- Timestamp of validation
-- Commit SHA and author
-- Pull request number
-- Validation result (pass/fail/skip)
-- Correlation ID for tracing
-
-## Agent Authentication
-
-Only approved AI agents are permitted to make commits to this repository.
-
-### Approved Agents
-
-The current list of approved agents includes:
-- **copilot-swe-agent[bot]** — GitHub Copilot workspace agent
-- **github-actions[bot]** — GitHub Actions automation
-- **dependabot[bot]** — Automated dependency updates
-
-The complete allowlist is maintained in `.github/approved-agents.json` (when implemented).
-
-### Authentication Workflow
-
-When a pull request is opened or updated, the `agent-auth` workflow (planned):
-
-1. Fetches all commits in the pull request
-2. Extracts commit author and committer information
-3. Validates each commit against the approved agents list
-4. Blocks merge if any commits are from non-approved sources
-
-### Adding New Agents
-
-To request approval for a new agent:
-
-1. Create an issue using the `agent-approval-request` template (when available)
-2. Provide:
-   - Agent username/GitHub App ID
-   - Purpose and use case
-   - Security and authentication details
-3. Wait for review and approval from repository maintainers
-4. Agent will be added to the approved agents list
-
-## Bypass Procedures
-
-While the governance rules are strict, we recognize that emergencies happen. Bypass procedures exist for exceptional circumstances.
-
-### When to Bypass
-
-Bypass procedures should **only** be used for:
-- **Security emergencies** — Critical vulnerabilities requiring immediate patches
-- **System outages** — Production-down scenarios requiring rapid fixes
-- **Infrastructure failures** — CI/CD or automation system failures preventing normal workflow
-
-Bypass is **not appropriate** for:
-- Convenience or speed
-- Avoiding review process
-- Working around disagreements
-- Personal preferences
-
-### How to Bypass
-
-#### Emergency Merge Label
-
-Apply the `emergency-merge` label to a pull request to bypass agent authentication validation.
-
-**Requirements:**
-- Only organization administrators can apply this label
-- A comment explaining the emergency is required
-- All bypasses are logged for audit
-
-**Steps:**
-1. Create pull request as normal
-2. Add `emergency-merge` label
-3. Comment with explanation: nature of emergency, why bypass is necessary
-4. Proceed with merge after approval
-
-#### Ruleset Bypass
-
-Organization administrators can bypass the ruleset temporarily for direct pushes.
-
-**Important:** This bypass should be used extremely rarely, as it circumvents all protections.
-
-**When ruleset bypass is used:**
-- Document the reason in a follow-up issue
-- Create a pull request to formalize the emergency change
-- Review the change post-facto
-- Update incident response documentation if needed
-
-### Who Can Bypass
-
-Bypass permissions are restricted to:
-- **Organization administrators** — Full bypass capability
-- **Repository administrators** — Can apply emergency-merge label
-
-### Audit Trail
-
-All bypass events are logged:
-- Emergency merge labels trigger logged validation results
-- Ruleset bypasses are recorded in GitHub's audit log
-- Comments on emergency merges provide context
-- Logs are reviewed periodically to identify patterns
-
-### Post-Bypass Process
-
-After using bypass procedures:
-
-1. **Document the incident** — Create a GitHub issue describing:
-   - What happened
-   - Why bypass was necessary
-   - What was changed
-   - Lessons learned
-
-2. **Review the change** — Even if already merged:
-   - Create a follow-up pull request if refinements needed
-   - Ensure documentation is updated
-   - Add tests if missing
-
-3. **Update procedures** — If the incident revealed gaps:
-   - Update governance documentation
-   - Enhance automation to prevent recurrence
-   - Revise incident response plans
-
-## Issue-Driven Workflow
-
-The Anokye-Krom System enforces an issue-first workflow.
+The commit validator ensures:
+- Every code change is traceable to a specific issue
+- The rationale for changes is documented
+- Work is properly planned and coordinated
+- The repository history remains meaningful and searchable
 
 ### How It Works
 
-1. **Human creates issue** — Describe what needs to be done and why
-2. **Agent is assigned** — AI agent receives the issue
-3. **Agent implements** — Agent reads issue, makes changes, creates PR
-4. **Human reviews** — Review code, test functionality, provide feedback
-5. **Agent refines** — Agent addresses feedback, updates PR
-6. **Human merges** — Merge when satisfied
+1. **Trigger**: Runs on every pull request (opened, synchronized, reopened)
+2. **Validation**: Examines each commit message in the pull request
+3. **Issue Check**: Verifies referenced issues exist and are open
+4. **Status Update**: Sets the required "Commit Validator" status check
 
-### Enforcement Mechanisms
+### Commit Message Requirements
 
-The workflow is enforced through:
-- **Branch protection** — No direct commits to `main`
-- **Commit validation** — Every commit must reference an issue
-- **Agent authentication** — Only approved agents can commit
-- **Required reviews** — Human approval required before merge
+Every commit message must reference at least one GitHub issue using one of these formats:
 
-## Troubleshooting
+```
+#123                    Basic issue reference
+Closes #123            Closes the issue when merged
+Fixes #123             Fixes the issue when merged
+Resolves #123          Resolves the issue when merged
+```
 
-### My commit was rejected
+Multiple issue references are allowed:
+```
+Fixes #123, #456
+Closes #123 and resolves #456
+```
 
-**Check:** Does your commit message reference a GitHub issue?
-- Add issue reference: `#123` or `Closes #456`
-- See [Commit Validation](#commit-validation) for valid formats
+### Validation Rules
 
-### My PR is blocked by status checks
+The workflow validates that:
+- ✅ Commit message contains at least one issue reference
+- ✅ Referenced issue exists in this repository
+- ✅ Referenced issue is currently open
+- ✅ Issue reference format is correct
 
-**Check:** Are all required status checks passing?
-- View the "Checks" tab on your pull request
-- Click on failed checks to see error details
-- Address issues and push new commits
+The workflow allows:
+- ✅ Merge commits (validated differently)
+- ✅ Commits from approved bots
+- ✅ Multiple issue references
 
-### I need to make an emergency change
+The workflow rejects:
+- ❌ Commits with no issue reference
+- ❌ References to closed issues
+- ❌ References to non-existent issues
+- ❌ Malformed issue references
 
-**See:** [Bypass Procedures](#bypass-procedures)
-- Determine if this truly qualifies as an emergency
-- Follow the emergency merge process
-- Document the incident thoroughly
+### Error Messages
 
-### How do I request a new agent?
+When validation fails, the workflow provides:
+- List of commits that failed validation
+- Specific reason for each failure
+- Examples of correct commit message format
+- Link to contribution guidelines
 
-**Process:** (Planned - agent approval workflow)
-- Create issue with `agent-approval-request` template
-- Provide agent details and justification
-- Wait for maintainer review
-- Agent added to approved list if approved
+### Special Cases
 
-## Related Documentation
+**Merge Commits**: Validated using the same rules, but the PR itself is considered the primary source of truth for issue references.
 
-- **[How We Work](./how-we-work.md)** — Overview of our coordination system
-- **[Contributing Guide](./CONTRIBUTING.md)** — How to contribute to this repository
-- **[Agent Conventions](./how-we-work/agent-conventions.md)** — Behavioral requirements for AI agents
-- **[Okyerema Skill](./.github/skills/okyerema/SKILL.md)** — Project orchestration skill for agents
+**Bot Commits**: Commits from approved bots (GitHub Apps) are allowed if the bot is registered in the approved agents list.
 
-## Future Enhancements
+**WIP Commits**: Work-in-progress commits should still reference the issue being worked on. Use the issue reference with a WIP prefix:
+```
+WIP: #123 Implement feature X
+```
 
-Planned improvements to the governance system:
+### Performance
 
-- **Ruleset export** — Export and version control ruleset configuration in `.github/rulesets/`
-- **Agent auth workflow** — Automated validation of commit authors against approved agents list
-- **Self-service agent registration** — Streamlined process for requesting new agent approvals
-- **Enhanced audit reporting** — Dashboard and reports for governance metrics
-- **Incident response playbooks** — Detailed procedures for common emergency scenarios
+- Average validation time: < 10 seconds
+- Issue lookups are cached to avoid rate limiting
+- Runs in parallel with other status checks
+
+### Examples
+
+**Valid commit messages:**
+```
+feat(auth): Add OAuth2 support (#123)
+fix(api): Resolve timeout issue - Fixes #456
+docs: Update README with installation steps (#789)
+refactor(core): Simplify error handling (closes #234)
+```
+
+**Invalid commit messages:**
+```
+Add new feature               ❌ No issue reference
+Fix bug (#999)                ❌ Issue doesn't exist
+Update docs (Closes #888)     ❌ Issue is closed
+WIP                           ❌ No issue reference
+```
+
+For detailed commit message formatting guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md#commit-message-format).
+
+## Agent Authentication
+
+The **Agent Authentication** workflow verifies that commits are from approved AI agents.
+
+### Purpose
+
+This ensures:
+- Only vetted agents can commit code
+- Agent behavior can be audited
+- Security vulnerabilities are prevented
+- Accountability is maintained
+
+### How It Works
+
+1. **Trigger**: Runs on every pull request
+2. **Author Check**: Examines the author of each commit
+3. **Allowlist Validation**: Verifies author is in approved agents list
+4. **Status Update**: Sets the required "Agent Authentication" status check
+
+### Approved Agents
+
+Agents must be registered in [`.github/approved-agents.json`](.github/approved-agents.json) with:
+- GitHub App ID or bot username
+- Description of agent's purpose
+- Permissions granted
+- Approval date and approver
+- Status (enabled/disabled)
+
+For the agent registration process, see [`.github/APPROVED-AGENTS.md`](.github/APPROVED-AGENTS.md).
+
+## Bypass Procedures
+
+In rare emergency situations, repository administrators may need to bypass protection rules.
+
+### When to Bypass
+
+Bypass should only be used for:
+- Critical security patches requiring immediate deployment
+- Infrastructure failures blocking normal workflow
+- Correcting critical errors in protection rules themselves
+
+### How to Bypass
+
+1. **Administrator Review**: Two administrators must approve the bypass
+2. **Document Reason**: Create an incident issue explaining the bypass
+3. **Use Bypass Permission**: Administrators with bypass permission can override checks
+4. **Post-Bypass Review**: Create a follow-up issue to restore normal process
+
+### Bypass Accountability
+
+All bypasses are:
+- Logged in repository audit trail
+- Documented in incident issues
+- Reviewed in monthly governance reviews
+- Subject to post-incident analysis
+
+### Requesting Bypass Permission
+
+If you believe protection rules need to be modified:
+1. Create an issue explaining the limitation
+2. Propose the change with rationale
+3. Discuss with maintainers
+4. Update rules through normal PR process
+
+**Note**: Most requests for bypass stem from misunderstanding the workflow. Before requesting bypass, consult [CONTRIBUTING.md](CONTRIBUTING.md) and [how-we-work.md](how-we-work.md).
 
 ---
 
-**Questions or Issues?**
+## Questions?
 
-If you have questions about governance policies or need assistance with bypass procedures, create an issue with the `question` label or contact repository administrators.
+If you have questions about these governance policies:
+- See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines
+- See [how-we-work.md](how-we-work.md) for workflow details
+- Create an issue with the `question` label
+- Contact repository maintainers
+
+**Remember**: These policies exist to make collaboration better, not harder. If something isn't working, we want to hear about it!

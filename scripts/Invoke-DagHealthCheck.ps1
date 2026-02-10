@@ -182,7 +182,7 @@ query(`$owner: String!, `$repo: String!) {
           id
           name
         }
-        trackedIssues(first: 100) {
+        subIssues(first: 100) {
           totalCount
           nodes {
             number
@@ -191,7 +191,7 @@ query(`$owner: String!, `$repo: String!) {
             }
           }
         }
-        trackedInIssues(first: 100) {
+        parents(first: 100) {
           totalCount
         }
       }
@@ -205,7 +205,11 @@ query(`$owner: String!, `$repo: String!) {
         repo = $Repo
     }
 
-    $result = Invoke-GraphQL -Query $query -Variables $variables -CorrelationId $CorrelationId
+    $headers = @{
+        "GraphQL-Features" = "sub_issues"
+    }
+
+    $result = Invoke-GraphQL -Query $query -Variables $variables -Headers $headers -CorrelationId $CorrelationId
 
     if (-not $result.Success) {
         Write-OkyeremaLog -Message "Failed to fetch issues" -Level Error -Operation "Get-AllOpenIssues" -CorrelationId $CorrelationId
@@ -265,8 +269,8 @@ function Check-CyclesInHierarchy {
 
     # Get the issue's children
     $issue = $allIssues | Where-Object { $_.number -eq $IssueNumber }
-    if ($issue -and $issue.trackedIssues.totalCount -gt 0) {
-        foreach ($child in $issue.trackedIssues.nodes) {
+    if ($issue -and $issue.subIssues.totalCount -gt 0) {
+        foreach ($child in $issue.subIssues.nodes) {
             Check-CyclesInHierarchy -IssueNumber $child.number -Visited $Visited -Path $Path -Owner $Owner -Repo $Repo -CorrelationId $CorrelationId
         }
     }
@@ -327,8 +331,8 @@ foreach ($issue in $allIssues) {
     }
     
     # Check each child
-    if ($issue.trackedIssues.totalCount -gt 0) {
-        foreach ($child in $issue.trackedIssues.nodes) {
+    if ($issue.subIssues.totalCount -gt 0) {
+        foreach ($child in $issue.subIssues.nodes) {
             $childType = if ($child.issueType) { $child.issueType.name } else { "Unknown" }
             
             if ($childType -eq "Unknown") {
@@ -370,7 +374,7 @@ Write-OkyeremaLog -Message "Check 5: Verifying Epics have children" -Level Info 
 
 $epics = $allIssues | Where-Object { $_.issueType.name -eq "Epic" }
 foreach ($epic in $epics) {
-    if ($epic.trackedIssues.totalCount -eq 0) {
+    if ($epic.subIssues.totalCount -eq 0) {
         Add-Warning -Category "ChildlessEpic" -Message "Epic has no child issues" -IssueNumber $epic.number -IssueTitle $epic.title
     }
 }
