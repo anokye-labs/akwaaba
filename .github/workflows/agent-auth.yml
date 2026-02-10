@@ -1,0 +1,122 @@
+name: Agent Authentication
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate-commit-authors:
+    name: Validate Commit Authors
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup PowerShell
+        run: |
+          # Verify PowerShell is available
+          pwsh --version
+      
+      - name: Validate commit authors
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Extract owner and repo from github.repository
+          OWNER="${{ github.repository_owner }}"
+          REPO="${{ github.event.repository.name }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          
+          echo "Repository: $OWNER/$REPO"
+          echo "Pull Request: #$PR_NUMBER"
+          echo ""
+          
+          # Run the validation script
+          pwsh -File scripts/Validate-CommitAuthors.ps1 \
+            -Owner "$OWNER" \
+            -Repo "$REPO" \
+            -PullRequestNumber "$PR_NUMBER" \
+            -Verbose
+          
+          EXIT_CODE=$?
+          
+          echo ""
+          echo "Validation exit code: $EXIT_CODE"
+          
+          # Exit codes:
+          # 0 = All commits approved
+          # 1 = Validation failed
+          # 2 = Emergency bypass
+          # 3 = Error
+          
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "✅ All commits are from approved agents"
+            exit 0
+          elif [ $EXIT_CODE -eq 2 ]; then
+            echo "⚠️  Emergency bypass active - allowing PR to proceed"
+            echo "This bypass is logged for audit purposes"
+            exit 0
+          elif [ $EXIT_CODE -eq 1 ]; then
+            echo "❌ Validation failed - unapproved commits detected"
+            exit 1
+          else
+            echo "❌ Validation error occurred"
+            exit 1
+          fi
+      
+      - name: Comment on PR (on failure)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.payload.pull_request.number;
+            
+            const comment = `## ❌ Agent Authentication Failed
+            
+            This pull request contains commits from unapproved authors. The Anokye-Krom System requires that all commits be made by approved AI agents.
+            
+            ### Why This Matters
+            
+            The agent-only commit pattern ensures:
+            - 🔍 **Auditability** — All changes are tracked and linked to issues
+            - ✅ **Consistency** — Automated processes maintain code quality
+            - 📋 **Traceability** — Clear separation between planning (human) and execution (agent)
+            
+            ### How to Fix This
+            
+            1. **Create a GitHub Issue** describing the needed changes
+            2. **Assign to an approved agent** (e.g., @copilot)
+            3. **Let the agent create a new PR** with the changes
+            
+            ### Emergency Situations
+            
+            If this is an emergency that requires immediate human intervention:
+            1. An administrator can apply the \`emergency-merge\` label to this PR
+            2. The bypass will be logged for audit purposes
+            3. Document the reason in the PR description
+            
+            ### Learn More
+            
+            - [How We Work](../blob/main/how-we-work.md)
+            - [Agent Conventions](../blob/main/how-we-work/agent-conventions.md)
+            - [Approved Agents List](../blob/main/.github/APPROVED-AGENTS.md)
+            
+            ---
+            
+            *This check is required and must pass (or be bypassed) before the PR can be merged.*`;
+            
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: comment
+            });
