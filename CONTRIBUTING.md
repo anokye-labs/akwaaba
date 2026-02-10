@@ -260,7 +260,7 @@ A: Yes! Use commas: `feat(api): Add endpoints (#123, #456)`
 A: Reference the specific task issue number, not the parent feature or epic.
 
 **Q: Can I use URLs instead of `#123`?**  
-A: Yes, but `#123` is preferred. Both work: `#123` or `https://github.com/owner/repo/issues/123`
+A: Yes, but `#123` is preferred. Both work: `#123` or `https://github.com/anokye-labs/akwaaba/issues/123`
 
 **Q: What about merge commits?**  
 A: Merge commits are validated the same way. The PR must reference an issue.
