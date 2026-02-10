@@ -1,0 +1,81 @@
+{
+  "_comment": "Main Branch Protection Ruleset for Anokye Labs Akwaaba Repository",
+  "_usage": "This file defines the branch protection rules to be applied via GitHub UI at Settings > Rules > Rulesets",
+  "_export_command": "pwsh -File scripts/Export-Ruleset.ps1 -Owner \"anokye-labs\" -Repo \"akwaaba\" -RulesetId <id>",
+  "_last_updated": "2026-02-09",
+  "name": "Main Branch Protection",
+  "target": "branch",
+  "enforcement": "active",
+  "_enforcement_comment": "active = enforced; disabled = not enforced; evaluate = dry-run mode",
+  "conditions": {
+    "ref_name": {
+      "include": [
+        "refs/heads/main"
+      ],
+      "exclude": []
+    }
+  },
+  "_conditions_comment": "Applies this ruleset only to the main branch",
+  "rules": [
+    {
+      "type": "pull_request",
+      "_rule_comment": "Require pull request before merging to main",
+      "parameters": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews_on_push": true,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": true
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "_rule_comment": "Require specific GitHub Actions workflows to pass before merging",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "_strict_comment": "Branches must be up to date before merging",
+        "required_status_checks": [
+          {
+            "context": "Commit Validator",
+            "integration_id": null
+          },
+          {
+            "context": "Agent Authentication",
+            "integration_id": null
+          }
+        ]
+      }
+    },
+    {
+      "type": "non_fast_forward",
+      "_rule_comment": "Block force pushes to main branch"
+    },
+    {
+      "type": "deletion",
+      "_rule_comment": "Prevent deletion of main branch"
+    }
+  ],
+  "_optional_rules_comment": "Additional rules that can be enabled if desired",
+  "_optional_rules": [
+    {
+      "type": "creation",
+      "_rule_comment": "Restrict who can create matching branches"
+    },
+    {
+      "type": "required_signatures",
+      "_rule_comment": "Require signed commits (currently optional per repository decision)"
+    },
+    {
+      "type": "required_deployments",
+      "_rule_comment": "Require deployments to succeed before merging"
+    }
+  ],
+  "bypass_actors": [
+    {
+      "actor_id": 1,
+      "actor_type": "OrganizationAdmin",
+      "bypass_mode": "always"
+    }
+  ],
+  "_bypass_actors_comment": "Organization administrators can bypass these rules in emergencies. See GOVERNANCE.md for bypass procedures."
+}
