@@ -1,0 +1,212 @@
+name: Bug Report
+description: Report a defect, error, or unexpected behavior
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Report a Bug
+        
+        Use this template to report:
+        - **Defects** — Something that's broken or doesn't work
+        - **Errors** — Crashes, exceptions, or error messages
+        - **Unexpected behavior** — System behaves differently than documented
+        
+        **Not for bugs:**
+        - Feature requests (use Feature template)
+        - Questions (create a Discussion)
+        - Security vulnerabilities (see SECURITY.md)
+
+  - type: input
+    id: bug-title
+    attributes:
+      label: Bug Title
+      description: A clear, concise summary of the bug
+      placeholder: "e.g., Agent authentication workflow fails with 404 error"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this bug?
+      options:
+        - Critical (System down, data loss, security breach)
+        - High (Major functionality broken, no workaround)
+        - Medium (Functionality impaired, workaround exists)
+        - Low (Minor issue, cosmetic, easy workaround)
+      default: 2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is fixing this?
+      options:
+        - P0 (Fix immediately)
+        - P1 (Fix this week)
+        - P2 (Fix this sprint)
+        - P3 (Fix when possible)
+      default: 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: What's wrong? Be specific and detailed.
+      placeholder: |
+        Describe the bug clearly:
+        - What were you trying to do?
+        - What went wrong?
+        - Is this consistently reproducible?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: How can someone else reproduce this bug?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Run command '...'
+        4. Observe error
+        
+        Be specific enough that someone else can follow these steps exactly.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead?
+      placeholder: |
+        Describe what you expected to happen:
+        - The workflow should complete successfully
+        - The API should return a 200 status code
+        - The file should be created in the correct location
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happens?
+      placeholder: |
+        Describe what actually happens:
+        - Include exact error messages
+        - Paste relevant log output
+        - Include screenshots if applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Where does this bug occur?
+      placeholder: |
+        - OS: Windows 11, macOS 14, Ubuntu 22.04
+        - PowerShell version: 7.4.0
+        - .NET version: 8.0
+        - Repository: anokye-labs/akwaaba
+        - Branch: main
+        - Commit SHA: abc123
+      value: |
+        - OS: 
+        - PowerShell version: 
+        - .NET version: 
+        - Repository: 
+        - Branch: 
+        - Commit SHA: 
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Paste any relevant log output, error messages, or stack traces
+      placeholder: |
+        ```
+        Error: Failed to authenticate agent
+        at ValidateAgent (line 42)
+        Status: 404 Not Found
+        ```
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround (if any)
+      description: Have you found a temporary workaround?
+      placeholder: |
+        Describe any workaround you've discovered:
+        - Manually editing the file works
+        - Running the command twice succeeds
+        - Using a different API endpoint works
+    validations:
+      required: false
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Who or what is affected by this bug?
+      placeholder: |
+        - Blocks all agent workflows
+        - Affects developers on Windows only
+        - Prevents new contributors from joining
+        - Causes builds to fail intermittently
+    validations:
+      required: false
+
+  - type: textarea
+    id: first-occurrence
+    attributes:
+      label: When Did This Start?
+      description: When did you first notice this bug?
+      placeholder: |
+        - Started after commit abc123
+        - Noticed after upgrading to PowerShell 7.4
+        - Has always been present
+        - Started on February 1, 2024
+    validations:
+      required: false
+
+  - type: dropdown
+    id: regression
+    attributes:
+      label: Is This a Regression?
+      description: Did this used to work correctly?
+      options:
+        - "Yes - This used to work"
+        - "No - This never worked"
+        - "Unknown"
+      default: 2
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information that might help diagnose this bug
+      placeholder: |
+        - Related issues or PRs
+        - Links to discussions
+        - Potential root cause
+        - Suggested fix
+    validations:
+      required: false

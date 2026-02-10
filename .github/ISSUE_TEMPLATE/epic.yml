@@ -1,0 +1,136 @@
+name: Epic
+description: Create a large initiative or phase of work that groups multiple Features
+title: "[Epic] "
+labels: ["epic"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## What is an Epic?
+        
+        Epics are **large initiatives** that span multiple features. Examples:
+        - Phase 2 - Governance
+        - Q1 Platform Modernization
+        - Security Hardening Initiative
+        
+        Epics typically contain:
+        - Multiple Features (3-10 Features)
+        - Clear deliverables and success criteria
+        - Significant scope (weeks to months of work)
+
+  - type: input
+    id: epic-title
+    attributes:
+      label: Epic Title
+      description: A clear, concise name for this initiative
+      placeholder: "e.g., Phase 2 - Governance, Authentication System Overhaul"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Project Phase
+      description: Which phase does this Epic belong to?
+      options:
+        - Phase 0 - Foundation
+        - Phase 1 - Setup
+        - Phase 2 - Governance
+        - Phase 3 - Agents
+        - Phase 4 - DotNet
+        - Phase 5 - Documentation
+        - Phase 6 - Validation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is this Epic about? Why is it important?
+      placeholder: |
+        Describe the big picture:
+        - What problem does this solve?
+        - What's the desired outcome?
+        - What's in scope / out of scope?
+    validations:
+      required: true
+
+  - type: textarea
+    id: goals
+    attributes:
+      label: Goals & Objectives
+      description: What specific goals will this Epic achieve?
+      placeholder: |
+        List 3-5 high-level goals:
+        1. Establish branch protection
+        2. Implement commit validation
+        3. Create agent authentication
+    validations:
+      required: true
+
+  - type: textarea
+    id: success-criteria
+    attributes:
+      label: Success Criteria
+      description: How will we know this Epic is complete?
+      placeholder: |
+        Define measurable outcomes:
+        - [ ] All Features are implemented
+        - [ ] Documentation is complete
+        - [ ] All tests pass
+        - [ ] System meets acceptance criteria
+    validations:
+      required: true
+
+  - type: textarea
+    id: features
+    attributes:
+      label: Features (Optional)
+      description: If known, list the Features this Epic will contain
+      placeholder: |
+        You can reference Features after they're created:
+        - #12 - Branch Protection
+        - #13 - Commit Validator
+        - #14 - Agent Authentication
+    validations:
+      required: false
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies & Blockers
+      description: What must be done before this Epic can start?
+      placeholder: |
+        List dependencies:
+        - Blocked by: #7 (Phase 1 must complete)
+        - Requires: Infrastructure setup
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this Epic?
+      options:
+        - Critical (Immediate)
+        - High (This quarter)
+        - Medium (Next quarter)
+        - Low (Future consideration)
+      default: 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      description: Any other context, links, or considerations
+      placeholder: |
+        - Related documentation
+        - Links to discussions
+        - Technical constraints
+    validations:
+      required: false

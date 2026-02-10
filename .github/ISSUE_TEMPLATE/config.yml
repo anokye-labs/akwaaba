@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/anokye-labs/akwaaba/blob/main/README.md
+    about: Read the project documentation and getting started guide
+  - name: 💬 Discussions
+    url: https://github.com/anokye-labs/akwaaba/discussions
+    about: Ask questions, share ideas, or discuss the project with the community
+  - name: 🎯 How We Work
+    url: https://github.com/anokye-labs/akwaaba/blob/main/how-we-work.md
+    about: Learn about our issue-first workflow and the Anokye-Krom System
+  - name: 🤖 Agent Conventions
+    url: https://github.com/anokye-labs/akwaaba/blob/main/how-we-work/agent-conventions.md
+    about: Guidelines for AI agents working in this repository
+  - name: 🔒 Security Policy
+    url: https://github.com/anokye-labs/akwaaba/security/policy
+    about: Report security vulnerabilities (do NOT use issue templates for security issues)

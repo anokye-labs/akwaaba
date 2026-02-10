@@ -1,0 +1,278 @@
+name: Agent Request
+description: Propose a new AI agent to join the Anokye-Krom System
+title: "[Agent Request] "
+labels: ["agent-request", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Agent Request
+        
+        Use this template to propose a new AI agent that can commit code to the repository.
+        
+        **Important:** All agents must follow the Anokye-Krom System principles:
+        - Agents respond to human-created issues
+        - All commits must reference an issue
+        - Agents must be approved and added to `.github/approved-agents.json`
+        - See [Agent Conventions](../how-we-work/agent-conventions.md) for behavioral requirements
+        
+        **Security Note:** Agent requests require review and approval from repository maintainers.
+
+  - type: input
+    id: agent-name
+    attributes:
+      label: Agent Name
+      description: What should this agent be called?
+      placeholder: "e.g., GitHub Copilot, Bolt AI, Custom Build Agent"
+    validations:
+      required: true
+
+  - type: input
+    id: agent-username
+    attributes:
+      label: Agent GitHub Username
+      description: What is the agent's GitHub username or bot name?
+      placeholder: "e.g., copilot, actions-user[bot]"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: agent-type
+    attributes:
+      label: Agent Type
+      description: What type of agent is this?
+      options:
+        - GitHub App (e.g., Copilot, GitHub Actions)
+        - Service Account (dedicated user account)
+        - GitHub Action Bot
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: github-app-id
+    attributes:
+      label: GitHub App ID (if applicable)
+      description: For GitHub Apps, provide the App ID
+      placeholder: "e.g., 12345678"
+    validations:
+      required: false
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose & Problem Statement
+      description: Why do we need this agent? What problem does it solve?
+      placeholder: |
+        Describe the need:
+        - What tasks will this agent perform?
+        - Why can't existing agents handle this?
+        - What value does it provide to the project?
+    validations:
+      required: true
+
+  - type: textarea
+    id: capabilities
+    attributes:
+      label: Agent Capabilities
+      description: What can this agent do?
+      placeholder: |
+        List the agent's capabilities:
+        - Automated code generation
+        - Pull request creation
+        - Issue management
+        - Running tests and builds
+        - Documentation updates
+    validations:
+      required: true
+
+  - type: textarea
+    id: operations
+    attributes:
+      label: Typical Operations
+      description: What operations will this agent perform?
+      placeholder: |
+        Describe typical workflows:
+        1. Reads issue description
+        2. Analyzes codebase
+        3. Generates or modifies code
+        4. Runs tests
+        5. Creates pull request
+        6. Responds to feedback
+    validations:
+      required: true
+
+  - type: textarea
+    id: permissions
+    attributes:
+      label: Required Permissions
+      description: What repository permissions does this agent need?
+      placeholder: |
+        List required permissions:
+        - Read access to code
+        - Write access to code
+        - Read/write access to issues
+        - Read/write access to pull requests
+        - Workflow permissions
+      value: |
+        - Read access to code: 
+        - Write access to code: 
+        - Issues: 
+        - Pull requests: 
+        - Workflows: 
+        - Other: 
+    validations:
+      required: true
+
+  - type: textarea
+    id: security-considerations
+    attributes:
+      label: Security Considerations
+      description: What are the security implications of this agent?
+      placeholder: |
+        Address security concerns:
+        - How is the agent authenticated?
+        - What secrets does it need access to?
+        - What are the risks if compromised?
+        - How will access be revoked if needed?
+        - Does it comply with the agent authentication workflow?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: authentication-method
+    attributes:
+      label: Authentication Method
+      description: How will this agent authenticate?
+      options:
+        - GitHub App (OAuth)
+        - Personal Access Token
+        - GitHub Actions (GITHUB_TOKEN)
+        - SSH Key
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Agent Validation
+      description: How will we verify this agent is working correctly?
+      placeholder: |
+        Describe validation steps:
+        - Create a test issue
+        - Verify agent responds appropriately
+        - Check commits are properly signed/attributed
+        - Verify agent authentication workflow passes
+        - Test error handling and edge cases
+    validations:
+      required: true
+
+  - type: input
+    id: maintainer
+    attributes:
+      label: Maintainer
+      description: Who will maintain and be responsible for this agent?
+      placeholder: "@username"
+    validations:
+      required: true
+
+  - type: textarea
+    id: maintenance-plan
+    attributes:
+      label: Maintenance Plan
+      description: How will this agent be maintained and monitored?
+      placeholder: |
+        Describe the maintenance plan:
+        - Who monitors agent activity?
+        - How are issues with the agent reported?
+        - What's the process for updating the agent?
+        - How often will access be reviewed?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      description: How soon is this agent needed?
+      options:
+        - Critical (Needed immediately)
+        - High (Needed this week)
+        - Medium (Needed this month)
+        - Low (Nice to have)
+      default: 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other solutions were considered?
+      placeholder: |
+        List alternatives:
+        - Using GitHub Actions workflows instead
+        - Manual process by human contributors
+        - Existing agent with modified permissions
+        - Third-party service
+    validations:
+      required: false
+
+  - type: textarea
+    id: testing-plan
+    attributes:
+      label: Testing Plan
+      description: How will this agent be tested before approval?
+      placeholder: |
+        Describe the testing approach:
+        - Create a test repository
+        - Run agent in sandbox environment
+        - Verify commits pass validation
+        - Test with various issue types
+        - Validate error handling
+    validations:
+      required: false
+
+  - type: textarea
+    id: rollout-plan
+    attributes:
+      label: Rollout Plan
+      description: How will this agent be deployed?
+      placeholder: |
+        Describe the rollout:
+        1. Add to approved-agents.json (enabled: false)
+        2. Test in development environment
+        3. Enable for select issues
+        4. Monitor for 1 week
+        5. Full rollout if successful
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: |
+        - Links to agent documentation
+        - Example repositories using this agent
+        - Related discussions or issues
+        - Cost considerations
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please verify these items before submitting
+      options:
+        - label: I have read the [Agent Conventions](../how-we-work/agent-conventions.md)
+          required: true
+        - label: I have considered security implications
+          required: true
+        - label: I have identified a maintainer for this agent
+          required: true
+        - label: I understand this requires maintainer approval
+          required: true

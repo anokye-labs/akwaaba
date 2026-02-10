@@ -1,0 +1,153 @@
+name: Task
+description: Create a specific, completable work item
+title: "[Task] "
+labels: ["task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## What is a Task?
+        
+        Tasks are **specific work items** that can be completed by a person or agent. Examples:
+        - Create `.github/ISSUE_TEMPLATE/epic.yml`
+        - Write unit tests for authentication service
+        - Update README with installation instructions
+        
+        Tasks typically:
+        - Are part of a Feature (or directly under an Epic)
+        - Can be completed in hours to days
+        - Have clear, measurable completion criteria
+        - Are assigned to a specific person or agent
+
+  - type: input
+    id: parent
+    attributes:
+      label: Parent Issue
+      description: Which Feature or Epic does this Task belong to? (Use issue number)
+      placeholder: "#15"
+    validations:
+      required: true
+
+  - type: input
+    id: task-title
+    attributes:
+      label: Task Title
+      description: A clear, action-oriented description of the task
+      placeholder: "e.g., Create epic.yml template, Write installation guide"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What needs to be done? Provide enough detail for someone to complete this task.
+      placeholder: |
+        Describe the task in detail:
+        - What exactly needs to be done?
+        - What files or systems are involved?
+        - Are there specific requirements or constraints?
+        - What's the expected output?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know this Task is complete?
+      placeholder: |
+        Define specific, testable criteria:
+        - [ ] epic.yml file exists in .github/ISSUE_TEMPLATE/
+        - [ ] All required fields are present
+        - [ ] YAML syntax is valid
+        - [ ] Template renders correctly on GitHub
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated Effort
+      description: How much work is this Task?
+      options:
+        - Small (< 2 hours)
+        - Medium (2-4 hours)
+        - Large (4-8 hours)
+        - Extra Large (> 8 hours)
+      default: 1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this Task?
+      options:
+        - Critical (Do immediately)
+        - High (Do soon)
+        - Medium (Normal priority)
+        - Low (When time permits)
+      default: 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: What must be done before this Task can start?
+      placeholder: |
+        List any blocking tasks or requirements:
+        - Blocked by: #12 (needs API access)
+        - Requires: Documentation of current system
+        - Depends on: Approval from maintainer
+    validations:
+      required: false
+
+  - type: input
+    id: assignee
+    attributes:
+      label: Preferred Assignee (Optional)
+      description: Who should work on this? Leave blank for any available agent/contributor
+      placeholder: "@copilot, @username, or leave blank"
+    validations:
+      required: false
+
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Notes
+      description: Implementation details, gotchas, or helpful context
+      placeholder: |
+        - Use YAML schema for GitHub issue forms
+        - Reference existing templates for examples
+        - Validate with yamllint before committing
+        - Test template by creating a draft issue
+    validations:
+      required: false
+
+  - type: textarea
+    id: resources
+    attributes:
+      label: Resources & References
+      description: Links to docs, examples, or related issues
+      placeholder: |
+        - GitHub issue forms documentation: https://...
+        - Example template: https://...
+        - Related discussion: #...
+    validations:
+      required: false
+
+  - type: textarea
+    id: testing-notes
+    attributes:
+      label: Testing & Verification
+      description: How should this Task be tested or verified?
+      placeholder: |
+        - Manual testing: Create a test issue using the template
+        - Automated: Run YAML linter
+        - Visual: Check template renders correctly in GitHub UI
+    validations:
+      required: false

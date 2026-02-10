@@ -1,0 +1,163 @@
+name: Feature
+description: Create a cohesive piece of functionality that groups related Tasks
+title: "[Feature] "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## What is a Feature?
+        
+        Features are **cohesive pieces of functionality** that group related tasks. Examples:
+        - Branch Protection Ruleset
+        - Commit Validator Workflow
+        - Agent Authentication System
+        
+        Features typically contain:
+        - 3-8 Tasks (related work items)
+        - Clear deliverable or capability
+        - Part of a larger Epic
+
+  - type: input
+    id: parent-epic
+    attributes:
+      label: Parent Epic
+      description: Which Epic does this Feature belong to? (Use issue number)
+      placeholder: "#10"
+    validations:
+      required: true
+
+  - type: input
+    id: feature-title
+    attributes:
+      label: Feature Title
+      description: A clear, descriptive name for this feature
+      placeholder: "e.g., Branch Protection Ruleset, User Authentication API"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What does this Feature accomplish? Why is it needed?
+      placeholder: |
+        Describe the feature:
+        - What capability does it provide?
+        - How does it fit into the Epic?
+        - What value does it deliver?
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      description: Break down the Feature into specific tasks (create Task issues after this)
+      placeholder: |
+        List the tasks needed:
+        - [ ] Research GitHub ruleset API
+        - [ ] Create ruleset JSON configuration
+        - [ ] Write documentation
+        - [ ] Test ruleset application
+        
+        After creating this Feature, create individual Task issues and link them as sub-issues.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know this Feature is complete?
+      placeholder: |
+        Define specific outcomes:
+        - [ ] All Tasks are complete
+        - [ ] Feature is tested and works as expected
+        - [ ] Documentation is updated
+        - [ ] Code review is approved
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: What must be done before this Feature can start?
+      placeholder: |
+        List dependencies:
+        - Blocked by: #5 (repo initialization)
+        - Requires: GitHub admin access
+        - Depends on: API documentation
+    validations:
+      required: false
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Project Phase
+      description: Which phase does this Feature belong to?
+      options:
+        - Phase 0 - Foundation
+        - Phase 1 - Setup
+        - Phase 2 - Governance
+        - Phase 3 - Agents
+        - Phase 4 - DotNet
+        - Phase 5 - Documentation
+        - Phase 6 - Validation
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this Feature within its Epic?
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+      default: 1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: size
+    attributes:
+      label: Estimated Size
+      description: How much work is this Feature?
+      options:
+        - Small (1-3 tasks, < 1 week)
+        - Medium (4-6 tasks, 1-2 weeks)
+        - Large (7+ tasks, 2-4 weeks)
+        - Extra Large (10+ tasks, > 1 month)
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Notes
+      description: Any technical considerations, constraints, or implementation details
+      placeholder: |
+        - Technologies involved
+        - APIs or libraries to use
+        - Performance considerations
+        - Security requirements
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Links, references, or other helpful information
+      placeholder: |
+        - Related issues
+        - Documentation links
+        - Design mockups
+        - Discussion threads
+    validations:
+      required: false
