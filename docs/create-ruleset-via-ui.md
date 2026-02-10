@@ -259,7 +259,7 @@ After creating the ruleset:
 
 ## Related Documentation
 
-- [Main Ruleset README](./.github/rulesets/README.md) - Detailed ruleset documentation
+- [Main Ruleset README](../.github/rulesets/README.md) - Detailed ruleset documentation
 - [GitHub Docs: Managing Rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)
 - [GitHub Docs: Available Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)
 
