@@ -246,7 +246,7 @@ $validCommits = @()
 $skippedCommits = @()
 
 foreach ($commit in $commits) {
-    $sha = $commit.oid.Substring(0, 7)
+    $sha = if ($commit.oid.Length -ge 7) { $commit.oid.Substring(0, 7) } else { $commit.oid }
     $message = $commit.messageHeadline
     $fullMessage = if ($commit.messageBody) { "$message`n$($commit.messageBody)" } else { $message }
     

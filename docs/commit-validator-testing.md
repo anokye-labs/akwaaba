@@ -258,7 +258,7 @@ Use this checklist when testing the commit validator:
 - [ ] Test with merge commits
 - [ ] Test with revert commits
 - [ ] Test with multiple issue references
-- [ ] Test with cross-repository references (#owner/repo#123)
+- [ ] Test with cross-repository references (owner/repo#123)
 - [ ] Test with full URL references
 - [ ] Verify error messages are clear and actionable
 - [ ] Verify PR comments are posted on failure
