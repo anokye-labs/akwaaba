@@ -1,0 +1,99 @@
+name: Task
+description: Create a specific work item that implements part of a Feature
+title: "[Task] "
+labels: ["task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Task Details
+        Use this template to create a specific, actionable work item that contributes to a Feature.
+        
+        Tasks should be:
+        - **Specific** - Clear and concrete deliverable
+        - **Scoped** - Completable in a single work session
+        - **Testable** - Clear acceptance criteria
+        - **Linked** - Always part of a parent Feature
+
+  - type: input
+    id: parent-feature
+    attributes:
+      label: Parent Feature
+      description: Issue number of the parent Feature this Task belongs to (e.g., #123)
+      placeholder: "#123"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Project Phase
+      description: Which phase of the project does this task belong to?
+      options:
+        - phase-1-foundation
+        - phase-2-governance
+        - phase-3-agents
+        - phase-4-dotnet
+        - phase-5-documentation
+        - phase-6-validation
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: Clear description of what needs to be done
+      placeholder: |
+        Describe the specific work to be completed in this task.
+        
+        Include:
+        - What needs to be built/changed
+        - Any relevant technical details
+        - Files or areas of the codebase affected
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know this task is complete?
+      placeholder: |
+        - [ ] Specific outcome 1
+        - [ ] Specific outcome 2
+        - [ ] Tests pass
+        - [ ] Documentation updated
+      value: |
+        - [ ] 
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated Effort
+      description: Rough estimate of complexity and time required
+      options:
+        - S - Small (< 2 hours)
+        - M - Medium (2-8 hours)
+        - L - Large (> 8 hours)
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      description: Any additional context, dependencies, or considerations
+      placeholder: |
+        - Technical considerations
+        - Dependencies on other work
+        - Known risks or blockers
+
+  - type: input
+    id: assignee
+    attributes:
+      label: Assignee
+      description: GitHub username of the person or agent assigned to this task (optional)
+      placeholder: "@username or agent-name[bot]"
