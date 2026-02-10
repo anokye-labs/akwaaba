@@ -1,0 +1,205 @@
+name: Agent Request
+description: Request a new AI agent to automate a specific task or workflow
+title: "[Agent Request]: "
+labels: ["agent-request", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Request a New AI Agent
+        
+        Use this template to propose a new AI agent for the Akwaaba system. Agents automate specific tasks or workflows by responding to triggers and producing defined outputs.
+        
+        **Before submitting:**
+        - Review existing agents in the `planning/phase-3-agents/` directory
+        - Check if an existing agent can be extended instead of creating a new one
+        - Ensure the agent aligns with the Anokye-Krom system principles
+
+  - type: input
+    id: agent-name
+    attributes:
+      label: Agent Name
+      description: Unique identifier for the agent (e.g., "issue-labeler", "pr-reviewer", "doc-sync")
+      placeholder: "agent-example-name"
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose / Problem Statement
+      description: What problem does this agent solve? What manual task will it automate? Why is this agent needed?
+      placeholder: |
+        This agent addresses the problem of...
+        
+        Currently, users have to manually...
+        
+        This agent will automate...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-behavior
+    attributes:
+      label: Proposed Behavior
+      description: Describe how the agent should work. Include the main workflow, decision logic, and any edge cases.
+      placeholder: |
+        1. When triggered, the agent will...
+        2. It will analyze/process...
+        3. Based on the analysis, it will...
+        4. Edge case handling:
+           - If X happens, then...
+           - If Y is missing, then...
+    validations:
+      required: true
+
+  - type: textarea
+    id: trigger-conditions
+    attributes:
+      label: Trigger Conditions
+      description: What events or conditions should activate this agent? (e.g., issue opened, PR created, schedule, manual trigger)
+      placeholder: |
+        - Event: issues.opened
+        - Event: pull_request.synchronize
+        - Schedule: daily at 00:00 UTC
+        - Manual: workflow_dispatch
+        
+        Filters:
+        - Only when label "needs-review" is present
+        - Only for files matching pattern "*.md"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-outputs
+    attributes:
+      label: Expected Outputs
+      description: What will the agent produce or modify? (e.g., labels, comments, files, PRs, issues)
+      placeholder: |
+        - Adds labels to issues based on content analysis
+        - Creates PR comment with review feedback
+        - Updates documentation files in docs/ directory
+        - Creates new issue with analysis results
+        - Sends notification to specified channels
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Implementation Phase
+      description: Which phase of the project should this agent be implemented in?
+      options:
+        - phase-1-foundation
+        - phase-2-governance
+        - phase-3-agents
+        - phase-4-dotnet
+        - phase-5-documentation
+        - phase-6-validation
+      default: 2
+    validations:
+      required: true
+
+  - type: input
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: List any agents, features, or systems this agent depends on (comma-separated)
+      placeholder: "agent-runner-common, agent-observability, GitHub GraphQL API"
+
+  - type: textarea
+    id: permissions
+    attributes:
+      label: Required Permissions
+      description: What GitHub permissions will this agent need? (e.g., read issues, write pull requests, manage labels)
+      placeholder: |
+        - issues: read, write
+        - pull_requests: read, write
+        - contents: read
+        - metadata: read
+    validations:
+      required: true
+
+  - type: dropdown
+    id: authentication
+    attributes:
+      label: Authentication Method
+      description: How should this agent authenticate with GitHub?
+      options:
+        - GitHub App (recommended for production agents)
+        - GitHub Actions token (GITHUB_TOKEN)
+        - Personal Access Token (for development/testing only)
+        - No authentication needed
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: success-criteria
+    attributes:
+      label: Success Criteria
+      description: How will we know this agent is working correctly? What are the acceptance criteria?
+      placeholder: |
+        - Agent responds to trigger within 30 seconds
+        - Correctly classifies 95% of test cases
+        - Produces expected output format
+        - Handles edge cases gracefully
+        - Includes comprehensive error logging
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing-strategy
+    attributes:
+      label: Testing Strategy
+      description: How should this agent be tested? Include unit tests, integration tests, and manual testing steps.
+      placeholder: |
+        Unit Tests:
+        - Test trigger condition matching
+        - Test output generation logic
+        - Test error handling
+        
+        Integration Tests:
+        - Test with real GitHub API (sandbox repo)
+        - Test end-to-end workflow
+        
+        Manual Testing:
+        - Create test issue/PR
+        - Verify agent behavior
+        - Check edge cases
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: What is the priority level for this agent?
+      options:
+        - Critical - Blocking other work
+        - High - Important for current phase
+        - Medium - Nice to have in current phase
+        - Low - Future enhancement
+      default: 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other approaches or solutions were considered? Why is an agent the best solution?
+      placeholder: |
+        1. Manual process - Rejected because...
+        2. GitHub Action without agent - Rejected because...
+        3. Third-party integration - Rejected because...
+        4. Extending existing agent - Rejected because...
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information, screenshots, links, or references that would help implement this agent
+      placeholder: |
+        - Links to related issues or PRs
+        - Screenshots or diagrams
+        - References to similar implementations
+        - Technical considerations
