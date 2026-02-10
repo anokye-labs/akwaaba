@@ -1,0 +1,209 @@
+name: Agent Request
+description: Request approval for a new AI agent or GitHub App
+title: "[Agent]: "
+labels: ["agent-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Agent Request Template
+        Use this template to request approval for a new AI agent or GitHub App that will interact with the repository.
+        
+        **Important:**
+        - All agents must be approved before use
+        - Agents will be added to `.github/approved-agents.json`
+        - This request will be reviewed by repository maintainers
+        
+        See [Governance Documentation](../../GOVERNANCE.md) for details on the agent approval process.
+
+  - type: input
+    id: agent-name
+    attributes:
+      label: Agent Name
+      description: The display name for this agent
+      placeholder: "Example: Code Review Agent"
+    validations:
+      required: true
+
+  - type: input
+    id: username
+    attributes:
+      label: GitHub Username
+      description: The GitHub account username (without @)
+      placeholder: "Example: copilot or my-bot-name"
+    validations:
+      required: true
+      pattern: '^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$'
+      patternError: "Please enter a valid GitHub username (1-39 characters, alphanumeric and hyphens)"
+
+  - type: input
+    id: bot-username
+    attributes:
+      label: Bot Username (if different)
+      description: The bot account username if different from regular username (include [bot] suffix)
+      placeholder: "Example: copilot[bot] or my-app[bot]"
+    validations:
+      required: false
+      pattern: '^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?\[bot\]$'
+      patternError: "Bot username must end with [bot] (e.g., my-app[bot])"
+
+  - type: input
+    id: github-app-id
+    attributes:
+      label: GitHub App ID
+      description: The numeric GitHub App ID (if this is a GitHub App)
+      placeholder: "Example: 12345"
+    validations:
+      required: false
+      pattern: '^\d+$'
+      patternError: "GitHub App ID must be a number"
+
+  - type: dropdown
+    id: agent-type
+    attributes:
+      label: Agent Type
+      description: What type of agent is this?
+      options:
+        - "GitHub App - Automated application"
+        - "AI Agent - Copilot or similar AI assistant"
+        - "Bot - Automated script or service"
+        - "Service Account - Human-managed automation account"
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose & Problem Statement
+      description: What problem does this agent solve? Why is it needed?
+      placeholder: |
+        Describe the agent's purpose:
+        - What problem does it solve?
+        - Why can't this be done manually?
+        - What value does it provide?
+        - What workflows will it support?
+    validations:
+      required: true
+
+  - type: textarea
+    id: operations
+    attributes:
+      label: Operations & Behavior
+      description: What will this agent do? What actions will it perform?
+      placeholder: |
+        List the operations this agent will perform:
+        - Create/update/close issues
+        - Create/update/merge pull requests
+        - Add comments or reviews
+        - Modify files or code
+        - Run workflows or scripts
+        - Other actions (specify)
+    validations:
+      required: true
+
+  - type: textarea
+    id: triggers
+    attributes:
+      label: Trigger Conditions
+      description: When and how will this agent be activated?
+      placeholder: |
+        Describe the trigger conditions:
+        - Manual invocation (how?)
+        - Automatic triggers (events, schedules, webhooks)
+        - Specific conditions or filters
+        - Required permissions or roles
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: permissions
+    attributes:
+      label: Required Permissions
+      description: What permissions does this agent need? (Select all that apply)
+      options:
+        - label: Read repository content
+        - label: Write repository content (create/update files)
+        - label: Create/update/close issues
+        - label: Create/update pull requests
+        - label: Merge pull requests
+        - label: Add comments and reviews
+        - label: Manage labels and milestones
+        - label: Manage projects
+        - label: Trigger workflows
+        - label: Access repository secrets
+        - label: Admin access
+
+  - type: textarea
+    id: security-considerations
+    attributes:
+      label: Security Considerations
+      description: How will this agent handle security? What safeguards are in place?
+      placeholder: |
+        Address security concerns:
+        - How are credentials/tokens managed?
+        - What validation is performed before actions?
+        - Are there rate limits or safety checks?
+        - How is abuse prevented?
+        - What audit logging is in place?
+    validations:
+      required: true
+
+  - type: input
+    id: maintainer
+    attributes:
+      label: Maintainer
+      description: Who is responsible for maintaining this agent?
+      placeholder: "Example: @username or Team Name"
+    validations:
+      required: true
+
+  - type: textarea
+    id: maintenance-plan
+    attributes:
+      label: Maintenance Plan
+      description: How will this agent be maintained, monitored, and updated?
+      placeholder: |
+        Describe the maintenance plan:
+        - How will the agent be monitored?
+        - Who responds to issues?
+        - How are updates deployed?
+        - What's the deprecation/removal process?
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing-plan
+    attributes:
+      label: Testing Plan
+      description: How will this agent be tested before approval?
+      placeholder: |
+        Describe the testing approach:
+        - What test scenarios will be used?
+        - Where will testing occur (test repo, branch)?
+        - What success criteria must be met?
+        - How will failures be handled?
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What alternatives were considered? Why is this agent the best solution?
+      placeholder: |
+        Describe alternatives you considered:
+        - Manual processes
+        - Different tools or services
+        - Existing agents or workflows
+        - Why this agent is the best choice
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: Include links to documentation, similar implementations, or related discussions
+    validations:
+      required: false
