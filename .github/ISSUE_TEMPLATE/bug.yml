@@ -7,12 +7,12 @@ body:
     attributes:
       value: |
         ## Report a Bug
-        
+
         Use this template to report:
         - **Defects** — Something that's broken or doesn't work
         - **Errors** — Crashes, exceptions, or error messages
         - **Unexpected behavior** — System behaves differently than documented
-        
+
         **Not for bugs:**
         - Feature requests (use Feature template)
         - Questions (create a Discussion)
@@ -78,7 +78,7 @@ body:
         2. Click on '...'
         3. Run command '...'
         4. Observe error
-        
+
         Be specific enough that someone else can follow these steps exactly.
     validations:
       required: true
@@ -122,12 +122,12 @@ body:
         - Branch: main
         - Commit SHA: abc123
       value: |
-        - OS: 
-        - PowerShell version: 
-        - .NET version: 
-        - Repository: 
-        - Branch: 
-        - Commit SHA: 
+        - OS:
+        - PowerShell version:
+        - .NET version:
+        - Repository:
+        - Branch:
+        - Commit SHA:
     validations:
       required: true
 

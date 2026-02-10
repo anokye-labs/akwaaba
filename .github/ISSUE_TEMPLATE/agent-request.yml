@@ -7,15 +7,15 @@ body:
     attributes:
       value: |
         ## Agent Request
-        
+
         Use this template to propose a new AI agent that can commit code to the repository.
-        
+
         **Important:** All agents must follow the Anokye-Krom System principles:
         - Agents respond to human-created issues
         - All commits must reference an issue
         - Agents must be approved and added to `.github/approved-agents.json`
         - See [Agent Conventions](../how-we-work/agent-conventions.md) for behavioral requirements
-        
+
         **Security Note:** Agent requests require review and approval from repository maintainers.
 
   - type: input
@@ -115,12 +115,12 @@ body:
         - Read/write access to pull requests
         - Workflow permissions
       value: |
-        - Read access to code: 
-        - Write access to code: 
-        - Issues: 
-        - Pull requests: 
-        - Workflows: 
-        - Other: 
+        - Read access to code:
+        - Write access to code:
+        - Issues:
+        - Pull requests:
+        - Workflows:
+        - Other:
     validations:
       required: true
 

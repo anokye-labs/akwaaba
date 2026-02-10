@@ -7,12 +7,12 @@ body:
     attributes:
       value: |
         ## What is a Feature?
-        
+
         Features are **cohesive pieces of functionality** that group related tasks. Examples:
         - Branch Protection Ruleset
         - Commit Validator Workflow
         - Agent Authentication System
-        
+
         Features typically contain:
         - 3-8 Tasks (related work items)
         - Clear deliverable or capability
@@ -60,7 +60,7 @@ body:
         - [ ] Create ruleset JSON configuration
         - [ ] Write documentation
         - [ ] Test ruleset application
-        
+
         After creating this Feature, create individual Task issues and link them as sub-issues.
     validations:
       required: true

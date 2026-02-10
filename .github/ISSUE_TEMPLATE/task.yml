@@ -7,12 +7,12 @@ body:
     attributes:
       value: |
         ## What is a Task?
-        
+
         Tasks are **specific work items** that can be completed by a person or agent. Examples:
         - Create `.github/ISSUE_TEMPLATE/epic.yml`
         - Write unit tests for authentication service
         - Update README with installation instructions
-        
+
         Tasks typically:
         - Are part of a Feature (or directly under an Epic)
         - Can be completed in hours to days

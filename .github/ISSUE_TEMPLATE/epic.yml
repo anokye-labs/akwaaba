@@ -7,12 +7,12 @@ body:
     attributes:
       value: |
         ## What is an Epic?
-        
+
         Epics are **large initiatives** that span multiple features. Examples:
         - Phase 2 - Governance
         - Q1 Platform Modernization
         - Security Hardening Initiative
-        
+
         Epics typically contain:
         - Multiple Features (3-10 Features)
         - Clear deliverables and success criteria
