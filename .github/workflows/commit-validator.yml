@@ -1,0 +1,62 @@
+name: Commit Validator
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate-commits:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
+
+      - name: Setup PowerShell
+        shell: pwsh
+        run: |
+          Write-Host "PowerShell version: $($PSVersionTable.PSVersion)"
+          Write-Host "Operating System: $($PSVersionTable.OS)"
+
+      - name: Run commit validation
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $prNumber = ${{ github.event.pull_request.number }}
+          Write-Host "Validating commits for PR #$prNumber"
+
+          # Check if validation script exists
+          $scriptPath = "./scripts/Validate-Commits.ps1"
+          if (Test-Path $scriptPath) {
+            Write-Host "Running validation script: $scriptPath"
+
+            # Run the validation script
+            $result = & $scriptPath -PRNumber $prNumber
+
+            # Check the exit code
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Commit validation failed!"
+              exit 1
+            }
+
+            Write-Host "✓ All commits validated successfully"
+            exit 0
+          } else {
+            Write-Warning "Validation script not found at: $scriptPath"
+            Write-Host `
+              "This workflow is configured but the validation " +
+              "script needs to be created."
+            Write-Host "Expected location: $scriptPath"
+            Write-Host ""
+            Write-Host `
+              "For now, marking as successful " +
+              "(script not yet implemented)."
+            exit 0
+          }

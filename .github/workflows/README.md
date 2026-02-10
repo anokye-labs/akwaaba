@@ -2,6 +2,72 @@
 
 This directory contains GitHub Actions workflows for automating repository operations.
 
+## Commit Validator
+
+**File:** `commit-validator.yml`
+
+### Purpose
+
+Validates that every commit in a pull request references a GitHub issue, enforcing issue-driven development.
+
+### Trigger
+
+- **Event:** `pull_request`
+- **Types:** `opened`, `synchronize`
+- **When:** A pull request is opened or updated with new commits
+
+### Behavior
+
+When a pull request is created or updated, the workflow:
+
+1. **Checks out the repository** with full git history
+2. **Sets up PowerShell environment** on ubuntu-latest
+3. **Runs validation script** (`scripts/Validate-Commits.ps1`) to check all commits
+4. **Validates each commit** contains an issue reference (e.g., `#123`, `Closes #123`, `Fixes #123`)
+5. **Sets job status** based on validation results:
+   - ✅ Success: All commits reference valid issues
+   - ❌ Failure: One or more commits missing issue references
+
+### Commit Message Format
+
+Commits should reference GitHub issues using one of these patterns:
+- `#123` - References issue
+- `Closes #123` - Closes issue when merged
+- `Fixes #123` - Fixes issue when merged
+- `Resolves #123` - Resolves issue when merged
+
+Example: `feat(governance): Add commit validation workflow (#42)`
+
+### Permissions
+
+The workflow requires:
+- `contents: read` - To checkout the repository
+- `pull-requests: read` - To read pull request information
+
+### Status
+
+**Current Status:** Workflow configured, validation script pending implementation
+
+The workflow file is in place and will:
+- Run successfully if the validation script exists
+- Show a warning and pass if the script doesn't exist yet (to avoid blocking PRs during initial setup)
+
+Once `scripts/Validate-Commits.ps1` is implemented, the workflow will enforce commit validation.
+
+### Related Documentation
+
+- Planning: `planning/phase-2-governance/02-workflow-commit-validator.md`
+- This implements Task 5 of the Commit Validator feature
+
+### Troubleshooting
+
+If the workflow fails:
+
+1. **Check commit messages** - Ensure all commits reference an issue with `#123` format
+2. **View workflow logs** - Check Actions tab for detailed error messages
+3. **Verify issue exists** - Make sure referenced issues exist and are open
+4. **Review validation script** - Check `scripts/Validate-Commits.ps1` for logic errors
+
 ## Auto-assign Unblocked Tasks
 
 **File:** `auto-assign-unblocked.yml`
