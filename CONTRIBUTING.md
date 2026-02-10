@@ -28,6 +28,8 @@ This restriction is enforced via:
 
 Even repository maintainers follow this rule. It ensures consistency, auditability, and maintains the integrity of the Anokye-Krom System.
 
+**For complete details on branch protection and bypass procedures, see [GOVERNANCE.md](GOVERNANCE.md).**
+
 ## How to Contribute
 
 ### 1. Create an Issue
