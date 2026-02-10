@@ -1,0 +1,105 @@
+name: Agent Authentication
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate-commit-authors:
+    name: Validate Commit Authors
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup PowerShell
+        shell: pwsh
+        run: |
+          Write-Host "PowerShell version: $($PSVersionTable.PSVersion)"
+          Write-Host "Platform: $($PSVersionTable.Platform)"
+      
+      - name: Validate commit authors
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $owner = "${{ github.repository_owner }}"
+          $repo = "${{ github.event.repository.name }}"
+          $prNumber = ${{ github.event.pull_request.number }}
+          
+          Write-Host "Validating PR #${prNumber} in ${owner}/${repo}"
+          
+          ./scripts/Validate-CommitAuthors.ps1 `
+            -Owner $owner `
+            -Repo $repo `
+            -PullNumber $prNumber `
+            -AllowlistPath ".github/approved-agents.json" `
+            -EmergencyBypassLabel "emergency-merge"
+      
+      - name: Post validation results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const prNumber = context.payload.pull_request.number;
+            
+            // Check if validation passed or failed
+            const jobStatus = '${{ job.status }}';
+            const success = jobStatus === 'success';
+            
+            let commentBody = '## 🔐 Agent Authentication Validation\n\n';
+            
+            if (success) {
+              commentBody += '✅ **PASSED**: All commits are from approved agents.\n\n';
+              commentBody += 'This pull request follows the repository\'s agent-only commit policy.';
+            } else {
+              commentBody += '❌ **FAILED**: Unauthorized commits detected.\n\n';
+              commentBody += '### What happened?\n';
+              commentBody += 'This repository requires all commits to be created by approved agents.\n\n';
+              commentBody += '### How to fix\n';
+              commentBody += '1. Set up an approved agent (GitHub Copilot Workspace, GitHub Actions, etc.)\n';
+              commentBody += '2. Have the agent recreate these commits\n';
+              commentBody += '3. Force-push to update this PR\n\n';
+              commentBody += '### Documentation\n';
+              commentBody += '- [Agent Setup Guide](how-we-work/agent-setup.md)\n';
+              commentBody += '- [Approved Agents List](.github/approved-agents.json)\n\n';
+              commentBody += '### Emergency Bypass\n';
+              commentBody += 'In exceptional circumstances, apply the `emergency-merge` label to bypass this check.\n';
+              commentBody += '_(Requires appropriate permissions and will be audited)_\n';
+            }
+            
+            // Post or update comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Agent Authentication Validation')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: commentBody
+              });
+            }

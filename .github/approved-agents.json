@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Allowlist of approved agents that can commit to this repository",
+  "agents": [
+    {
+      "username": "copilot-swe-agent[bot]",
+      "type": "github-app",
+      "appId": "198982749",
+      "description": "GitHub Copilot Workspace agent for automated code changes",
+      "approvedBy": "repository-admin",
+      "approvedDate": "2026-02-09"
+    },
+    {
+      "username": "github-actions[bot]",
+      "type": "github-app",
+      "appId": "41898282",
+      "description": "GitHub Actions automation bot",
+      "approvedBy": "repository-admin",
+      "approvedDate": "2026-02-09"
+    },
+    {
+      "username": "dependabot[bot]",
+      "type": "github-app",
+      "appId": "49699333",
+      "description": "Dependabot for automated dependency updates",
+      "approvedBy": "repository-admin",
+      "approvedDate": "2026-02-09"
+    }
+  ]
+}
