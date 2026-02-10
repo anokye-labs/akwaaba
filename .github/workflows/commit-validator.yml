@@ -215,7 +215,7 @@ jobs:
             2. Or amend the most recent commit: \`git commit --amend\`
             3. Force push your changes: \`git push --force\`
             
-            See [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) for more details.`;
+            See [CONTRIBUTING.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md) for more details.`;
             } else {
               commentBody = `## ✅ Commit Validation Passed
             
