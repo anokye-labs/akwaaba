@@ -75,7 +75,7 @@ jobs:
             comment += '- **Bot commits**: Allowed from approved bots (github-actions, dependabot, renovate)\n';
             comment += '- **WIP commits**: Warning issued but validation passes\n\n';
             
-            comment += 'See [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) for more information.\n';
+            comment += `See [CONTRIBUTING.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md) for more information.\n`;
             
             await github.rest.issues.createComment({
               owner: context.repo.owner,

@@ -13,8 +13,15 @@
 
 $ErrorActionPreference = 'Stop'
 
-# Import the script to test
-. "$PSScriptRoot/Validate-Commits.ps1" -Owner "test" -Repo "test" -PullRequestNumber 1 -GitHubToken "test" -ErrorAction SilentlyContinue
+# Load only the functions from the script, not the main execution logic
+$scriptContent = Get-Content "$PSScriptRoot/Validate-Commits.ps1" -Raw
+# Extract only the function definitions (everything before "# Main validation logic")
+$functionsOnly = ($scriptContent -split '# Main validation logic')[0]
+# Set required variables that functions depend on
+$script:Owner = "test"
+$script:Repo = "test"
+# Execute the functions
+Invoke-Expression $functionsOnly
 
 <#
 .SYNOPSIS

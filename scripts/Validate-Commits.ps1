@@ -91,7 +91,8 @@ function Test-IsRevertCommit {
 function Test-IsWIPCommit {
     param([string]$Message)
     
-    return $Message -match '^\[?WIP\]?' -or $Message -match '^WIP:'
+    # Match common WIP patterns more strictly to avoid false positives
+    return $Message -match '^\[WIP\]' -or $Message -match '^WIP:' -or $Message -match '^wip:' -or $Message -match '^\[wip\]'
 }
 
 <#
@@ -207,7 +208,7 @@ function Test-IssueIsOpen {
     }
     
     $headers = @{
-        'Authorization' = "Bearer $GitHubToken"
+        'Authorization' = "token $GitHubToken"
         'Accept' = 'application/vnd.github.v3+json'
     }
     
@@ -242,7 +243,7 @@ function Get-PRCommits {
     }
     
     $headers = @{
-        'Authorization' = "Bearer $GitHubToken"
+        'Authorization' = "token $GitHubToken"
         'Accept' = 'application/vnd.github.v3+json'
     }
     
