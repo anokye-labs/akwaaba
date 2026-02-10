@@ -100,7 +100,7 @@ jobs:
             ### Emergency Situations
             
             If this is an emergency that requires immediate human intervention:
-            1. An administrator can apply the `emergency-merge` label to this PR
+            1. An administrator can apply the \`emergency-merge\` label to this PR
             2. The bypass will be logged for audit purposes
             3. Document the reason in the PR description
             
