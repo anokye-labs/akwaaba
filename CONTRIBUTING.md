@@ -28,6 +28,68 @@ This restriction is enforced via:
 
 Even repository maintainers follow this rule. It ensures consistency, auditability, and maintains the integrity of the Anokye-Krom System.
 
+## Commit Message Requirements
+
+All commits in pull requests **must reference an open GitHub issue**. This is automatically validated by our commit validator workflow.
+
+### Valid Commit Message Formats
+
+Your commit messages must include one of these formats:
+
+- **Simple reference:** `#123` — Links to issue #123
+- **Closes issue:** `Closes #123` — Closes issue #123 when merged
+- **Fixes issue:** `Fixes #123` — Fixes issue #123 when merged
+- **Resolves issue:** `Resolves #123` — Resolves issue #123 when merged
+- **Full URL:** `https://github.com/owner/repo/issues/123`
+
+### Examples
+
+✅ **Good commit messages:**
+```
+feat: Add commit validator workflow (#162)
+
+Implement PowerShell-based commit validation with status check reporting.
+Closes #162
+```
+
+```
+fix: Handle edge case in issue parser
+
+Fixes #145 - Improves regex pattern to handle cross-repo references
+```
+
+❌ **Bad commit messages:**
+```
+Update README
+
+No issue reference - will fail validation
+```
+
+### Special Cases
+
+The following commit types are **automatically skipped** during validation:
+- **Merge commits** — `Merge branch 'main'` or `Merge pull request #123`
+- **Revert commits** — `Revert "previous commit message"`
+
+### Validation Errors
+
+If your commits fail validation, you'll see:
+1. A ❌ comment on your PR with details
+2. A failed status check blocking merge
+3. Instructions on how to fix the issues
+
+To fix invalid commits:
+```bash
+# Edit commit messages interactively
+git rebase -i HEAD~3  # Replace 3 with number of commits
+
+# Or amend the most recent commit
+git commit --amend
+
+# Force push your changes
+git push --force
+```
+
 ## How to Contribute
 
 ### 1. Create an Issue
