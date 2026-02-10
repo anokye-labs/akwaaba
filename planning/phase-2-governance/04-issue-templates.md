@@ -2,12 +2,20 @@
 
 **ID:** issue-templates  
 **Phase:** 2 - Governance  
-**Status:** Pending  
+**Status:** ~~Pending~~ **Superseded by ADR-0003**  
 **Dependencies:** repo-init
+
+> **⚠️ IMPORTANT:** This planning document proposed using GitHub issue templates with auto-applying labels.
+> However, **[ADR-0003: Use Organization-Level Issue Types](../../docs/adr/ADR-0003-use-org-level-issue-types.md)** decided to use organization-level issue types instead.
+> 
+> The testing requirements from **Task 9** have been implemented using organization-level issue types.
+> See [docs/testing-issue-types.md](../../docs/testing-issue-types.md) and `scripts/Test-IssueTypes.ps1` for the current implementation.
 
 ## Overview
 
-Build comprehensive YAML issue templates that structure how work is proposed, categorized, and tracked.
+~~Build comprehensive YAML issue templates that structure how work is proposed, categorized, and tracked.~~
+
+**Current Implementation:** We use GitHub organization-level issue types (Epic, Feature, Task, Bug) rather than issue templates. See ADR-0003 for rationale.
 
 ## Tasks
 
@@ -99,14 +107,64 @@ Build comprehensive YAML issue templates that structure how work is proposed, ca
 
 ## Acceptance Criteria
 
-- 5 templates exist (Epic, Feature, Task, Bug, Agent Request)
-- All templates use YAML schema
-- Required fields are enforced
-- Labels auto-apply correctly
-- Templates guide users to provide needed information
+~~- 5 templates exist (Epic, Feature, Task, Bug, Agent Request)~~
+~~- All templates use YAML schema~~
+~~- Required fields are enforced~~
+~~- Labels auto-apply correctly~~
+~~- Templates guide users to provide needed information~~
 - Hierarchy (Epic → Feature → Task) is clear
 - Documentation explains usage
-- Templates render correctly on GitHub
+~~- Templates render correctly on GitHub~~
+
+## What Was Actually Implemented
+
+Instead of issue templates, we implemented organization-level issue types per ADR-0003:
+
+### Implemented Features
+
+✅ **Organization-Level Issue Types**:
+- Epic, Feature, Task, and Bug types configured at organization level
+- Types set via GraphQL API during issue creation
+- Types are first-class metadata, not labels
+
+✅ **Hierarchy Support**:
+- Sub-issues API for parent-child relationships
+- Epic → Feature → Task hierarchy pattern
+- GraphQL queries for relationship traversal
+
+✅ **Testing Infrastructure** (Task 9 equivalent):
+- `scripts/Test-IssueTypes.ps1` — Comprehensive test script
+- `docs/testing-issue-types.md` — Testing documentation
+- `docs/issue-types-vs-templates.md` — Clarification document
+- Creates test Epic, Feature, Task, and Bug issues
+- Verifies types and hierarchical relationships
+- Provides cleanup functionality
+
+✅ **Documentation**:
+- [ADR-0003: Use Organization-Level Issue Types](../../docs/adr/ADR-0003-use-org-level-issue-types.md)
+- [Testing Issue Types](../../docs/testing-issue-types.md)
+- [Issue Types vs Templates](../../docs/issue-types-vs-templates.md)
+- [How We Work](../../how-we-work.md)
+- [Okyerema Skill](../../.github/skills/okyerema/SKILL.md)
+
+### Key Differences from Original Plan
+
+| Original Plan | Actual Implementation |
+|--------------|----------------------|
+| Issue templates in `.github/ISSUE_TEMPLATE/` | Organization-level issue types |
+| Auto-applying labels | No structural labels (types are native) |
+| 5 templates (including Agent Request) | 4 org-level types (Epic, Feature, Task, Bug) |
+| YAML schema validation | GraphQL API with required type IDs |
+| Template rendering in UI | Native GitHub type selection |
+
+### Why the Change?
+
+See [ADR-0003](../../docs/adr/ADR-0003-use-org-level-issue-types.md) for full rationale:
+- Issue types are first-class GitHub features
+- Better UI/API integration
+- No label pollution
+- Consistent across all org repositories
+- Works seamlessly with sub-issues API and Projects
 
 ## Notes
 
