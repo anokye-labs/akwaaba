@@ -25,6 +25,8 @@ We use GitHub Issues and Projects as our primary coordination mechanism. Our app
 - **[ADR Process](./how-we-work/adr-process.md)** — How we document architectural decisions
 
 ### For Agents
+- **[Agent Setup Guide](./how-we-work/agent-setup.md)** — How to register and configure AI agents
+- **[Agent Behavior Conventions](./how-we-work/agent-conventions.md)** — Required behavioral conventions for agents
 - **[Okyerema Skill](/.github/skills/okyerema/SKILL.md)** — The agent skill with GraphQL examples and helper scripts
 
 ## Quick Summary
