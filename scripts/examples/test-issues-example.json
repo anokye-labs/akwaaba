@@ -1,0 +1,16 @@
+{
+  "description": "Example test issue numbers for Test-IssueTypes.ps1",
+  "usage": "Load this file and pass to -TestIssueNumbers parameter",
+  "example": "$issues = Get-Content test-issues.json | ConvertFrom-Json -AsHashtable; ./scripts/Test-IssueTypes.ps1 -Owner anokye-labs -Repo akwaaba -TestIssueNumbers $issues",
+  "testIssues": {
+    "Epic": null,
+    "Feature": null,
+    "Task": null,
+    "Bug": null
+  },
+  "instructions": [
+    "Replace null values with actual issue numbers after creation",
+    "Example: { \"Epic\": 123, \"Feature\": 124, \"Task\": 125, \"Bug\": 126 }",
+    "Use this file to track test issues for verification and cleanup"
+  ]
+}
