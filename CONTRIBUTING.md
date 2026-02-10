@@ -247,7 +247,7 @@ Invalid commits will block the pull request from merging.
 1. **Be specific**: "Fix login bug" → "Fix OAuth token refresh race condition"
 2. **Use imperative mood**: "Add feature" not "Added feature" or "Adding feature"
 3. **Reference the issue**: Always include the issue number
-4. **Keep it concise**: First line should be ≤ 72 characters
+4. **Keep it concise**: First line should be ≤ 50 characters (72 max)
 5. **Add details in body**: Use the body for detailed explanations if needed
 6. **One logical change**: Each commit should be one cohesive change
 
