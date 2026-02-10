@@ -301,7 +301,7 @@ $issueVars = @{
 $issueResult = Invoke-GraphQL -Query $issueQuery -Variables $issueVars -CorrelationId $CorrelationId -DryRun:$DryRun
 
 if (-not $issueResult.Success) {
-    $errorMsg = "Failed to fetch issue #$IssueNumber: $(Get-FirstErrorMessage -Result $issueResult)"
+    $errorMsg = "Failed to fetch issue #${IssueNumber}: $(Get-FirstErrorMessage -Result $issueResult)"
     Write-OkyeremaLogHelper -Level Error -Message $errorMsg -Operation "Complete-IssueWork" -CorrelationId $CorrelationId -Quiet:$Quiet
     throw $errorMsg
 }
