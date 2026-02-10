@@ -58,7 +58,6 @@ function Get-ApprovedAgents {
     
     if (-not (Test-Path $Path)) {
         Write-Error "Allowlist file not found: $Path"
-        return @()
     }
 
     $allowlist = Get-Content $Path -Raw | ConvertFrom-Json
