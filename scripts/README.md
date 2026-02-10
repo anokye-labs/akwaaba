@@ -2593,3 +2593,81 @@ SKILL.md mentions tasklists for relationships. ADR-0001 mandates using createIss
 
 All 4 scripts referenced in SKILL.md exist.
 ```
+
+### Test-RulesetEnforcement.ps1
+
+Tests GitHub branch protection and ruleset enforcement for the main branch.
+
+**Features:**
+- Attempts direct push to main (should fail)
+- Tests push requirements (PR-only workflow)
+- Creates test PR to verify merge blocking
+- Validates that status checks are enforced
+- Automatic cleanup of test branches
+- Structured test results in JSON format
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- Git configured with repository access
+- GitHub CLI (`gh`) optional for PR creation
+- Branch protection ruleset configured on main
+
+**Usage:**
+
+```powershell
+# Run all tests with automatic cleanup
+./scripts/Test-RulesetEnforcement.ps1
+
+# Run tests but keep test branches for inspection
+./scripts/Test-RulesetEnforcement.ps1 -CleanupTestBranches $false
+
+# Use custom test branch prefix
+./scripts/Test-RulesetEnforcement.ps1 -TestBranchPrefix "verify-protection-"
+```
+
+**Output:**
+
+Returns structured test results and creates:
+- `test-results-ruleset-enforcement.json` - Detailed results in JSON format
+- Console output with color-coded pass/fail/skip status
+
+**Example Output:**
+
+```
+===================================================
+GitHub Ruleset Enforcement Tests
+===================================================
+
+Repository: https://github.com/anokye-labs/akwaaba
+Current branch: copilot/test-ruleset-enforcement
+Test branch prefix: test-ruleset-
+Cleanup after tests: True
+
+===================================================
+Test 1: Attempt Direct Push to Main Branch
+===================================================
+
+  [PASS] Direct push to main blocked
+         Push was correctly rejected by branch protection
+
+===================================================
+Test Summary
+===================================================
+Total Tests: 4
+Passed: 3
+Failed: 0
+Skipped: 1
+
+All tests passed!
+```
+
+**Related Documentation:**
+- `docs/test-results-ruleset-enforcement.md` - Detailed test results and findings
+- `docs/manual-test-procedure-ruleset.md` - Step-by-step manual verification guide
+- `planning/phase-2-governance/01-ruleset-protect-main.md` - Ruleset requirements
+
+**Notes:**
+- Some tests require being on the main branch to execute
+- PR creation tests may require manual GitHub CLI authentication
+- Full verification includes manual UI checks per the documented procedure
+- Test results are safe to run in CI/CD environments
