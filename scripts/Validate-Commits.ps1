@@ -244,9 +244,11 @@ catch {
 $invalidCommits = @()
 $validCommits = @()
 $skippedCommits = @()
+$shortShaLength = 7  # Standard abbreviated commit SHA length
 
 foreach ($commit in $commits) {
-    $sha = if ($commit.oid.Length -ge 7) { $commit.oid.Substring(0, 7) } else { $commit.oid }
+    # Safely abbreviate commit SHA (standard is 7 characters, but handle shorter SHAs)
+    $sha = if ($commit.oid.Length -ge $shortShaLength) { $commit.oid.Substring(0, $shortShaLength) } else { $commit.oid }
     $message = $commit.messageHeadline
     $fullMessage = if ($commit.messageBody) { "$message`n$($commit.messageBody)" } else { $message }
     

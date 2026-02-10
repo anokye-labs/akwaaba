@@ -65,7 +65,7 @@ jobs:
             - \`owner/repo#123\`
             - \`https://github.com/owner/repo/issues/123\`
             
-            See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.`;
+            See [CONTRIBUTING.md](/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md) for more information.`;
             
             await github.rest.issues.createComment({
               owner: context.repo.owner,
