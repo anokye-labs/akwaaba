@@ -463,7 +463,7 @@ mutation(`$projectId: ID!, `$itemId: ID!, `$fieldId: ID!, `$value: ProjectV2Fiel
                                     -Quiet:$Quiet
                             }
                             else {
-                                Write-OkyeremaLog -Message "Failed to set field '$fieldName' for issue #$issueNum: $($updateResult.Errors[0].Message)" `
+                                Write-OkyeremaLog -Message "Failed to set field '$fieldName' for issue #${issueNum}: $($updateResult.Errors[0].Message)" `
                                     -Level Warn `
                                     -Operation "Add-IssuesToProject" `
                                     -CorrelationId $CorrelationId `
@@ -487,7 +487,7 @@ mutation(`$projectId: ID!, `$itemId: ID!, `$fieldId: ID!, `$value: ProjectV2Fiel
                 $failedCount++
                 $errorMsg = $addResult.Errors[0].Message
                 
-                Write-OkyeremaLog -Message "Failed to add issue #$issueNum: $errorMsg" `
+                Write-OkyeremaLog -Message "Failed to add issue #${issueNum}: $errorMsg" `
                     -Level Error `
                     -Operation "Add-IssuesToProject" `
                     -CorrelationId $CorrelationId `

@@ -275,7 +275,7 @@ mutation(`$issueId: ID!, `$assigneeIds: [ID!]!) {
             $assignedTo = $currentUser
         }
         else {
-            Write-OkyeremaLog -Message "Failed to assign issue #$IssueNumber: $($assignResult.Errors[0].Message)" `
+            Write-OkyeremaLog -Message "Failed to assign issue #${IssueNumber}: $($assignResult.Errors[0].Message)" `
                 -Level Warn `
                 -Operation "Start-IssueWork" `
                 -CorrelationId $CorrelationId
