@@ -1,0 +1,112 @@
+name: Commit Validator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+
+jobs:
+  validate-commits:
+    name: Validate Commit Messages
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Validate commits
+        id: validate
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $result = ./scripts/Validate-Commits.ps1 `
+            -Owner "${{ github.repository_owner }}" `
+            -Repo "${{ github.event.repository.name }}" `
+            -PullRequestNumber ${{ github.event.pull_request.number }}
+          
+          # Output results for next step
+          $resultJson = $result | ConvertTo-Json -Depth 10 -Compress
+          "result=$resultJson" >> $env:GITHUB_OUTPUT
+          
+          # Set exit code based on validation result
+          if (-not $result.Success) {
+            Write-Host "::error::Commit validation failed"
+            exit 1
+          }
+      
+      - name: Post PR comment on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = JSON.parse('${{ steps.validate.outputs.result }}');
+            
+            let comment = '## ❌ Commit Validation Failed\n\n';
+            comment += `${result.Message}\n\n`;
+            
+            if (result.Commits && result.Commits.length > 0) {
+              comment += '### Commit Details\n\n';
+              result.Commits.forEach(commit => {
+                if (!commit.Success) {
+                  comment += `- \`${commit.Sha}\`: ${commit.Message}\n`;
+                  comment += `  - ❌ ${commit.Reason}\n`;
+                }
+              });
+              comment += '\n';
+            }
+            
+            comment += '### Required Format\n\n';
+            comment += 'All commits must reference an open GitHub issue using one of these formats:\n\n';
+            comment += '- `#123`\n';
+            comment += '- `Closes #123`, `Fixes #456`, `Resolves #789`\n';
+            comment += '- `owner/repo#123`\n';
+            comment += '- `https://github.com/owner/repo/issues/123`\n\n';
+            
+            comment += '### Edge Cases (Automatically Handled)\n\n';
+            comment += '- **Merge commits**: Automatically skipped\n';
+            comment += '- **Revert commits**: Allowed without issue reference\n';
+            comment += '- **Bot commits**: Allowed from approved bots (github-actions, dependabot, renovate)\n';
+            comment += '- **WIP commits**: Warning issued but validation passes\n\n';
+            
+            comment += 'See [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) for more information.\n';
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+      
+      - name: Post PR comment with warnings
+        if: success() && steps.validate.outputs.result != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = JSON.parse('${{ steps.validate.outputs.result }}');
+            
+            if (result.Warnings && result.Warnings.length > 0) {
+              let comment = '## ⚠️ Commit Validation Warnings\n\n';
+              comment += 'All commits passed validation, but the following warnings were issued:\n\n';
+              
+              result.Warnings.forEach(warning => {
+                comment += `- ${warning}\n`;
+              });
+              
+              comment += '\n### Note on WIP Commits\n\n';
+              comment += 'WIP (Work In Progress) commits are allowed but should be squashed or ';
+              comment += 'have their messages updated before merging to maintain a clean commit history.\n';
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }

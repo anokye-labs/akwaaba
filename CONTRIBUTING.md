@@ -28,6 +28,24 @@ This restriction is enforced via:
 
 Even repository maintainers follow this rule. It ensures consistency, auditability, and maintains the integrity of the Anokye-Krom System.
 
+## Commit Message Requirements
+
+**All commits must reference an open GitHub issue.** This requirement is automatically enforced by our commit validator.
+
+Valid formats:
+- `feat: Add feature #123`
+- `fix: Bug fix Closes #456`
+- `docs: Update docs Fixes #789`
+- `refactor: Code cleanup Resolves #101`
+
+Edge cases handled automatically:
+- **Merge commits** — Skipped automatically
+- **Revert commits** — Allowed without issue reference
+- **Bot commits** — Allowed from github-actions, dependabot, renovate
+- **WIP commits** — Warning issued but passes
+
+For detailed information, see [Commit Validation](./docs/commit-validation.md).
+
 ## How to Contribute
 
 ### 1. Create an Issue
