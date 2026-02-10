@@ -18,7 +18,7 @@ Write-Host "Example 1: Basic issue existence check" -ForegroundColor Yellow
 Write-Host "Command: ./Test-IssueExists.ps1 -IssueNumber 68" -ForegroundColor Gray
 Write-Host ""
 try {
-    $result = & "$PSScriptRoot/Test-IssueExists.ps1" -IssueNumber 68 -WarningAction SilentlyContinue
+    $result = & "$PSScriptRoot/../Test-IssueExists.ps1" -IssueNumber 68 -WarningAction SilentlyContinue
     Write-Host "Result:" -ForegroundColor Green
     Write-Host "  Exists: $($result.Exists)"
     Write-Host "  IsOpen: $($result.IsOpen)"
@@ -36,7 +36,7 @@ Write-Host "Example 2: Check issue in specific repository" -ForegroundColor Yell
 Write-Host "Command: ./Test-IssueExists.ps1 -IssueNumber 1 -Owner 'anokye-labs' -Repo 'akwaaba'" -ForegroundColor Gray
 Write-Host ""
 try {
-    $result = & "$PSScriptRoot/Test-IssueExists.ps1" -IssueNumber 1 -Owner "anokye-labs" -Repo "akwaaba" -WarningAction SilentlyContinue
+    $result = & "$PSScriptRoot/../Test-IssueExists.ps1" -IssueNumber 1 -Owner "anokye-labs" -Repo "akwaaba" -WarningAction SilentlyContinue
     Write-Host "Result:" -ForegroundColor Green
     Write-Host "  Exists: $($result.Exists)"
     Write-Host "  Repository: $($result.RepositoryNameWithOwner)"
@@ -99,21 +99,21 @@ Write-Host ""
 try {
     Write-Host "First call (fetches from GitHub):" -ForegroundColor Cyan
     Measure-Command { 
-        $result1 = & "$PSScriptRoot/Test-IssueExists.ps1" -IssueNumber 68 -WarningAction SilentlyContinue
+        $result1 = & "$PSScriptRoot/../Test-IssueExists.ps1" -IssueNumber 68 -WarningAction SilentlyContinue
     } | Select-Object -ExpandProperty TotalMilliseconds | ForEach-Object {
         Write-Host "  Time: $_ ms"
     }
     
     Write-Host "Second call (uses cache):" -ForegroundColor Cyan
     Measure-Command { 
-        $result2 = & "$PSScriptRoot/Test-IssueExists.ps1" -IssueNumber 68 -WarningAction SilentlyContinue
+        $result2 = & "$PSScriptRoot/../Test-IssueExists.ps1" -IssueNumber 68 -WarningAction SilentlyContinue
     } | Select-Object -ExpandProperty TotalMilliseconds | ForEach-Object {
         Write-Host "  Time: $_ ms (should be much faster)"
     }
     
     Write-Host "Forcing refresh (bypasses cache):" -ForegroundColor Cyan
     Measure-Command { 
-        $result3 = & "$PSScriptRoot/Test-IssueExists.ps1" -IssueNumber 68 -Refresh -WarningAction SilentlyContinue
+        $result3 = & "$PSScriptRoot/../Test-IssueExists.ps1" -IssueNumber 68 -Refresh -WarningAction SilentlyContinue
     } | Select-Object -ExpandProperty TotalMilliseconds | ForEach-Object {
         Write-Host "  Time: $_ ms"
     }
