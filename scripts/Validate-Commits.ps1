@@ -244,11 +244,10 @@ catch {
 $invalidCommits = @()
 $validCommits = @()
 $skippedCommits = @()
-# Git standard abbreviated commit SHA length (short enough to be readable, long enough to avoid collisions in most repos)
-$shortShaLength = 7
+$shortShaLength = 7  # Standard abbreviated SHA length (7 characters)
 
 foreach ($commit in $commits) {
-    # Safely abbreviate commit SHA (standard is 7 characters, but handle shorter SHAs)
+    # Safely abbreviate commit SHA (handle shorter SHAs gracefully)
     $sha = if ($commit.oid.Length -ge $shortShaLength) { $commit.oid.Substring(0, $shortShaLength) } else { $commit.oid }
     $message = $commit.messageHeadline
     $fullMessage = if ($commit.messageBody) { "$message`n$($commit.messageBody)" } else { $message }
