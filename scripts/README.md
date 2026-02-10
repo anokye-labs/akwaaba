@@ -2477,3 +2477,84 @@ SKILL.md mentions tasklists for relationships. ADR-0001 mandates using createIss
 
 All 4 scripts referenced in SKILL.md exist.
 ```
+
+### Validate-CommitAuthors.ps1
+
+Validates that all commits in a pull request are from approved agents listed in the allowlist.
+
+**Features:**
+- Fetches all commits in a specified PR
+- Extracts author and committer information
+- Detects GitHub Apps and bots by username patterns
+- Validates against approved agents allowlist (`.github/approved-agents.json`)
+- Handles special cases like GitHub web UI commits
+- Supports multiple output formats: Console (default), Markdown, Json
+- DryRun mode for testing without validation
+- Structured logging with correlation IDs
+
+**Prerequisites:**
+- PowerShell 7.x or higher
+- GitHub CLI (`gh`) installed and authenticated
+- `.github/approved-agents.json` allowlist file
+
+**Usage:**
+
+```powershell
+# Validate commits in PR #42
+./scripts/Validate-CommitAuthors.ps1 -PRNumber 42
+
+# With explicit owner and repo
+./scripts/Validate-CommitAuthors.ps1 -PRNumber 42 -Owner anokye-labs -Repo akwaaba
+
+# Output as JSON
+./scripts/Validate-CommitAuthors.ps1 -PRNumber 42 -OutputFormat Json
+
+# Output as Markdown report
+./scripts/Validate-CommitAuthors.ps1 -PRNumber 42 -OutputFormat Markdown
+
+# DryRun mode (test without validation)
+./scripts/Validate-CommitAuthors.ps1 -PRNumber 42 -DryRun
+
+# Custom allowlist path
+./scripts/Validate-CommitAuthors.ps1 -PRNumber 42 -AllowlistPath /path/to/agents.json
+```
+
+**Output:**
+
+Returns a PSCustomObject with:
+- `Valid`: Boolean indicating if all commits are from approved agents
+- `TotalCommits`: Total number of commits checked
+- `ValidCommits`: Number of valid commits
+- `InvalidCommits`: Array of commits that failed validation
+- `ApprovedAgents`: Array of enabled agents from the allowlist
+- `ValidationDetails`: Detailed information about each commit
+
+**Approved Agents Format:**
+
+The `.github/approved-agents.json` file should contain:
+
+```json
+{
+  "agents": [
+    {
+      "id": "github-copilot",
+      "username": "copilot",
+      "botUsername": "github-actions[bot]",
+      "githubAppId": 15368,
+      "type": "GitHubApp",
+      "description": "GitHub Copilot coding agent",
+      "approvedBy": "system",
+      "approvedDate": "2026-02-09",
+      "permissions": ["code_changes"],
+      "enabled": true
+    }
+  ]
+}
+```
+
+**Testing:**
+
+```powershell
+# Run test suite
+./scripts/Test-Validate-CommitAuthors.ps1
+```
