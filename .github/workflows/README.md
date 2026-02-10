@@ -1,6 +1,78 @@
 # GitHub Actions Workflows
 
-This directory contains GitHub Actions workflows for automating repository operations.
+This directory contains GitHub Actions workflows for automating repository operations and enforcing governance policies.
+
+## Agent Authentication
+
+**File:** `agent-auth.yml`
+
+### Purpose
+
+Validates that all commits in pull requests are from approved AI agents, enforcing the agent-only commit pattern of the Anokye-Krom System.
+
+### Trigger
+
+- **Event:** `pull_request`
+- **Types:** `opened`, `synchronize`, `reopened`, `labeled`, `unlabeled`
+
+### Behavior
+
+When a pull request is opened or updated, the workflow:
+
+1. **Fetches all commits** in the pull request
+2. **Extracts author information** (name and email)
+3. **Validates against allowlist** in `.github/approved-agents.json`
+4. **Detects GitHub Apps** by `[bot]` suffix in username
+5. **Checks for emergency bypass** via `emergency-merge` label
+6. **Creates audit log** of all validation attempts
+7. **Reports results** with clear, actionable feedback
+
+### Exit Codes
+
+- **0** — All commits approved (success)
+- **1** — Validation failed (blocks merge)
+- **2** — Emergency bypass applied (allowed with warning)
+- **3** — Error occurred (blocks merge)
+
+### Approved Agents
+
+Currently approved agents (see `.github/approved-agents.json`):
+- **GitHub Copilot** (`copilot[bot]`) — AI-powered code generation
+- **GitHub Actions** (`github-actions[bot]`) — Workflow automation
+
+### Emergency Bypass
+
+Administrators can apply the `emergency-merge` label to bypass validation in critical situations. All bypasses are logged for audit purposes.
+
+### Permissions
+
+The workflow requires:
+- `contents: read` — To checkout repository and read configuration
+- `pull-requests: read` — To fetch PR commits and labels
+
+### Related Documentation
+
+- [Approved Agents Guide](../APPROVED-AGENTS.md) — Complete documentation
+- [Agent Conventions](../../how-we-work/agent-conventions.md) — Agent behavior
+- [Contributing](../../CONTRIBUTING.md) — Contribution process
+
+### Validation Script
+
+The workflow calls `scripts/Validate-CommitAuthors.ps1` which:
+- Uses GitHub CLI to fetch commit data
+- Validates each commit author
+- Provides detailed error messages
+- Supports audit logging
+
+### Testing
+
+Run the test suite to verify the validation logic:
+
+```bash
+pwsh scripts/Test-Validate-CommitAuthors.ps1
+```
+
+---
 
 ## Auto-assign Unblocked Tasks
 
