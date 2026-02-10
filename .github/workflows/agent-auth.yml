@@ -1,0 +1,31 @@
+name: Agent Authentication
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate-commit-authors:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Validate commit authors
+        run: |
+          echo "Agent authentication validation"
+          echo "This workflow will validate that all commits are from approved agents"
+          echo "PR number: ${{ github.event.pull_request.number }}"
+          
+          # Placeholder for future validation script
+          # Will call: scripts/Validate-CommitAuthors.ps1
+          
+          echo "Validation placeholder - currently passing"
+          exit 0
