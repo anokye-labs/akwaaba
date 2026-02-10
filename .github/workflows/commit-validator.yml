@@ -40,7 +40,7 @@ jobs:
           
           # Run validation
           Write-Host "Running commit validation for PR #${{ github.event.pull_request.number }}..."
-          & $scriptPath -PRNumber ${{ github.event.pull_request.number }}
+          & $scriptPath -PRNumber ${{ github.event.pull_request.number }} -Owner "${{ github.repository_owner }}" -Repo "${{ github.event.repository.name }}"
           
           # Exit with the script's exit code
           exit $LASTEXITCODE
