@@ -97,8 +97,8 @@ function Get-IssueReferences {
     
     $issueRefs = @()
     
-    # Pattern 1: Simple #123 format
-    $simplePattern = '#(\d+)\b'
+    # Pattern 1: Simple #123 format (with word boundary to avoid false matches)
+    $simplePattern = '(?<!\w)#(\d+)\b'
     $simpleMatches = [regex]::Matches($Message, $simplePattern)
     foreach ($match in $simpleMatches) {
         $issueRefs += @{
@@ -108,8 +108,8 @@ function Get-IssueReferences {
         }
     }
     
-    # Pattern 2: Closes #123, Fixes #456, Resolves #789
-    $keywordPattern = '(?:Closes|Fixes|Resolves|Refs?)\s+#(\d+)'
+    # Pattern 2: Closes #123, Fixes #456, Resolves #789 (keywords as complete words)
+    $keywordPattern = '\b(?:Closes|Fixes|Resolves|Refs?)\s+#(\d+)'
     $keywordMatches = [regex]::Matches($Message, $keywordPattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
     foreach ($match in $keywordMatches) {
         $num = [int]$match.Groups[1].Value

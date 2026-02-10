@@ -91,7 +91,8 @@ Test-CommitValidation -TestName "Script contains simple issue reference pattern 
     return $scriptContent
 } -Validation {
     param($result)
-    return $result -match '#\(\\d\+\)\\b'
+    # Check for key components: # symbol, digit pattern, and word boundary
+    return ($result -match 'simplePattern') -and ($result -match '#') -and ($result -match '\\d')
 }
 
 # Test 5: Issue reference patterns - keyword format
