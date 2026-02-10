@@ -30,9 +30,9 @@ Input fields with specific format requirements use regex validation:
 
 #### GitHub Usernames (Task & Agent Request)
 - **Pattern**: `^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$`
-- **Validates**: Valid GitHub username format (3-39 characters, alphanumeric and hyphens)
-- **Examples**: `copilot`, `my-bot-name`
-- **Error Message**: "Please enter a valid GitHub username (3-39 characters, alphanumeric and hyphens)"
+- **Validates**: Valid GitHub username format (1-39 characters, alphanumeric and hyphens)
+- **Examples**: `copilot`, `my-bot-name`, `a`
+- **Error Message**: "Please enter a valid GitHub username (1-39 characters, alphanumeric and hyphens)"
 
 #### Bot Usernames (Agent Request)
 - **Pattern**: `^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?\[bot\]$`

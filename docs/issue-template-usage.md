@@ -209,7 +209,7 @@ Maintainer: @team-leads
 
 ### Username Validation
 
-**Error:** "Please enter a valid GitHub username (3-39 characters, alphanumeric and hyphens)"
+**Error:** "Please enter a valid GitHub username (1-39 characters, alphanumeric and hyphens)"
 
 **Causes:**
 - Including @ symbol
@@ -220,7 +220,7 @@ Maintainer: @team-leads
 **Fix:**
 - Use only letters, numbers, and hyphens
 - Don't include @ symbol
-- Keep under 40 characters
+- Must be 1-39 characters
 - Can't start or end with hyphen
 
 ### Bot Username Validation

@@ -105,4 +105,4 @@ body:
     validations:
       required: false
       pattern: '^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$'
-      patternError: "Please enter a valid GitHub username (3-39 characters, alphanumeric and hyphens)"
+      patternError: "Please enter a valid GitHub username (1-39 characters, alphanumeric and hyphens)"
