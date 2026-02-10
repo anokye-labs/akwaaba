@@ -1,0 +1,265 @@
+name: Commit Validator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+jobs:
+  validate-commits:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Validate commit messages
+        id: validate
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $baseRef = "${{ github.event.pull_request.base.sha }}"
+          $headRef = "${{ github.event.pull_request.head.sha }}"
+          $prNumber = "${{ github.event.pull_request.number }}"
+          
+          Write-Host "Validating commits in PR #$prNumber"
+          Write-Host "Base: $baseRef"
+          Write-Host "Head: $headRef"
+          
+          # Get all commits in the PR
+          $commits = git log --pretty=format:"%H|%s|%an|%ae" "$baseRef..$headRef"
+          
+          if (-not $commits) {
+            Write-Host "No commits found in PR"
+            echo "validation_result=success" >> $env:GITHUB_OUTPUT
+            echo "summary=No commits to validate" >> $env:GITHUB_OUTPUT
+            echo "details=" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+          
+          $validCommits = @()
+          $invalidCommits = @()
+          $totalCommits = 0
+          
+          foreach ($commitLine in $commits) {
+            $totalCommits++
+            $parts = $commitLine -split '\|'
+            $sha = $parts[0]
+            $message = $parts[1]
+            $author = $parts[2]
+            $email = $parts[3]
+            
+            Write-Host "`nChecking commit: $($sha.Substring(0,7)) - $message"
+            
+            # Skip merge commits
+            if ($message -match '^Merge (branch|pull request)') {
+              Write-Host "  ✓ Skipping merge commit"
+              $validCommits += @{
+                sha = $sha
+                message = $message
+                reason = "Merge commit (skipped)"
+              }
+              continue
+            }
+            
+            # Skip revert commits
+            if ($message -match '^Revert ') {
+              Write-Host "  ✓ Skipping revert commit"
+              $validCommits += @{
+                sha = $sha
+                message = $message
+                reason = "Revert commit (skipped)"
+              }
+              continue
+            }
+            
+            # Check for issue references
+            # Matches: #123, Closes #123, Fixes #123, Resolves #123, owner/repo#123
+            # Also matches full URLs: https://github.com/owner/repo/issues/123
+            $issuePattern = '(?:(?:Closes?|Fixes?|Resolves?)\s+)?(?:https?://github\.com/[^/]+/[^/]+/issues/(\d+)|(?:[\w-]+/[\w-]+)?#(\d+))'
+            
+            if ($message -match $issuePattern) {
+              $issueNumber = if ($matches[1]) { $matches[1] } else { $matches[2] }
+              Write-Host "  Found issue reference: #$issueNumber"
+              
+              # Verify issue exists and is open
+              try {
+                $issueInfo = gh issue view $issueNumber --json state,title --jq '{state: .state, title: .title}' 2>&1
+                
+                if ($LASTEXITCODE -eq 0) {
+                  $issue = $issueInfo | ConvertFrom-Json
+                  
+                  if ($issue.state -eq "OPEN") {
+                    Write-Host "  ✓ Issue #$issueNumber is open: $($issue.title)"
+                    $validCommits += @{
+                      sha = $sha
+                      message = $message
+                      issue = $issueNumber
+                      reason = "Valid issue reference"
+                    }
+                  } else {
+                    Write-Host "  ✗ Issue #$issueNumber is closed"
+                    $invalidCommits += @{
+                      sha = $sha
+                      message = $message
+                      issue = $issueNumber
+                      reason = "Issue is closed"
+                    }
+                  }
+                } else {
+                  Write-Host "  ✗ Issue #$issueNumber not found or not accessible"
+                  $invalidCommits += @{
+                    sha = $sha
+                    message = $message
+                    issue = $issueNumber
+                    reason = "Issue not found"
+                  }
+                }
+              } catch {
+                Write-Host "  ✗ Error checking issue #$issueNumber : $_"
+                $invalidCommits += @{
+                  sha = $sha
+                  message = $message
+                  issue = $issueNumber
+                  reason = "Error checking issue"
+                }
+              }
+            } else {
+              Write-Host "  ✗ No issue reference found"
+              $invalidCommits += @{
+                sha = $sha
+                message = $message
+                reason = "No issue reference"
+              }
+            }
+          }
+          
+          # Generate summary
+          $validCount = $validCommits.Count
+          $invalidCount = $invalidCommits.Count
+          
+          Write-Host "`n========================================="
+          Write-Host "Validation Summary"
+          Write-Host "========================================="
+          Write-Host "Total commits: $totalCommits"
+          Write-Host "Valid commits: $validCount"
+          Write-Host "Invalid commits: $invalidCount"
+          
+          # Set outputs
+          if ($invalidCount -gt 0) {
+            echo "validation_result=failure" >> $env:GITHUB_OUTPUT
+            
+            # Build details for invalid commits
+            $detailsText = ""
+            foreach ($commit in $invalidCommits) {
+              $shortSha = $commit.sha.Substring(0, 7)
+              $detailsText += "- ``$shortSha``: $($commit.message)`n"
+              $detailsText += "  - **Reason**: $($commit.reason)`n"
+            }
+            
+            # Escape for GitHub Actions output
+            $detailsText = $detailsText -replace "`n", "%0A"
+            $detailsText = $detailsText -replace "`r", "%0D"
+            
+            echo "details=$detailsText" >> $env:GITHUB_OUTPUT
+            echo "summary=$invalidCount of $totalCommits commits failed validation" >> $env:GITHUB_OUTPUT
+            
+            exit 1
+          } else {
+            echo "validation_result=success" >> $env:GITHUB_OUTPUT
+            echo "summary=All $totalCommits commits are valid" >> $env:GITHUB_OUTPUT
+            echo "details=" >> $env:GITHUB_OUTPUT
+          }
+      
+      - name: Post validation results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const validation_result = '${{ steps.validate.outputs.validation_result }}';
+            const summary = '${{ steps.validate.outputs.summary }}';
+            const details = `${{ steps.validate.outputs.details }}`;
+            
+            // Prepare the comment body
+            let commentBody = '';
+            
+            if (validation_result === 'failure') {
+              commentBody = `## ❌ Commit Validation Failed
+            
+            ${summary}
+            
+            ### Invalid Commits
+            
+            ${details}
+            
+            ### How to Fix
+            
+            All commits must reference an open GitHub issue. Please update your commit messages to include:
+            
+            - \`#123\` - Simple issue reference
+            - \`Closes #123\` - Closes the issue when merged
+            - \`Fixes #123\` - Fixes the issue when merged
+            - \`Resolves #123\` - Resolves the issue when merged
+            
+            You can also use full URLs: \`https://github.com/owner/repo/issues/123\`
+            
+            To fix invalid commits:
+            1. Use \`git rebase -i\` to edit commit messages
+            2. Or amend the most recent commit: \`git commit --amend\`
+            3. Force push your changes: \`git push --force\`
+            
+            See [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) for more details.`;
+            } else {
+              commentBody = `## ✅ Commit Validation Passed
+            
+            ${summary}
+            
+            All commits reference valid open issues. Great job following our issue-driven development workflow! 🎉`;
+            }
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Commit Validation')
+            );
+            
+            // Update or create comment
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: commentBody
+              });
+            }
+            
+            // Update check status
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request.head.sha,
+              state: validation_result === 'success' ? 'success' : 'failure',
+              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              description: summary,
+              context: 'commit-validator'
+            });
