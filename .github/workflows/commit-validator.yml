@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   validate-commits:
@@ -58,12 +58,12 @@ jobs:
             Please review the workflow logs for details and update your commit messages.
             
             ### Supported Formats
-            - \`#123\`
-            - \`Closes #123\`
-            - \`Fixes #456\`
-            - \`Resolves #789\`
-            - \`owner/repo#123\`
-            - \`https://github.com/owner/repo/issues/123\`
+            - `#123`
+            - `Closes #123`
+            - `Fixes #456`
+            - `Resolves #789`
+            - `owner/repo#123`
+            - `https://github.com/owner/repo/issues/123`
             
             See [CONTRIBUTING.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/CONTRIBUTING.md) for more information.`;
             

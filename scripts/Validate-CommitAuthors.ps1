@@ -348,7 +348,7 @@ try {
         $results += $result
         
         $status = if ($validation.Approved) { "APPROVED" } else { "REJECTED" }
-        Write-AuditLog "Commit $sha by $authorName: $status"
+        Write-AuditLog "Commit $sha by ${authorName}: $status"
     }
     
     # Determine overall result
@@ -359,15 +359,15 @@ try {
     
     # Set exit code
     if ($emergencyBypass) {
-        Write-AuditLog "PR #$PullRequestNumber: Emergency bypass - ALLOWED"
+        Write-AuditLog "PR #${PullRequestNumber}: Emergency bypass - ALLOWED"
         exit 2
     }
     elseif ($allApproved) {
-        Write-AuditLog "PR #$PullRequestNumber: All commits approved - PASSED"
+        Write-AuditLog "PR #${PullRequestNumber}: All commits approved - PASSED"
         exit 0
     }
     else {
-        Write-AuditLog "PR #$PullRequestNumber: Unapproved commits found - FAILED"
+        Write-AuditLog "PR #${PullRequestNumber}: Unapproved commits found - FAILED"
         exit 1
     }
 }
