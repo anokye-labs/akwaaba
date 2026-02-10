@@ -71,6 +71,9 @@ function Invoke-GraphQLHelper {
     $params = @{
         Query = $Query
         Variables = $Variables
+        Headers = @{
+            "GraphQL-Features" = "sub_issues"
+        }
         CorrelationId = $CorrelationId
     }
     
@@ -160,7 +163,7 @@ query(`$owner: String!, `$repo: String!) {
           id
           name
         }
-        trackedInIssues(first: 1) {
+        parents(first: 1) {
           totalCount
         }
       }
@@ -197,7 +200,7 @@ Write-OkyeremaLogHelper -Message "Found $($issues.Count) open issues" -Level "In
 
 # Filter to orphaned issues (no parent) and exclude Epics
 $orphanedIssues = @($issues | Where-Object { 
-    $_.trackedInIssues.totalCount -eq 0 -and 
+    $_.parents.totalCount -eq 0 -and 
     $_.issueType.name -ne "Epic" 
 })
 
@@ -223,7 +226,7 @@ query(`$owner: String!, `$repo: String!) {
           id
           name
         }
-        trackedIssues(first: 1) {
+        subIssues(first: 1) {
           totalCount
         }
       }
