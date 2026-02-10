@@ -106,13 +106,13 @@ The failures and skips are expected due to the nature of the testing environment
 
 ## Files Created
 
-1. ✅ `scripts/Test-RulesetEnforcement.ps1` - Automated test script (435 lines)
-2. ✅ `docs/test-results-ruleset-enforcement.md` - Test results and analysis (248 lines)
-3. ✅ `docs/manual-test-procedure-ruleset.md` - Manual verification guide (461 lines)
-4. ✅ `test-results-ruleset-enforcement.json` - Structured test results
-5. ✅ `scripts/README.md` - Updated with new script documentation
+1. ✅ `scripts/Test-RulesetEnforcement.ps1` - Automated test script (380 lines)
+2. ✅ `docs/test-results-ruleset-enforcement.md` - Test results and analysis (207 lines)
+3. ✅ `docs/manual-test-procedure-ruleset.md` - Manual verification guide (356 lines)
+4. ✅ `test-results-ruleset-enforcement.json` - Structured test results (26 lines)
+5. ✅ `scripts/README.md` - Updated with new script documentation (78 lines added)
 
-**Total Lines Added:** ~1,200 lines of code and documentation
+**Total Lines Added:** ~1,047 lines of code and documentation
 
 ## How to Use This Testing Framework
 
