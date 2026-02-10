@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/anokye-labs/akwaaba/blob/main/README.md
+    about: Read the project documentation and guides
+  - name: 💬 Discussions
+    url: https://github.com/anokye-labs/akwaaba/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 🎯 Project Board
+    url: https://github.com/orgs/anokye-labs/projects
+    about: View the project roadmap and current work
+  - name: ⚡ How We Work
+    url: https://github.com/anokye-labs/akwaaba/blob/main/how-we-work.md
+    about: Learn about our development process and conventions
